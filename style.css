@@ -11,19 +11,42 @@ h1{font-family:'Press Start 2P',monospace;color:var(--neon-p);text-shadow:0 0 8p
 .game-btn:hover,.game-btn.active{background:var(--neon-c);color:#000;box-shadow:0 0 14px var(--neon-c)}
 .controls{display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center;margin-bottom:16px;font-size:.9rem}
 .controls select,.controls button{background:#1a0b2e;border:2px solid var(--neon-p);color:#fff;padding:6px 12px;border-radius:6px;font-family:'Space Mono',monospace;cursor:pointer}
-#board{background:radial-gradient(ellipse at center,#1a0b2e 0%,#0d001a 100%);border:3px solid var(--neon-c);border-radius:14px;padding:20px;min-width:min(900px,96vw);min-height:520px;box-shadow:0 0 30px rgba(0,255,240,.15)}
-.card{width:68px;height:96px;border-radius:8px;background:#e6e6ed;border:2px solid #444;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:700;cursor:pointer;user-select:none;font-size:1.05rem;color:#1a1a1a}
+#board{background:radial-gradient(ellipse at center,#1a0b2e 0%,#0d001a 100%);border:3px solid var(--neon-c);border-radius:14px;padding:20px;min-width:min(950px,96vw);min-height:540px;box-shadow:0 0 30px rgba(0,255,240,.15)}
+.card{width:68px;height:96px;border-radius:8px;background:#e6e6ed;border:2px solid #444;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:700;cursor:pointer;user-select:none;font-size:1.05rem;color:#1a1a1a;position:relative}
 .card.red{color:#a22}.card .small{font-size:.7rem}
 .card.back{background:repeating-linear-gradient(45deg,#3a0066,#3a0066 8px,#6a00b3 8px,#6a00b3 16px);color:transparent;border-color:#ff2ad6}
-.card.selected{outline:3px solid var(--neon-y);box-shadow:0 0 14px var(--neon-y)}
-.card:hover{transform:translateY(-3px)}
+.card.selected{outline:3px solid var(--neon-y);box-shadow:0 0 14px var(--neon-y);z-index:50 !important}
+.card:hover{filter:brightness(1.08)}
 .piles{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:18px}
 .pile-slot{width:68px;height:96px;border:2px dashed rgba(0,255,240,.3);border-radius:8px}
 #waste-pile{min-width:68px;min-height:96px}
-.tableau{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-.tableau-col{min-width:68px}
-.tableau-col .card{margin-bottom:-72px}
+.tableau{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.tableau-col{min-width:68px;position:relative}
+/* card stacking - face-down cards overlap tightly, face-up cards show more */
+.tableau-col .card{margin-bottom:-60px}
+.tableau-col .card.back{margin-bottom:-78px}
 .tableau-col .card:last-child{margin-bottom:0}
+/* ensure proper top-to-bottom stacking */
+.tableau-col .card:nth-child(1){z-index:1}
+.tableau-col .card:nth-child(2){z-index:2}
+.tableau-col .card:nth-child(3){z-index:3}
+.tableau-col .card:nth-child(4){z-index:4}
+.tableau-col .card:nth-child(5){z-index:5}
+.tableau-col .card:nth-child(6){z-index:6}
+.tableau-col .card:nth-child(7){z-index:7}
+.tableau-col .card:nth-child(8){z-index:8}
+.tableau-col .card:nth-child(9){z-index:9}
+.tableau-col .card:nth-child(10){z-index:10}
+.tableau-col .card:nth-child(11){z-index:11}
+.tableau-col .card:nth-child(12){z-index:12}
+.tableau-col .card:nth-child(13){z-index:13}
+.tableau-col .card:nth-child(14){z-index:14}
+.tableau-col .card:nth-child(15){z-index:15}
+.tableau-col .card:nth-child(16){z-index:16}
+.tableau-col .card:nth-child(17){z-index:17}
+.tableau-col .card:nth-child(18){z-index:18}
+.tableau-col .card:nth-child(19){z-index:19}
+.tableau-col .card:nth-child(20){z-index:20}
 .peaks{display:flex;flex-direction:column;align-items:center;gap:4px}
 .peak-row{display:flex;gap:6px}
 .waste-row{display:flex;align-items:center;justify-content:center;gap:18px;margin-top:18px}
@@ -34,4 +57,4 @@ h1{font-family:'Press Start 2P',monospace;color:var(--neon-p);text-shadow:0 0 8p
 .win-box{background:#1a0b2e;border:3px solid var(--neon-y);border-radius:14px;padding:32px;text-align:center;box-shadow:0 0 30px rgba(255,239,0,.3)}
 .win-box h2{font-family:'Press Start 2P',monospace;color:var(--neon-y);margin-bottom:16px;font-size:1rem}
 footer{margin-top:auto;padding:18px;color:#888;font-size:.78rem}
-@media(max-width:600px){.card{width:52px;height:74px;font-size:.85rem}.tableau-col .card{margin-bottom:-54px}}
+@media(max-width:600px){.card{width:52px;height:74px;font-size:.85rem}.tableau-col .card{margin-bottom:-48px}.tableau-col .card.back{margin-bottom:-60px}}
