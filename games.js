@@ -25,7 +25,7 @@ function newKlondike(){
 function renderKlondike(){
   board.innerHTML=`<div class="piles"><div id="stock-pile">${
     state.stock.length?cardHtml({},true):'<div class="pile-slot"></div>'
-  }</div><div id="waste-pile">${
+  }</div><div id="waste-pile" class="waste-click">${
     state.waste.at(-1)?cardHtml(state.waste.at(-1)):'<div class="pile-slot"></div>'
   }</div><div style="flex:1"></div>${
     state.foundations.map((f,i)=>`<div class="pile-slot foundation" data-found="${i}">${
@@ -33,11 +33,29 @@ function renderKlondike(){
     }</div>`).join('')
   }</div><div class="tableau">${
     state.tableau.map((col,ci)=>`<div class="tableau-col" data-col="${ci}">`+
-      col.map(c=>c.faceUp?cardHtml(c):cardHtml(c,true)).join('')+`</div>`
+      col.map(c=>c.faceUp?cardHtml(c):cardHtml(c,true)).join('')+
+      (col.length===0?'<div class="pile-slot empty-col"></div>':'')+
+      `</div>`
     ).join('')
   }</div>`;
-  board.querySelectorAll('.card:not(.back)').forEach(el=>el.onclick=klondikeClick);
-  board.querySelectorAll('.foundation').forEach(el=>el.onclick=()=>{if(sel) autoFoundFromTableau();});
+
+  // card clicks
+  board.querySelectorAll('.card:not(.back)').forEach(el=>{
+    el.onclick = e => { e.stopPropagation(); klondikeCardClick(e); };
+  });
+  // empty tableau column clicks
+  board.querySelectorAll('.tableau-col').forEach(el=>{
+    el.onclick = e => {
+      if(e.target.closest('.card')) return;
+      let ci = parseInt(el.dataset.col,10);
+      klondikeColClick(ci);
+    };
+  });
+  // foundation clicks
+  board.querySelectorAll('.foundation').forEach(el=>{
+    el.onclick = () => { if(sel) autoFoundFromTableau(); };
+  });
+  // stock
   $('#stock-pile').onclick=()=>{
     pushUndo();
     if(state.stock.length){
@@ -46,34 +64,66 @@ function renderKlondike(){
     }else{
       state.stock=state.waste.reverse(); state.waste=[];
     }
+    sel=null;
     moves++; updateHUD(); renderKlondike();
+  };
+  // waste pile click (for auto-foundation)
+  const wp = board.querySelector('.waste-click');
+  if(wp) wp.onclick = e => {
+    if(e.target.closest('.card')) return;
+    let w = state.waste.at(-1);
+    if(w) tryFoundation(w, true);
   };
 }
 let sel=null;
-function klondikeClick(e){
+
+function klondikeCardClick(e){
   const id=parseInt(e.currentTarget.dataset.id,10);
-  // check waste first
+
+  // waste card?
   let w = state.waste.find(x=>x.id===id);
   if(w){ tryFoundation(w,true); return; }
-  // check tableau
+
+  // find in tableau
   for(let ci=0; ci<state.tableau.length; ci++){
     let col=state.tableau[ci], idx=col.findIndex(c=>c.id===id);
     if(idx>=0 && col[idx].faceUp){
-      // double-click / second click on same card = try foundation
+      // clicking the already-selected card = try foundation
       if(sel && sel.ci===ci && sel.idx===idx){
         if(tryFoundation(col[idx], false)){ sel=null; return; }
+        // foundation failed, keep selected
+        return;
       }
+      // no selection yet -> select this stack
       if(!sel){
-        sel={ci,idx}; e.currentTarget.classList.add('selected'); return;
+        sel={ci,idx};
+        e.currentTarget.classList.add('selected');
+        return;
       }
-      // try to move stack from sel to this column
-      tryKMove(sel.ci, sel.idx, ci);
-      sel=null; renderKlondike(); return;
+      // have a selection, clicking a different card = try move
+      if(sel.ci!==ci || sel.idx!==idx){
+        if(tryKMove(sel.ci, sel.idx, ci)){
+          sel=null;
+          return;
+        } else {
+          // illegal move, keep selection, just flash
+          return;
+        }
+      }
+      return;
     }
   }
-  // click on a foundation card = try to send back? no, just clear selection
   sel=null; renderKlondike();
 }
+
+function klondikeColClick(ci){
+  if(!sel) return;
+  // clicking empty column - try to move King there
+  if(tryKMove(sel.ci, sel.idx, ci)){
+    sel=null;
+  }
+}
+
 function tryKMove(a,b,to){
   if(a===to) return false;
   let stack=state.tableau[a].slice(b), target=state.tableau[to].at(-1), first=stack[0];
@@ -82,7 +132,7 @@ function tryKMove(a,b,to){
     state.tableau[to].push(...stack);
     state.tableau[a].length=b;
     let t=state.tableau[a].at(-1); if(t) t.faceUp=true;
-    moves++; updateHUD(); checkKWin(); return true;
+    moves++; updateHUD(); renderKlondike(); checkKWin(); return true;
   }
   return false;
 }
