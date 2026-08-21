@@ -1,0 +1,36 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap');
+:root{--bg:#0d001a;--neon-p:#ff2ad6;--neon-c:#00fff0;--neon-y:#ffef00}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:#fff;font-family:'Space Mono',monospace;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:16px}
+.scanlines{position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(transparent,transparent 2px,rgba(0,255,240,.03) 3px);z-index:999}
+header{text-align:center;margin:12px 0 20px}
+h1{font-family:'Press Start 2P',monospace;color:var(--neon-p);text-shadow:0 0 8px var(--neon-p),0 0 20px var(--neon-p);font-size:1.4rem}
+.tag{color:var(--neon-c);margin-top:8px;font-size:.85rem}
+.game-select{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;justify-content:center}
+.game-btn{background:#1a0b2e;border:2px solid var(--neon-c);color:var(--neon-c);padding:10px 18px;border-radius:8px;cursor:pointer;font-family:'Space Mono',monospace;font-weight:700}
+.game-btn:hover,.game-btn.active{background:var(--neon-c);color:#000;box-shadow:0 0 14px var(--neon-c)}
+.controls{display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center;margin-bottom:16px;font-size:.9rem}
+.controls select,.controls button{background:#1a0b2e;border:2px solid var(--neon-p);color:#fff;padding:6px 12px;border-radius:6px;font-family:'Space Mono',monospace;cursor:pointer}
+#board{background:radial-gradient(ellipse at center,#1a0b2e 0%,#0d001a 100%);border:3px solid var(--neon-c);border-radius:14px;padding:20px;min-width:min(900px,96vw);min-height:520px;box-shadow:0 0 30px rgba(0,255,240,.15)}
+.card{width:68px;height:96px;border-radius:8px;background:#f8f8ff;border:2px solid #333;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:700;cursor:pointer;user-select:none;font-size:1.05rem;color:#111}
+.card.red{color:#d00}.card .small{font-size:.7rem}
+.card.back{background:repeating-linear-gradient(45deg,#3a0066,#3a0066 8px,#6a00b3 8px,#6a00b3 16px);color:transparent;border-color:#ff2ad6}
+.card.selected{outline:3px solid var(--neon-y);box-shadow:0 0 14px var(--neon-y)}
+.card:hover{transform:translateY(-3px)}
+.piles{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:18px}
+.pile-slot{width:68px;height:96px;border:2px dashed rgba(0,255,240,.3);border-radius:8px}
+.tableau{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.tableau-col{min-width:68px}
+.tableau-col .card{margin-bottom:-72px}
+.tableau-col .card:last-child{margin-bottom:0}
+.peaks{display:flex;flex-direction:column;align-items:center;gap:4px}
+.peak-row{display:flex;gap:6px}
+.waste-row{display:flex;align-items:center;justify-content:center;gap:18px;margin-top:18px}
+.fc-top{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:16px}
+.fc-label{font-size:.7rem;color:#888;text-align:center;margin-bottom:4px}
+#win{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:1000}
+#win.hidden{display:none}
+.win-box{background:#1a0b2e;border:3px solid var(--neon-y);border-radius:14px;padding:32px;text-align:center;box-shadow:0 0 30px rgba(255,239,0,.3)}
+.win-box h2{font-family:'Press Start 2P',monospace;color:var(--neon-y);margin-bottom:16px;font-size:1rem}
+footer{margin-top:auto;padding:18px;color:#888;font-size:.78rem}
+@media(max-width:600px){.card{width:52px;height:74px;font-size:.85rem}.tableau-col .card{margin-bottom:-54px}}
