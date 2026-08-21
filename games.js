@@ -38,7 +38,7 @@ function cardHtml(c, faceDown=false){
 
 /* ==================== KLONDIKE ==================== */
 
-let kSel = null; // {ci, idx}
+let kSel = null; // {ci, idx}  or  {waste:true}
 
 function newKlondike(){
   const d = buildDeck();
@@ -77,14 +77,19 @@ function renderKlondike(){
 
   // highlight selection
   if(kSel){
-    const colEl = board.querySelector(`.tableau-col[data-col="${kSel.ci}"]`);
-    if(colEl){
-      const cards = [...colEl.querySelectorAll('.card[data-id]')];
-      const colData = state.tableau[kSel.ci];
-      for(let i=kSel.idx; i<colData.length; i++){
-        const card = colData[i];
-        const el = cards.find(e => parseInt(e.dataset.id,10) === card.id);
-        if(el) el.classList.add('selected');
+    if(kSel.waste){
+      const w = board.querySelector('#waste-pile .card[data-id]');
+      if(w) w.classList.add('selected');
+    } else {
+      const colEl = board.querySelector(`.tableau-col[data-col="${kSel.ci}"]`);
+      if(colEl){
+        const cards = [...colEl.querySelectorAll('.card[data-id]')];
+        const colData = state.tableau[kSel.ci];
+        for(let i=kSel.idx; i<colData.length; i++){
+          const card = colData[i];
+          const el = cards.find(e => parseInt(e.dataset.id,10) === card.id);
+          if(el) el.classList.add('selected');
+        }
       }
     }
   }
@@ -118,17 +123,31 @@ function renderKlondike(){
     moves++; updateHUD(); renderKlondike();
   });
 
-  // waste card -> try foundation
+  // waste card
   const wasteCard = board.querySelector('#waste-pile .card[data-id]');
   if(wasteCard){
-    wasteCard.addEventListener('click', ()=>{
-      const id = parseInt(wasteCard.dataset.id,10);
-      const card = state.waste.find(c => c.id === id);
-      if(card) tryKFoundation(card, true);
+    wasteCard.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      klondikeWasteClick();
     });
   }
 
   // foundation cards -> no-op (just display)
+}
+
+function klondikeWasteClick(){
+  const card = state.waste.at(-1);
+  if(!card) return;
+  // if waste is already selected -> try foundation
+  if(kSel && kSel.waste){
+    tryKFoundation(card, true);
+    kSel = null;
+    renderKlondike();
+    return;
+  }
+  // select waste card
+  kSel = {waste:true};
+  renderKlondike();
 }
 
 function klondikeTableauClick(e){
@@ -150,21 +169,27 @@ function klondikeTableauClick(e){
 
     // already have a selection -> try to move it here
     if(kSel){
-      const srcCi = kSel.ci, srcIdx = kSel.idx;
-      if(srcCi !== ci || srcIdx !== idx){
-        if(tryKMove(srcCi, srcIdx, ci)){
+      if(kSel.waste){
+        // waste -> tableau
+        if(tryKWasteToTableau(ci)){
           kSel = null;
           return;
         }
-        // illegal move: select the clicked card instead
-        kSel = {ci, idx};
-        renderKlondike();
-        return;
+        // illegal: fall through to select clicked tableau card
+      } else {
+        const srcCi = kSel.ci, srcIdx = kSel.idx;
+        if(srcCi !== ci || srcIdx !== idx){
+          if(tryKMove(srcCi, srcIdx, ci)){
+            kSel = null;
+            return;
+          }
+          // illegal move: select the clicked card instead
+        }
       }
-      return;
+      // fall through to select
     }
 
-    // no selection: select this card/stack
+    // no selection, or illegal move: select this card/stack
     kSel = {ci, idx};
     renderKlondike();
     return;
@@ -173,6 +198,10 @@ function klondikeTableauClick(e){
 
 function klondikeEmptyColClick(ci){
   if(!kSel) return;
+  if(kSel.waste){
+    if(tryKWasteToTableau(ci)) kSel = null;
+    return;
+  }
   if(tryKMove(kSel.ci, kSel.idx, ci)){
     kSel = null;
   }
@@ -196,6 +225,22 @@ function tryKMove(fromCi, fromIdx, toCi){
   srcCol.length = fromIdx;
   const newTop = srcCol.at(-1);
   if(newTop) newTop.faceUp = true;
+  moves++; updateHUD(); renderKlondike(); checkKWin();
+  return true;
+}
+
+function tryKWasteToTableau(toCi){
+  const card = state.waste.at(-1);
+  if(!card) return false;
+  const destCol = state.tableau[toCi];
+  const target = destCol.at(-1);
+  const canPlace = (!target && card.val === 13) ||
+    (target && target.color !== card.color && target.val === card.val + 1);
+  if(!canPlace) return false;
+  pushUndo();
+  state.waste.pop();
+  card.faceUp = true;
+  destCol.push(card);
   moves++; updateHUD(); renderKlondike(); checkKWin();
   return true;
 }
