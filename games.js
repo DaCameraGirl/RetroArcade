@@ -659,8 +659,9 @@ function startTimer(){
 }
 
 function applyDeck(){
-  const d = (document.querySelector('#deck')?.value) || 'neon';
-  board.className = 'deck-' + d;
+  const d = (document.querySelector('#deck') && document.querySelector('#deck').value) || 'neon';
+  document.body.className = document.body.className.replace(/\bdeck-\w+\b/g, '').trim();
+  document.body.classList.add('deck-' + d);
 }
 function renderCurrent(){
   applyDeck();
@@ -693,7 +694,7 @@ document.querySelectorAll('.game-btn').forEach(b=>{
 });
 
 $('#newGame').addEventListener('click', newGame);
-$('#deck')?.addEventListener('change', ()=>{ applyDeck(); renderCurrent(); });
+var deckSel = document.querySelector('#deck'); if(deckSel) deckSel.addEventListener('change', function(){ applyDeck(); renderCurrent(); });
 $('#undo').addEventListener('click', doUndo);
 $('#playAgain').addEventListener('click', ()=>{
   $('#win').classList.add('hidden');
