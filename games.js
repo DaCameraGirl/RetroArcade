@@ -132,20 +132,35 @@ function renderKlondike(){
     });
   }
 
-  // foundation cards -> no-op (just display)
+  // foundation piles – click to place selected card
+  board.querySelectorAll('.foundation').forEach((el,i)=>{
+    el.addEventListener('click', e=>{
+      e.stopPropagation();
+      if(kSel && kSel.waste){
+        const card = state.waste.at(-1);
+        if(card) tryKFoundation(card, true);
+        kSel = null;
+        renderKlondike();
+      }
+    });
+  });
 }
 
 function klondikeWasteClick(){
   const card = state.waste.at(-1);
   if(!card) return;
-  // if waste is already selected -> try foundation
+  // try foundation immediately
+  if(tryKFoundation(card, true)){
+    kSel = null;
+    return;
+  }
+  // if already selected, deselect
   if(kSel && kSel.waste){
-    tryKFoundation(card, true);
     kSel = null;
     renderKlondike();
     return;
   }
-  // select waste card
+  // select waste card for tableau play
   kSel = {waste:true};
   renderKlondike();
 }
@@ -404,7 +419,7 @@ function renderFreeCell(){
   html += '<div style="width:30px"></div>';
   state.fc_found.forEach((f,i)=>{
     html += `<div><div class="fc-label">Home</div>`+
-      `<div class="pile-slot fc-found" data-found="${i}">${f.at(-1) ? cardHtml(f.at(-1)) : ''}</div></div>`;
+      `<div class=\"pile-slot fc-found\" data-found=\"${f.id ?? i}\">${f.at(-1) ? cardHtml(f.at(-1)) : ''}</div></div>`;
   });
   html += '</div>';
 
