@@ -1,10 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap');
-:root{--bg:#0d001a;--neon-p:#d926b8;--neon-c:#00fff0;--neon-y:#ffef00}
+:root{--bg:#0d001a;--neon-p:#b080a0;--neon-c:#00fff0;--neon-y:#ffef00}
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:#fff;font-family:'Space Mono',monospace;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:16px}
 .scanlines{position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(transparent,transparent 2px,rgba(0,255,240,.015) 3px);z-index:999;opacity:.6}
 header{text-align:center;margin:12px 0 20px}
-h1{font-family:'Press Start 2P',monospace;color:var(--neon-p);text-shadow:0 0 2px var(--neon-p),0 0 6px var(--neon-p);font-size:1.4rem}
+h1{font-family:'Press Start 2P',monospace;color:var(--neon-p);text-shadow:none;font-size:1.4rem}
 .tag{color:var(--neon-c);margin-top:8px;font-size:.85rem}
 .game-select{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;justify-content:center}
 .game-btn{background:#1a0b2e;border:2px solid var(--neon-c);color:var(--neon-c);padding:10px 18px;border-radius:8px;cursor:pointer;font-family:'Space Mono',monospace;font-weight:700}
@@ -14,19 +14,43 @@ h1{font-family:'Press Start 2P',monospace;color:var(--neon-p);text-shadow:0 0 2p
 #board{background:radial-gradient(ellipse at center,#1a0b2e 0%,#0d001a 100%);border:3px solid var(--neon-c);border-radius:14px;padding:20px;min-width:min(950px,96vw);min-height:540px;box-shadow:0 0 30px rgba(0,255,240,.15)}
 .card{width:68px;height:96px;border-radius:8px;background:#e6e6ed;border:2px solid #444;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:700;cursor:pointer;user-select:none;font-size:1.05rem;color:#1a1a1a;position:relative}
 .card.red{color:#a22}.card .small{font-size:1.1rem;font-weight:700}
-.card.back{background:repeating-linear-gradient(45deg,#3a0066,#3a0066 8px,#6a00b3 8px,#6a00b3 16px);color:transparent;border-color:#ff2ad6}
+.card.back{color:transparent}
+.card.selected{outline:3px solid var(--neon-y);box-shadow:0 0 14px var(--neon-y);z-index:50 !important}
+.card:hover{filter:brightness(1.08)}
+.piles{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:18px}
+.pile-slot{width:68px;height:96px;border:2px dashed rgba(0,255,240,.3);border-radius:8px}
+#waste-pile{min-width:68px;min-height:96px}
+.tableau{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.tableau-col{min-width:68px;position:relative}
+.tableau-col .card{margin-bottom:-35px}
+.tableau-col .card.back{margin-bottom:-65px}
+.tableau-col .card:last-child{margin-bottom:0}
+.tableau-col .card:nth-child(1){z-index:1}
+.tableau-col .card:nth-child(2){z-index:2}
+.tableau-col .card:nth-child(3){z-index:3}
+.tableau-col .card:nth-child(4){z-index:4}
+.tableau-col .card:nth-child(5){z-index:5}
+.tableau-col .card:nth-child(6){z-index:6}
+.tableau-col .card:nth-child(7){z-index:7}
+.tableau-col .card:nth-child(8){z-index:8}
+.tableau-col .card:nth-child(9){z-index:9}
+.tableau-col .card:nth-child(10){z-index:10}
+.tableau-col .card:nth-child(11){z-index:11}
+.tableau-col .card:nth-child(12){z-index:12}
+.tableau-col .card:nth-child(13){z-index:13}
+.tableau-col .card:nth-child(14){z-index:14}
+.tableau-col .card:nth-child(15){z-index:15}
+.tableau-col .card:nth-child(16){z-index:16}
+.tableau-col .card:nth-child(17){z-index:17}
+.tableau-col .card:nth-child(18){z-index:18}
+.tableau-col .card:nth-child(19){z-index:19}
+.tableau-col .card:nth-child(20){z-index:20}
 /* === DECK BACKS === */
-/* Neon – purple arcade grid */
 .deck-neon .card.back { background:#3a0066; background-image: repeating-linear-gradient(45deg,#6a00b3 0 8px,transparent 8px 16px), radial-gradient(circle at 50% 50%, #ff2ad6 0 2px, transparent 3px); background-size: auto, 16px 16px; border-color:#ff2ad6 }
-/* Ocean – deep blue with waves and fish */
 .deck-ocean .card.back { background:#004466; background-image: radial-gradient(ellipse 12px 6px at 20% 30%, #00ddff 0, transparent 70%), radial-gradient(ellipse 10px 5px at 70% 60%, #00ddff 0, transparent 70%), radial-gradient(circle at 50% 80%, #00aaff66 0 8px, transparent 9px); background-size: 34px 32px, 34px 32px, 34px 32px; border-color:#00fff0 }
-/* Forest – green with leaf pattern */
 .deck-forest .card.back { background:#0a3d1a; background-image: radial-gradient(ellipse 8px 12px at 30% 30%, #1aff66 0, transparent 70%), radial-gradient(ellipse 8px 12px at 65% 65%, #1aff66 0, transparent 70%), radial-gradient(circle at 50% 50%, #0f6 0 1px, transparent 2px); background-size: 24px 24px, 24px 24px, 12px 12px; border-color:#1aff66 }
-/* Sunset – warm orange with suns */
 .deck-sunset .card.back { background:#662200; background-image: radial-gradient(circle at 50% 50%, #ffcc00 0 5px, #ff6600 6px 8px, transparent 9px), radial-gradient(circle at 15% 15%, #ffaa00aa 0 2px, transparent 3px), radial-gradient(circle at 85% 85%, #ffaa00aa 0 2px, transparent 3px); background-size: 28px 28px, 28px 28px, 28px 28px; border-color:#ff8800 }
-/* Classic – navy blue traditional */
 .deck-classic .card.back { background:#1a3d66; background-image: repeating-linear-gradient(45deg, #3366aa 0 6px, transparent 6px 12px), repeating-linear-gradient(-45deg, #3366aa 0 6px, transparent 6px 12px); border-color:#6699dd }
-
 .peaks{display:flex;flex-direction:column;align-items:center;gap:4px}
 .peak-row{display:flex;gap:6px}
 .waste-row{display:flex;align-items:center;justify-content:center;gap:18px;margin-top:18px}
