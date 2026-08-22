@@ -658,7 +658,12 @@ function startTimer(){
   }, 1000);
 }
 
+function applyDeck(){
+  const d = (document.querySelector('#deck')?.value) || 'neon';
+  board.className = 'deck-' + d;
+}
 function renderCurrent(){
+  applyDeck();
   if(game === 'klondike') renderKlondike();
   else if(game === 'tripeaks') renderTriPeaks();
   else renderFreeCell();
@@ -688,6 +693,7 @@ document.querySelectorAll('.game-btn').forEach(b=>{
 });
 
 $('#newGame').addEventListener('click', newGame);
+$('#deck')?.addEventListener('change', ()=>{ applyDeck(); renderCurrent(); });
 $('#undo').addEventListener('click', doUndo);
 $('#playAgain').addEventListener('click', ()=>{
   $('#win').classList.add('hidden');
