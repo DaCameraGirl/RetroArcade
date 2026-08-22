@@ -15,6 +15,12 @@ h1{font-family:'Press Start 2P',monospace;color:var(--neon-p);text-shadow:0 0 4p
 .card{width:68px;height:96px;border-radius:8px;background:#e6e6ed;border:2px solid #444;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:700;cursor:pointer;user-select:none;font-size:1.05rem;color:#1a1a1a;position:relative}
 .card.red{color:#a22}.card .small{font-size:1.1rem;font-weight:700}
 .card.back{background:repeating-linear-gradient(45deg,#3a0066,#3a0066 8px,#6a00b3 8px,#6a00b3 16px);color:transparent;border-color:#ff2ad6}
+/* === DECK BACKS === */
+.deck-neon .card.back { background:repeating-linear-gradient(45deg,#3a0066,#3a0066 8px,#6a00b3 8px,#6a00b3 16px); border-color:#ff2ad6 }
+.deck-ocean .card.back { background:repeating-linear-gradient(45deg,#004466,#004466 8px,#00aaff 8px,#00aaff 16px); border-color:#00fff0 }
+.deck-forest .card.back { background:repeating-linear-gradient(45deg,#0a3d1a,#0a3d1a 8px,#1aff66 8px,#1aff66 16px); border-color:#1aff66 }
+.deck-sunset .card.back { background:repeating-linear-gradient(45deg,#662200,#662200 8px,#ff6600 8px,#ff6600 16px); border-color:#ff8800 }
+.deck-classic .card.back { background:repeating-linear-gradient(45deg,#1a3d66,#1a3d66 8px,#3366aa 8px,#3366aa 16px); border-color:#6699dd }
 .card.selected{outline:3px solid var(--neon-y);box-shadow:0 0 14px var(--neon-y);z-index:50 !important}
 .card:hover{filter:brightness(1.08)}
 .piles{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:18px}
