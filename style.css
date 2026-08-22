@@ -11,7 +11,7 @@ h1{font-family:'Press Start 2P',monospace;color:var(--neon-p);text-shadow:none;f
 .game-btn:hover,.game-btn.active{background:var(--neon-c);color:#000;box-shadow:0 0 14px var(--neon-c)}
 .controls{display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center;margin-bottom:16px;font-size:.9rem}
 .controls select,.controls button{background:#1a0b2e;border:1px solid var(--neon-p);color:#fff;padding:6px 12px;border-radius:6px;font-family:'Space Mono',monospace;cursor:pointer}
-#board{background:radial-gradient(ellipse at center,#1a0b2e 0%,#0d001a 100%);border:3px solid var(--neon-c);border-radius:14px;padding:20px;min-width:min(950px,96vw);min-height:540px;box-shadow:0 0 30px rgba(0,255,240,.15)}
+#board{padding:12px;width:100%;max-width:1100px}
 .card{width:68px;height:96px;border-radius:8px;background:#e6e6ed;border:2px solid #444;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:700;cursor:pointer;user-select:none;font-size:1.05rem;color:#1a1a1a;position:relative}
 .card.red{color:#a22}.card .small{font-size:1.1rem;font-weight:700}
 .card.back{color:transparent}
@@ -45,11 +45,30 @@ h1{font-family:'Press Start 2P',monospace;color:var(--neon-p);text-shadow:none;f
 .tableau-col .card:nth-child(18){z-index:18}
 .tableau-col .card:nth-child(19){z-index:19}
 .tableau-col .card:nth-child(20){z-index:20}
+
 /* === DECK BACKS === */
 .deck-neon .card.back { background:#3a0066; background-image: repeating-linear-gradient(45deg,#6a00b3 0 8px,transparent 8px 16px), radial-gradient(circle at 50% 50%, #ff2ad6 0 2px, transparent 3px); background-size: auto, 16px 16px; border-color:#ff2ad6 }
-.deck-ocean .card.back { background:#004466; background-image: radial-gradient(ellipse 12px 6px at 20% 30%, #00ddff 0, transparent 70%), radial-gradient(ellipse 10px 5px at 70% 60%, #00ddff 0, transparent 70%), radial-gradient(circle at 50% 80%, #00aaff66 0 8px, transparent 9px); background-size: 34px 32px, 34px 32px, 34px 32px; border-color:#00fff0 }
-.deck-forest .card.back { background:#0a3d1a; background-image: radial-gradient(ellipse 8px 12px at 30% 30%, #1aff66 0, transparent 70%), radial-gradient(ellipse 8px 12px at 65% 65%, #1aff66 0, transparent 70%), radial-gradient(circle at 50% 50%, #0f6 0 1px, transparent 2px); background-size: 24px 24px, 24px 24px, 12px 12px; border-color:#1aff66 }
-.deck-sunset .card.back { background:#662200; background-image: radial-gradient(circle at 50% 50%, #ffcc00 0 5px, #ff6600 6px 8px, transparent 9px), radial-gradient(circle at 15% 15%, #ffaa00aa 0 2px, transparent 3px), radial-gradient(circle at 85% 85%, #ffaa00aa 0 2px, transparent 3px); background-size: 28px 28px, 28px 28px, 28px 28px; border-color:#ff8800 }
+
+/* OCEAN – waves + starfish/shells */
+.deck-ocean .card.back { background:#003b5c; border-color:#00fff0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath d='M0 30 Q15 22 30 30 Q45 38 60 30' stroke='%2300ddff' stroke-width='1.5' fill='none' opacity='.5'/%3E%3Cpath d='M0 45 Q15 37 30 45 Q45 53 60 45' stroke='%2300ddff' stroke-width='1.2' fill='none' opacity='.35'/%3E%3Ccircle cx='15' cy='12' r='1.5' fill='%2300eeff' opacity='.7'/%3E%3Ccircle cx='45' cy='18' r='1.2' fill='%2300eeff' opacity='.6'/%3E%3C/svg%3E"),
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='68' height='96' viewBox='0 0 68 96'%3E%3Ctext x='34' y='34' text-anchor='middle' font-size='20' opacity='.85'%3E%E2%AD%90%3C/text%3E%3Ctext x='34' y='64' text-anchor='middle' font-size='18' opacity='.8'%3E%F0%9F%90%9A%3C/text%3E%3C/svg%3E");
+  background-size: 60px 60px, 68px 96px; background-position: 0 0, center; background-repeat: repeat, no-repeat;
+}
+
+/* FOREST – leaves + pine trees */
+.deck-forest .card.back { background:#0b3b1a; border-color:#1aff66;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Ctext x='10' y='18' font-size='12' opacity='.55'%3E%F0%9F%8C%BF%3C/text%3E%3Ctext x='24' y='34' font-size='12' opacity='.55'%3E%F0%9F%8D%83%3C/text%3E%3C/svg%3E"),
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='68' height='96' viewBox='0 0 68 96'%3E%3Ctext x='34' y='42' text-anchor='middle' font-size='26' opacity='.9'%3E%F0%9F%8C%B2%3C/text%3E%3Ctext x='34' y='68' text-anchor='middle' font-size='16' opacity='.7'%3E%F0%9F%8C%BF%20%F0%9F%8C%BF%3C/text%3E%3C/svg%3E");
+  background-size: 40px 40px, 68px 96px; background-position: 0 0, center; background-repeat: repeat, no-repeat;
+}
+
+/* SUNSET – actual suns with rays */
+.deck-sunset .card.back { background:#6b2a00; border-color:#ff8800;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='68' height='96' viewBox='0 0 68 96'%3E%3Ccircle cx='34' cy='38' r='14' fill='%23ffcc33'/%3E%3Cg stroke='%23ffcc33' stroke-width='2' opacity='.8'%3E%3Cline x1='34' y1='16' x2='34' y2='8'/%3E%3Cline x1='34' y1='60' x2='34' y2='68'/%3E%3Cline x1='12' y1='38' x2='4' y2='38'/%3E%3Cline x1='56' y1='38' x2='64' y2='38'/%3E%3Cline x1='18' y1='22' x2='12' y2='16'/%3E%3Cline x1='50' y1='22' x2='56' y2='16'/%3E%3Cline x1='18' y1='54' x2='12' y2='60'/%3E%3Cline x1='50' y1='54' x2='56' y2='60'/%3E%3C/g%3E%3Cpath d='M8 76 Q20 70 34 76 Q48 82 60 76' stroke='%23ff9955' stroke-width='2' fill='none' opacity='.6'/%3E%3Cpath d='M8 84 Q20 78 34 84 Q48 90 60 84' stroke='%23ff9955' stroke-width='1.5' fill='none' opacity='.45'/%3E%3C/svg%3E");
+  background-size: 68px 96px; background-position: center; background-repeat: no-repeat;
+}
+
 .deck-classic .card.back { background:#1a3d66; background-image: repeating-linear-gradient(45deg, #3366aa 0 6px, transparent 6px 12px), repeating-linear-gradient(-45deg, #3366aa 0 6px, transparent 6px 12px); border-color:#6699dd }
 .peaks{display:flex;flex-direction:column;align-items:center;gap:4px}
 .peak-row{display:flex;gap:6px}
