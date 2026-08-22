@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap');
 :root{--bg:#0d001a;--neon-p:#b080a0;--neon-c:#00fff0;--neon-y:#ffef00}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:#fff;font-family:'Space Mono',monospace;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:16px}
+body{background:var(--bg);color:#fff;font-family:'Space Mono',monospace;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:16px;transition:background .3s ease}
 .scanlines{position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(transparent,transparent 2px,rgba(0,255,240,.015) 3px);z-index:999;opacity:.6}
 header{text-align:center;margin:12px 0 20px}
 h1{font-family:'Press Start 2P',monospace;color:var(--neon-p);text-shadow:none;font-size:1.4rem}
@@ -70,6 +70,39 @@ h1{font-family:'Press Start 2P',monospace;color:var(--neon-p);text-shadow:none;f
 }
 
 .deck-classic .card.back { background:#1a3d66; background-image: repeating-linear-gradient(45deg, #3366aa 0 6px, transparent 6px 12px), repeating-linear-gradient(-45deg, #3366aa 0 6px, transparent 6px 12px); border-color:#6699dd }
+
+/* === THEMED PAGE BACKGROUNDS === */
+body.deck-neon   { background:#0d001a; --neon-p:#ff2ad6; --neon-c:#00fff0; }
+body.deck-ocean  { background: linear-gradient(180deg,#001a2e 0%,#003b5c 60%,#001828 100%); --neon-p:#4ddfff; --neon-c:#00fff0; }
+body.deck-forest { background: linear-gradient(180deg,#061d0c 0%,#0b3b1a 60%,#051208 100%); --neon-p:#7CFFB2; --neon-c:#1aff66; }
+body.deck-sunset { background: linear-gradient(180deg,#2a0a00 0%,#6b2a00 45%,#b84a00 70%,#2a0a00 100%); --neon-p:#ffcc33; --neon-c:#ff8800; }
+body.deck-classic{ background: linear-gradient(180deg,#0a1428 0%,#1a3d66 60%,#0a1428 100%); --neon-p:#7ab8ff; --neon-c:#6699dd; }
+
+/* theme-tinted controls so everything matches */
+body.deck-ocean .game-btn,
+body.deck-ocean .controls select,
+body.deck-ocean .controls button { border-color:#00c8e6; color:#bff6ff }
+body.deck-ocean .game-btn:hover,
+body.deck-ocean .game-btn.active { background:#00fff0; color:#00263a }
+
+body.deck-forest .game-btn,
+body.deck-forest .controls select,
+body.deck-forest .controls button { border-color:#1aff66; color:#bfffdd }
+body.deck-forest .game-btn:hover,
+body.deck-forest .game-btn.active { background:#1aff66; color:#002a12 }
+
+body.deck-sunset .game-btn,
+body.deck-sunset .controls select,
+body.deck-sunset .controls button { border-color:#ff8800; color:#ffe0b0 }
+body.deck-sunset .game-btn:hover,
+body.deck-sunset .game-btn.active { background:#ff8800; color:#2a0a00 }
+
+body.deck-classic .game-btn,
+body.deck-classic .controls select,
+body.deck-classic .controls button { border-color:#6699dd; }
+body.deck-classic .game-btn:hover,
+body.deck-classic .game-btn.active { background:#6699dd; color:#0a1428 }
+
 .peaks{display:flex;flex-direction:column;align-items:center;gap:4px}
 .peak-row{display:flex;gap:6px}
 .waste-row{display:flex;align-items:center;justify-content:center;gap:18px;margin-top:18px}
