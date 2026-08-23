@@ -72,7 +72,7 @@ h1{font-family:'Press Start 2P',monospace;color:var(--neon-p);text-shadow:none;f
 .deck-classic .card.back { background:#1a3d66; background-image: repeating-linear-gradient(45deg, #3366aa 0 6px, transparent 6px 12px), repeating-linear-gradient(-45deg, #3366aa 0 6px, transparent 6px 12px); border-color:#6699dd }
 
 /* === THEMED PAGE BACKGROUNDS === */
-body.deck-neon   { background:#0d001a; --neon-p:#ff2ad6; --neon-c:#00fff0; }
+body.deck-neon   { background: linear-gradient(180deg,#0d001a 0%,#2a0055 45%,#1a0033 70%,#0d001a 100%); --neon-p:#ff2ad6; --neon-c:#00fff0; }
 body.deck-ocean  { background: linear-gradient(180deg,#001a2e 0%,#003b5c 60%,#001828 100%); --neon-p:#4ddfff; --neon-c:#00fff0; }
 body.deck-forest { background: linear-gradient(180deg,#061d0c 0%,#0b3b1a 60%,#051208 100%); --neon-p:#7CFFB2; --neon-c:#1aff66; }
 body.deck-sunset { background: linear-gradient(180deg,#2a0a00 0%,#6b2a00 45%,#b84a00 70%,#2a0a00 100%); --neon-p:#ffcc33; --neon-c:#ff8800; }
