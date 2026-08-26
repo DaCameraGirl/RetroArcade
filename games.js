@@ -1025,29 +1025,10 @@ function renderSlotMini(selected){
   document.querySelector('#miniSpin').addEventListener('click', function(){ renderSlotMini(selected); });
 }
 
-function renderArcadeMini(selected){
-  state.arcadeScore = state.arcadeScore || 0;
-  board.innerHTML = '<section class="mini-game cabinet-mini mode-' + selected.mode + '"><h2>' + selected.name + '</h2>' +
-    '<div class="pixel-stage"><span class="pixel-player"></span><span class="pixel-target"></span><span class="pixel-danger"></span></div>' +
-    '<p class="mini-status">' + selected.prompt + '</p>' +
-    '<div class="score-display">Score ' + state.arcadeScore + '</div>' +
-    '<div class="mini-actions"><button id="miniPlay">Play move</button><button id="miniReset">Reset</button></div></section>';
-  document.querySelector('#miniPlay').addEventListener('click', function(){
-    const hit = Math.random() > (difficulty === 'hard' ? .42 : difficulty === 'easy' ? .24 : .33);
-    state.arcadeScore += hit ? 10 : -3;
-    if(state.arcadeScore < 0) state.arcadeScore = 0;
-    moves++;
-    updateHUD();
-    renderArcadeMini(selected);
-  });
-  document.querySelector('#miniReset').addEventListener('click', function(){
-    state.arcadeScore = 0;
-    moves = 0;
-    updateHUD();
-    renderArcadeMini(selected);
-  });
+function renderComingSoon(selected){
+  board.innerHTML = '<section class="mini-game coming-soon-game"><h2>' + selected.name + '</h2>' +
+    '<p class="mini-status">This cabinet is being rebuilt as a real game.</p></section>';
 }
-
 
 function ensureRetroSlotState(selected){
   if(state.retroSlot) return;
@@ -1514,7 +1495,7 @@ function renderQuickGame(){
   if(selected.kind === 'slots') return renderSlotMini(selected);
   if(selected.kind === 'snake') return renderSnakeMini(selected);
   if(selected.kind === 'frog') return renderFrogCrossing(selected);
-  renderArcadeMini(selected);
+  renderComingSoon(selected);
 }
 const ROOMS = [
   {
@@ -1527,8 +1508,6 @@ const ROOMS = [
       { id: 'tripeaks', name: 'Tri-Peaks', table: 'Table 2', available: true },
       { id: 'freecell', name: 'FreeCell', table: 'Table 3', available: true },
       { id: 'pyramid', name: 'Pyramid', table: 'Table 4', available: true },
-      { id: 'war', name: 'War', table: 'Table 5', kind: 'highcard', available: true },
-      { id: 'high-card', name: 'High Card', table: 'Table 6', kind: 'highcard', available: true },
     ],
   },
   {
@@ -1537,12 +1516,7 @@ const ROOMS = [
     name: 'Table Games',
     desc: 'Roulette, blackjack, dice, and baccarat',
     games: [
-      { id: 'roulette', name: 'Roulette', table: 'Wheel 1', kind: 'roulette', available: true },
-      { id: 'blackjack', name: 'Blackjack', table: 'Table 1', kind: 'blackjack', available: true },
-      { id: 'craps', name: 'Craps', table: 'Dice 1', kind: 'dice', available: true },
-      { id: 'sic-bo', name: 'Sic Bo', table: 'Dice 2', kind: 'sicbo', available: true },
-      { id: 'baccarat', name: 'Baccarat', table: 'Table 2', kind: 'baccarat', available: true },
-      { id: 'casino-war', name: 'Casino War', table: 'Table 3', kind: 'highcard', available: true },
+      { id: 'sic-bo', name: 'Sic Bo', table: 'Dice 1', kind: 'sicbo', available: true },
     ],
   },
   {
@@ -1551,14 +1525,7 @@ const ROOMS = [
     name: 'Poker Tables',
     desc: 'Holdem, draw, stud, and video poker',
     games: [
-      { id: 'video-poker', name: 'Video Poker', table: 'Poker 1', kind: 'poker', available: true },
-      { id: 'texas-holdem', name: 'Texas Holdem', table: 'Poker 2', kind: 'poker', handSize: 7, available: true },
-      { id: 'five-card-draw', name: 'Five Card Draw', table: 'Poker 3', kind: 'poker', available: true },
-      { id: 'three-card-poker', name: 'Three Card Poker', table: 'Poker 4', kind: 'poker', handSize: 3, available: true },
-      { id: 'seven-card-stud', name: 'Seven Card Stud', table: 'Poker 5', kind: 'poker', handSize: 7, available: true },
-      { id: 'omaha', name: 'Omaha', table: 'Poker 6', kind: 'poker', handSize: 7, available: true },
-      { id: 'caribbean-stud', name: 'Caribbean Stud', table: 'Poker 7', kind: 'poker', available: true },
-      { id: 'red-dog', name: 'Red Dog', table: 'Poker 8', kind: 'highcard', available: true },
+      { id: 'video-poker', name: 'Poker Table Prototype', table: 'Rebuild queued', kind: 'coming-soon', available: false },
     ],
   },
   {
@@ -1567,15 +1534,7 @@ const ROOMS = [
     name: 'Slot Machines',
     desc: 'Rows of playable slot cabinets',
     games: [
-      { id: 'classic-slots', name: 'Classic 3-Reel', table: 'Slot 1', kind: 'slots', symbols: ['7','BAR','Cherry','Bell','Lemon'], available: true },
-      { id: 'lucky-sevens', name: 'Lucky Sevens', table: 'Slot 2', kind: 'slots', symbols: ['7','7','BAR','Star','Gem'], available: true },
-      { id: 'fruit-spin', name: 'Fruit Spin', table: 'Slot 3', kind: 'slots', symbols: ['Cherry','Lemon','Plum','Melon','Bell'], available: true },
-      { id: 'diamond-deluxe', name: 'Diamond Deluxe', table: 'Slot 4', kind: 'slots', symbols: ['Gem','Crown','7','BAR','Bell'], available: true },
-      { id: 'treasure-wheel', name: 'Treasure Wheel', table: 'Slot 5', kind: 'slots', symbols: ['Gold','Key','Chest','Gem','7'], available: true },
-      { id: 'arcade-jackpot', name: 'Arcade Jackpot', table: 'Slot 6', kind: 'slots', symbols: ['Bolt','Star','7','Gem','BAR'], available: true },
-      { id: 'ocean-pearls', name: 'Ocean Pearls', table: 'Slot 7', kind: 'slots', symbols: ['Pearl','Wave','Shell','Gem','7'], available: true },
-      { id: 'forest-fortune', name: 'Forest Fortune', table: 'Slot 8', kind: 'slots', symbols: ['Leaf','Acorn','Moon','Gem','7'], available: true },
-      { id: 'retro-arcade-slot', name: 'RetroArcade Reels', table: 'Slot 9', kind: 'retro-slot', symbols: ['PIXEL','JOY','CRT','7','CHERRY','COIN'], available: true },
+      { id: 'retro-arcade-slot', name: 'RetroArcade Reels', table: 'Slot 1', kind: 'retro-slot', symbols: ['PIXEL','JOY','CRT','7','CHERRY','COIN'], available: true },
     ],
   },
   {
@@ -1584,18 +1543,8 @@ const ROOMS = [
     name: 'Classic Arcade',
     desc: 'Stand-up retro cabinet games',
     games: [
-      { id: 'maze-chase', name: 'Maze Chase', table: 'Cabinet 1', kind: 'arcade', mode: 'maze', prompt: 'Dodge the ghosts and grab the dots.', available: true },
-      { id: 'barrel-climb', name: 'Barrel Climb', table: 'Cabinet 2', kind: 'arcade', mode: 'barrel', prompt: 'Jump the barrels and climb the ramps.', available: true },
-      { id: 'tunnel-digger', name: 'Tunnel Digger', table: 'Cabinet 3', kind: 'arcade', mode: 'dig', prompt: 'Dig tunnels and clear the underground board.', available: true },
-      { id: 'pixel-plumber', name: 'Pixel Plumber', table: 'Cabinet 4', kind: 'arcade', mode: 'run', prompt: 'Run, jump, and grab coins.', available: true },
-      { id: 'bug-trail', name: 'Bug Trail', table: 'Cabinet 5', kind: 'arcade', mode: 'bug', prompt: 'Blast the crawling bug chain before it reaches you.', available: true },
-      { id: 'pyramid-hopper', name: 'Pyramid Hopper', table: 'Cabinet 6', kind: 'arcade', mode: 'pyramid', prompt: 'Hop the pyramid tiles and dodge the bounce balls.', available: true },
-      { id: 'jungle-pit-run', name: 'Jungle Pit Run', table: 'Cabinet 7', kind: 'arcade', mode: 'jungle', prompt: 'Swing over pits and grab treasure.', available: true },
-      { id: 'space-blaster', name: 'Space Blaster', table: 'Cabinet 8', kind: 'arcade', mode: 'space', prompt: 'Blast invaders before they reach you.', available: true },
-      { id: 'brick-wall', name: 'Brick Wall', table: 'Cabinet 9', kind: 'arcade', mode: 'brick', prompt: 'Break the wall and keep the ball alive.', available: true },
-      { id: 'frog-crossing', name: 'Frog Crossing', table: 'Cabinet 10', kind: 'frog', mode: 'frog', prompt: 'Hop lanes and reach the safe side.', available: true },
-      { id: 'moon-patrol', name: 'Moon Patrol', table: 'Cabinet 11', kind: 'arcade', mode: 'moon', prompt: 'Jump craters and patrol the moon road.', available: true },
-      { id: 'snake', name: 'Snake', table: 'Cabinet 12', kind: 'snake', mode: 'snake', prompt: 'Eat pixels and dodge your own tail.', available: true },
+      { id: 'frog-crossing', name: 'Frog Crossing', table: 'Cabinet 1', kind: 'frog', mode: 'frog', prompt: 'Hop lanes and reach the safe side.', available: true },
+      { id: 'snake', name: 'Snake', table: 'Cabinet 2', kind: 'snake', mode: 'snake', prompt: 'Eat pixels and dodge your own tail.', available: true },
     ],
   },
 ];
@@ -1656,10 +1605,10 @@ function renderRoom(roomId){
 
   arcadeGrid.className = 'cabinet-grid casino-floor room-floor room-' + currentRoom.id;
   arcadeGrid.innerHTML = currentRoom.games.map(function(item){
-    return '<button class="floor-game game-choice station-' + item.id + '" type="button" data-game="' + item.id + '">' +
+    return '<button class="floor-game game-choice station-' + item.id + (item.available === false ? ' unavailable' : '') + '" type="button" data-game="' + item.id + '"' + (item.available === false ? ' disabled' : '') + '>' +
       '<span class="table-label">' + item.table + '</span>' +
       '<span class="table-name">' + item.name + '</span>' +
-      '<span class="play-tag">PLAY</span>' +
+      '<span class="play-tag">' + (item.available === false ? 'COMING SOON' : 'PLAY') + '</span>' +
       '</button>';
   }).join('');
 

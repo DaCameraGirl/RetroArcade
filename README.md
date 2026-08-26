@@ -6,7 +6,7 @@
 ![CSS](https://img.shields.io/badge/CSS-30.5%25-1572B6?style=for-the-badge&logo=css&logoColor=white)
 ![HTML](https://img.shields.io/badge/HTML-4.9%25-E34F26?style=for-the-badge&logo=html5&logoColor=white)
 
-**Realistic casino arcade floor with playable card tables, poker, slots, table games, and classic arcade cabinets**
+**Retro casino arcade floor with honest playable rooms and cabinet/table rebuilds in progress**
 
 </div>
 
@@ -16,13 +16,13 @@
 
 | Area | Games |
 |---|---|
-| **Card Tables** | Klondike, Tri-Peaks, FreeCell, Pyramid, War, High Card |
-| **Table Games** | Roulette, Blackjack, Craps, Sic Bo, Baccarat, Casino War |
-| **Poker Tables** | Video Poker, Texas Holdem, Five Card Draw, Three Card Poker, Seven Card Stud, Omaha, Caribbean Stud, Red Dog |
-| **Slot Machines** | Classic 3-Reel, Lucky Sevens, Fruit Spin, Diamond Deluxe, Treasure Wheel, Arcade Jackpot, Ocean Pearls, Forest Fortune, RetroArcade Reels |
-| **Classic Arcade** | Maze Chase, Barrel Climb, Tunnel Digger, Pixel Plumber, Bug Trail, Pyramid Hopper, Jungle Pit Run, Space Blaster, Brick Wall, Frog Crossing, Moon Patrol, Snake |
+| **Card Tables** | Klondike, Tri-Peaks, FreeCell, Pyramid |
+| **Table Games** | Sic Bo |
+| **Poker Tables** | Poker table scene rebuild queued |
+| **Slot Machines** | RetroArcade Reels |
+| **Classic Arcade** | Frog Crossing, Snake |
 
-Klondike, Tri-Peaks, FreeCell, and Pyramid use card-table rules. Frog Crossing is a canvas arcade cabinet with coin/start controls, traffic, logs, lives, homes, score, and local hi-score. Sic Bo, RetroArcade Reels, and Snake have direct player choices; the remaining casino and cabinet entries are lightweight mini-game loops.
+Klondike, Tri-Peaks, FreeCell, and Pyramid use card-table rules. Frog Crossing is a canvas arcade cabinet with coin/start controls, traffic, logs, lives, homes, score, and local hi-score. Sic Bo, RetroArcade Reels, and Snake have direct player choices. Placeholder mini-game loops are no longer listed as playable games.
 
 ---
 

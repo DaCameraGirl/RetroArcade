@@ -925,3 +925,16 @@ body.deck-arcade .room-classics .floor-game::after {
   .cabinet-controls { grid-template-columns: 1fr 1fr; }
   .cabinet-controls span { grid-column: 1 / -1; text-align: center; }
 }
+
+
+.floor-game.unavailable {
+  opacity: .52;
+  cursor: not-allowed;
+  filter: grayscale(.45);
+}
+
+.floor-game.unavailable:hover {
+  transform: none !important;
+  filter: grayscale(.45);
+  box-shadow: 0 18px 30px rgba(0,0,0,.48), inset 0 9px 22px rgba(255,255,255,.08), inset 0 -18px 34px rgba(0,0,0,.45);
+}
