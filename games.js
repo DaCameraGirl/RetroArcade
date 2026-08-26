@@ -641,7 +641,7 @@ function updateHUD(){
 }
 
 function showWin(){
-  $('#win-stats').textContent = `${game} — ${difficulty} — ${moves} moves — ${$('#timer').textContent}`;
+  $('#win-stats').textContent = `${game} | ${difficulty} | ${moves} moves | ${$('#timer').textContent}`;
   $('#win').classList.remove('hidden');
   clearInterval(timerInt);
 }
