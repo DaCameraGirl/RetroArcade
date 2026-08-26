@@ -3,28 +3,77 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Nature Arcade</title>
-<link rel="stylesheet" href="style.css?v=20260825b">
+<title>🕹️ RetroArcade</title>
+<link rel="stylesheet" href="assets/css/arcade.css">
 </head>
 <body class="deck-forest">
-<header><h1>🌿 NATURE ARCADE</h1><p class="tag">Solitaire Puzzle Collection</p></header>
-<nav class="game-select">
-  <button class="game-btn active" data-game="klondike">♣️ Klondike</button>
-  <button class="game-btn" data-game="tripeaks">⛰️ Tri-Peaks</button>
-  <button class="game-btn" data-game="freecell">♦️ FreeCell</button>
-</nav>
-<div class="controls">
-  <label>Theme: <select id="deck"><option value="forest" selected>Forest</option><option value="ocean">Ocean</option><option value="meadow">Meadow</option><option value="sunset">Sunset</option><option value="classic">Classic</option></select></label>
-  <label>Difficulty: <select id="difficulty"><option value="easy">Easy</option><option value="medium" selected>Medium</option><option value="hard">Hard</option></select></label>
-  <button id="newGame">New Game</button>
-  <button id="undo">Undo</button>
-  <span id="moves">Moves: 0</span>
-  <span id="timer">00:00</span>
-  <button id="pauseBtn">⏸ Pause</button>
+<div class="scanlines"></div>
+
+<header>
+  <h1 id="lobby-title">🎰 RETRO ARCADE 🎰</h1>
+  <p class="tag" id="lobby-subtitle">Pick a room</p>
+  <div id="breadcrumb" class="breadcrumb hidden"></div>
+</header>
+
+<!-- Lobby / Room floor -->
+<div id="game-grid-wrap">
+  <div id="game-grid" class="cabinet-grid"></div>
+  <p class="arcade-hint">Casino-style arcade — different rooms for different vibes</p>
 </div>
-<main id="board"></main>
-<div id="win" class="hidden"><div class="win-box"><h2>🎉 YOU WIN!</h2><p id="win-stats"></p><button id="playAgain">Play Again</button></div></div>
-<footer>Nature Arcade — DaCameraGirl</footer>
-<script src="games.js?v=20260825"></script>
+
+<!-- Play area -->
+<div id="play-area" class="hidden">
+  <div class="controls">
+    <button id="backBtn">⬅ Back</button>
+    <span id="game-title" class="game-title-label"></span>
+    <label>Theme:
+      <select id="deck">
+        <option value="forest" selected>Forest</option>
+        <option value="ocean">Ocean</option>
+        <option value="meadow">Meadow</option>
+        <option value="sunset">Sunset</option>
+        <option value="classic">Classic</option>
+        <option value="neon">Neon</option>
+      </select>
+    </label>
+    <label>Difficulty:
+      <select id="difficulty">
+        <option value="easy">Easy</option>
+        <option value="medium" selected>Medium</option>
+        <option value="hard">Hard</option>
+      </select>
+    </label>
+    <button id="newGame">New Game</button>
+    <button id="undo">Undo</button>
+    <span id="moves">Moves: 0</span>
+    <span id="timer">00:00</span>
+    <button id="pauseBtn">⏸ Pause</button>
+  </div>
+  <main id="board"></main>
+</div>
+
+<!-- Win modal -->
+<div id="win" class="hidden"><div class="win-box">
+  <h2>🎉 YOU WIN!</h2>
+  <p id="win-stats"></p>
+  <button id="playAgain">Play Again</button>
+  <button id="backToArcade" class="secondary">Back</button>
+</div></div>
+
+<footer>RetroArcade — <a href="https://github.com/DaCameraGirl/RetroArcade" target="_blank">DaCameraGirl</a></footer>
+
+<!-- Engine -->
+<script src="js/engine/events.js"></script>
+<script src="js/engine/input.js"></script>
+<script src="js/engine/storage.js"></script>
+<script src="js/engine/canvas.js"></script>
+<script src="js/engine/audio.js"></script>
+<script src="js/engine/game.js"></script>
+<!-- Card games -->
+<script src="js/games/cards.js"></script>
+<script src="js/games/klondike.js"></script>
+<script src="js/games/tripeaks.js"></script>
+<!-- Arcade loader -->
+<script src="js/arcade.js"></script>
 </body>
 </html>
