@@ -22,7 +22,7 @@
 | **Slot Machines** | RetroArcade Reels |
 | **Classic Arcade** | Frog Crossing, Snake |
 
-Klondike, Tri-Peaks, FreeCell, and Pyramid use card-table rules. Frog Crossing is a canvas arcade cabinet with coin/start controls, traffic, logs, lives, homes, score, and local hi-score. Sic Bo, RetroArcade Reels, and Snake have direct player choices. Placeholder mini-game loops are no longer listed as playable games.
+Klondike, Tri-Peaks, FreeCell, and Pyramid use card-table rules. Frog Crossing is a canvas arcade cabinet with coin/start controls, traffic, logs, lives, homes, score, and local hi-score. Sic Bo and RetroArcade Reels have direct player choices; Snake is a forest canvas game with movement, food, collision, score, and local hi-score. Placeholder mini-game loops are no longer listed as playable games.
 
 ---
 
