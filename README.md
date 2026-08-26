@@ -2,9 +2,9 @@
 
 <div align="center">
 
-![JavaScript](https://img.shields.io/badge/JavaScript-64.5%25-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
+![JavaScript](https://img.shields.io/badge/JavaScript-64.6%25-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
 ![CSS](https://img.shields.io/badge/CSS-30.5%25-1572B6?style=for-the-badge&logo=css&logoColor=white)
-![HTML](https://img.shields.io/badge/HTML-5.0%25-E34F26?style=for-the-badge&logo=html5&logoColor=white)
+![HTML](https://img.shields.io/badge/HTML-4.9%25-E34F26?style=for-the-badge&logo=html5&logoColor=white)
 
 **Arcade-themed solitaire puzzle collection**
 
