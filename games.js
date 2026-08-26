@@ -11,6 +11,7 @@ let moves = 0;
 let undoStack = [];
 let state = {};
 let timerInt, seconds = 0;
+let snakeInt = null;
 
 const $ = s => document.querySelector(s);
 const board = $('#board');
@@ -615,11 +616,154 @@ function checkFCWin(){
   }
 }
 
+
+/* ==================== PYRAMID ==================== */
+
+let pyramidSel = null; // {card, source}
+
+function newPyramid(){
+  const d = buildDeck();
+  state.pyramid = [];
+  for(let row=0; row<7; row++){
+    for(let col=0; col<=row; col++){
+      const card = d.pop();
+      card.row = row;
+      card.col = col;
+      card.removed = false;
+      state.pyramid.push(card);
+    }
+  }
+  state.stock = d;
+  state.waste = [];
+  pyramidSel = null;
+  renderPyramid();
+}
+
+function pyramidAt(row, col){
+  return state.pyramid.find(function(card){ return card.row === row && card.col === col; });
+}
+
+function isFreePyramid(card){
+  if(card.removed) return false;
+  if(card.row === 6) return true;
+  const left = pyramidAt(card.row + 1, card.col);
+  const right = pyramidAt(card.row + 1, card.col + 1);
+  return Boolean(left && left.removed && right && right.removed);
+}
+
+function finishPyramidMove(){
+  pyramidSel = null;
+  moves++;
+  updateHUD();
+  renderPyramid();
+  if(state.pyramid.every(function(card){ return card.removed; })) showWin();
+}
+
+function clearPyramidCards(cards){
+  pushUndo();
+  cards.forEach(function(card){ card.removed = true; });
+  finishPyramidMove();
+}
+
+function pyramidCardClick(card){
+  if(!card || !isFreePyramid(card)) return;
+  if(card.val === 13){
+    clearPyramidCards([card]);
+    return;
+  }
+  if(pyramidSel && pyramidSel.card.id === card.id && pyramidSel.source === 'pyramid'){
+    pyramidSel = null;
+    renderPyramid();
+    return;
+  }
+  if(pyramidSel && pyramidSel.card.val + card.val === 13){
+    pushUndo();
+    card.removed = true;
+    if(pyramidSel.source === 'waste') state.waste.pop();
+    else pyramidSel.card.removed = true;
+    finishPyramidMove();
+    return;
+  }
+  pyramidSel = { card: card, source: 'pyramid' };
+  renderPyramid();
+}
+
+function pyramidWasteClick(){
+  const card = state.waste.at(-1);
+  if(!card) return;
+  if(card.val === 13){
+    pushUndo();
+    state.waste.pop();
+    finishPyramidMove();
+    return;
+  }
+  if(pyramidSel && pyramidSel.card.id === card.id && pyramidSel.source === 'waste'){
+    pyramidSel = null;
+    renderPyramid();
+    return;
+  }
+  if(pyramidSel && pyramidSel.card.val + card.val === 13){
+    pushUndo();
+    state.waste.pop();
+    if(pyramidSel.source === 'pyramid') pyramidSel.card.removed = true;
+    finishPyramidMove();
+    return;
+  }
+  pyramidSel = { card: card, source: 'waste' };
+  renderPyramid();
+}
+
+function renderPyramid(){
+  let html = '<div class="pyramid-board">';
+  for(let row=0; row<7; row++){
+    html += '<div class="pyramid-row">';
+    for(let col=0; col<=row; col++){
+      const card = pyramidAt(row, col);
+      if(!card || card.removed){
+        html += '<div class="pyramid-gap"></div>';
+        continue;
+      }
+      const free = isFreePyramid(card);
+      const selected = pyramidSel && pyramidSel.source === 'pyramid' && pyramidSel.card.id === card.id;
+      html += '<div class="pyramid-card-wrap"><div class="card ' + (card.color === 'red' ? 'red ' : '') + (free ? '' : 'back ') + (selected ? 'selected ' : '') + '" data-pyramid-id="' + card.id + '">' +
+        (free ? card.rank + '<div class="small">' + card.suit + '</div>' : '') + '</div></div>';
+    }
+    html += '</div>';
+  }
+  const waste = state.waste.at(-1);
+  const wasteSelected = waste && pyramidSel && pyramidSel.source === 'waste' && pyramidSel.card.id === waste.id;
+  html += '</div><div class="waste-row pyramid-stock-row">' +
+    '<div id="pyramid-stock">' + (state.stock.length ? '<div class="card back"></div>' : '<div class="pile-slot"></div>') + '</div>' +
+    '<div id="pyramid-waste">' + (waste ? '<div class="card ' + (waste.color === 'red' ? 'red ' : '') + (wasteSelected ? 'selected ' : '') + '" data-id="' + waste.id + '">' + waste.rank + '<div class="small">' + waste.suit + '</div></div>' : '<div class="pile-slot"></div>') + '</div>' +
+    '<span>Pair cards to 13. Kings clear alone.</span></div>';
+  board.innerHTML = html;
+  board.querySelectorAll('[data-pyramid-id]').forEach(function(el){
+    el.addEventListener('click', function(){
+      const id = parseInt(el.dataset.pyramidId, 10);
+      pyramidCardClick(state.pyramid.find(function(card){ return card.id === id; }));
+    });
+  });
+  document.querySelector('#pyramid-stock').addEventListener('click', function(){
+    pushUndo();
+    if(state.stock.length) state.waste.push(state.stock.pop());
+    else {
+      state.stock = state.waste.reverse();
+      state.waste = [];
+    }
+    pyramidSel = null;
+    moves++;
+    updateHUD();
+    renderPyramid();
+  });
+  const wasteCard = document.querySelector('#pyramid-waste .card[data-id]');
+  if(wasteCard) wasteCard.addEventListener('click', pyramidWasteClick);
+}
+
 /* ==================== SHARED ==================== */
 
 function pushUndo(){
   try{
-    undoStack.push(JSON.stringify({game, state, moves, fcSelId: fcSel?.id ?? null, kSel}));
+    undoStack.push(JSON.stringify({game, state, moves, fcSelId: fcSel?.id ?? null, kSel, pyramidSelId: pyramidSel?.card?.id ?? null, pyramidSelSource: pyramidSel?.source ?? null}));
     if(undoStack.length > 40) undoStack.shift();
   }catch(e){}
 }
@@ -632,6 +776,13 @@ function doUndo(){
   moves = o.moves;
   fcSel = null;
   kSel = o.kSel ?? null;
+  pyramidSel = null;
+  if(o.pyramidSelId != null){
+    const source = o.pyramidSelSource || 'pyramid';
+    const sourceCards = source === 'waste' ? (state.waste || []) : (state.pyramid || []);
+    const card = sourceCards.find(function(item){ return item.id === o.pyramidSelId; });
+    if(card) pyramidSel = { card: card, source: source };
+  }
   renderCurrent();
   updateHUD();
 }
@@ -658,6 +809,11 @@ function startTimer(){
   }, 1000);
 }
 
+function stopLiveMiniGames(){
+  clearInterval(snakeInt);
+  snakeInt = null;
+}
+
 function applyDeck(){
   const d = (document.querySelector('#deck') && document.querySelector('#deck').value) || 'forest';
   document.body.className = document.body.className.replace(/\bdeck-\w+\b/g, '').trim();
@@ -668,13 +824,16 @@ function renderCurrent(){
   if(game === 'klondike') renderKlondike();
   else if(game === 'tripeaks') renderTriPeaks();
   else if(game === 'freecell') renderFreeCell();
+  else if(game === 'pyramid') renderPyramid();
   else renderQuickGame();
 }
 function newGame(){
+  stopLiveMiniGames();
   moves = 0;
   undoStack = [];
   fcSel = null;
   kSel = null;
+  pyramidSel = null;
   state = {};
   difficulty = $('#difficulty').value;
   startTimer();
@@ -683,6 +842,7 @@ function newGame(){
   if(game === 'klondike') newKlondike();
   else if(game === 'tripeaks') newTriPeaks();
   else if(game === 'freecell') newFreeCell();
+  else if(game === 'pyramid') newPyramid();
   else renderQuickGame();
 }
 /* ==================== CASINO / ARCADE MINI-GAMES ==================== */
@@ -788,16 +948,45 @@ function renderRouletteMini(selected){
 }
 
 function renderDiceMini(selected){
-  const a = 1 + Math.floor(Math.random() * 6);
-  const b = 1 + Math.floor(Math.random() * 6);
-  const total = a + b;
+  const diceCount = selected.diceCount || 2;
+  const dice = Array.from({length: diceCount}, function(){ return 1 + Math.floor(Math.random() * 6); });
+  const total = dice.reduce(function(sum, n){ return sum + n; }, 0);
   moves++;
   updateHUD();
   board.innerHTML = '<section class="mini-game dice-mini"><h2>' + selected.name + '</h2>' +
-    '<div class="dice-row"><span>' + a + '</span><span>' + b + '</span></div>' +
+    '<div class="dice-row">' + dice.map(function(n){ return '<span>' + n + '</span>'; }).join('') + '</div>' +
     '<p class="mini-status">Roll total ' + total + '</p>' +
     '<div class="mini-actions"><button id="miniRoll">Roll again</button></div></section>';
   document.querySelector('#miniRoll').addEventListener('click', function(){ renderDiceMini(selected); });
+}
+
+function renderSicBoMini(selected){
+  state.sicBo = state.sicBo || { bet: 'big', dice: null, result: 'Choose a bet, then roll.' };
+  const betLabel = { small: 'Small 4-10', triple: 'Any Triple', big: 'Big 11-17' };
+  const dice = state.sicBo.dice || [1, 1, 1];
+  board.innerHTML = '<section class="mini-game dice-mini sicbo-mini"><h2>' + selected.name + '</h2>' +
+    '<div class="sicbo-board">' + ['small','triple','big'].map(function(bet){ return '<button class="sicbo-bet ' + (state.sicBo.bet === bet ? 'active' : '') + '" data-bet="' + bet + '">' + betLabel[bet] + '</button>'; }).join('') + '</div>' +
+    '<div class="dice-row">' + dice.map(function(n){ return '<span>' + n + '</span>'; }).join('') + '</div>' +
+    '<p class="mini-status">' + state.sicBo.result + '</p>' +
+    '<div class="mini-actions"><button id="miniRoll">Roll dice</button></div></section>';
+  board.querySelectorAll('[data-bet]').forEach(function(button){
+    button.addEventListener('click', function(){
+      state.sicBo.bet = button.dataset.bet;
+      state.sicBo.result = 'Bet on ' + betLabel[state.sicBo.bet] + '.';
+      renderSicBoMini(selected);
+    });
+  });
+  document.querySelector('#miniRoll').addEventListener('click', function(){
+    const rolled = Array.from({length: 3}, function(){ return 1 + Math.floor(Math.random() * 6); });
+    const total = rolled.reduce(function(sum, n){ return sum + n; }, 0);
+    const triple = rolled[0] === rolled[1] && rolled[1] === rolled[2];
+    const outcome = triple ? 'triple' : (total >= 11 ? 'big' : 'small');
+    state.sicBo.dice = rolled;
+    state.sicBo.result = (outcome === state.sicBo.bet ? 'Win' : 'House wins') + ' | ' + betLabel[outcome] + ' | Total ' + total;
+    moves++;
+    updateHUD();
+    renderSicBoMini(selected);
+  });
 }
 
 function renderBaccaratMini(selected){
@@ -855,17 +1044,173 @@ function renderArcadeMini(selected){
   });
 }
 
+
+function ensureRetroSlotState(selected){
+  if(state.retroSlot) return;
+  const symbols = selected.symbols || ['PIXEL','JOY','CRT','7','CHERRY','COIN'];
+  state.retroSlot = {
+    symbols: symbols,
+    reels: Array.from({length: 5}, function(){ return symbols[Math.floor(Math.random() * symbols.length)]; }),
+    holds: [false, false, false, false, false],
+    bonusSpins: 0,
+    result: 'Hold any reels, then spin.'
+  };
+}
+
+function scoreRetroSlot(slot){
+  const counts = {};
+  slot.reels.forEach(function(symbol){ counts[symbol] = (counts[symbol] || 0) + 1; });
+  const best = Math.max.apply(null, Object.values(counts));
+  const retroBonus = slot.reels.includes('JOY') && slot.reels.includes('PIXEL') && slot.reels.includes('CRT');
+  if(best >= 5) return 'Mega jackpot';
+  if(best >= 4){
+    slot.bonusSpins = Math.max(slot.bonusSpins, 3);
+    return 'Hold & Spin bonus armed';
+  }
+  if(best >= 3) return 'Line hit';
+  if(retroBonus) return 'Retro bonus';
+  return 'No win';
+}
+
+function renderRetroSlotMini(selected){
+  ensureRetroSlotState(selected);
+  const slot = state.retroSlot;
+  board.innerHTML = '<section class="mini-game slot-mini retro-slot-mini"><h2>' + selected.name + '</h2>' +
+    '<div class="slot-reels retro-reels">' + slot.reels.map(function(r, i){ return '<button class="retro-reel ' + (slot.holds[i] ? 'held' : '') + '" data-reel="' + i + '"><span>' + r + '</span><small>' + (slot.holds[i] ? 'HELD' : 'HOLD') + '</small></button>'; }).join('') + '</div>' +
+    '<p class="mini-status">' + slot.result + (slot.bonusSpins ? ' | Bonus spins ' + slot.bonusSpins : '') + '</p>' +
+    '<div class="mini-actions"><button id="miniSpin">Spin</button><button id="clearHolds">Clear holds</button></div></section>';
+  board.querySelectorAll('[data-reel]').forEach(function(button){
+    button.addEventListener('click', function(){
+      const idx = parseInt(button.dataset.reel, 10);
+      slot.holds[idx] = !slot.holds[idx];
+      renderRetroSlotMini(selected);
+    });
+  });
+  document.querySelector('#clearHolds').addEventListener('click', function(){
+    slot.holds = [false, false, false, false, false];
+    slot.result = 'Holds cleared.';
+    renderRetroSlotMini(selected);
+  });
+  document.querySelector('#miniSpin').addEventListener('click', function(){
+    slot.reels = slot.reels.map(function(symbol, i){
+      if(slot.holds[i]) return symbol;
+      return slot.symbols[Math.floor(Math.random() * slot.symbols.length)];
+    });
+    if(slot.bonusSpins > 0){
+      slot.bonusSpins--;
+      slot.holds = slot.reels.map(function(symbol){ return symbol === '7' || symbol === 'JOY'; });
+    }
+    slot.result = scoreRetroSlot(slot);
+    moves++;
+    updateHUD();
+    renderRetroSlotMini(selected);
+  });
+}
+
+function makeSnakeFood(size, snake){
+  let food;
+  do{
+    food = { x: Math.floor(Math.random() * size), y: Math.floor(Math.random() * size) };
+  }while(snake.some(function(part){ return part.x === food.x && part.y === food.y; }));
+  return food;
+}
+
+function ensureSnakeState(){
+  if(state.snake) return;
+  const size = 14;
+  const snake = [{x: 6, y: 7}, {x: 5, y: 7}, {x: 4, y: 7}];
+  state.snake = { size: size, snake: snake, food: makeSnakeFood(size, snake), dir: 'right', nextDir: 'right', score: 0, over: false };
+}
+
+function setSnakeDir(dir){
+  ensureSnakeState();
+  const opposite = { up: 'down', down: 'up', left: 'right', right: 'left' };
+  if(opposite[dir] === state.snake.dir) return;
+  state.snake.nextDir = dir;
+}
+
+function tickSnake(){
+  ensureSnakeState();
+  const s = state.snake;
+  if(s.over) return;
+  s.dir = s.nextDir;
+  const head = s.snake[0];
+  const delta = { up: {x:0,y:-1}, down: {x:0,y:1}, left: {x:-1,y:0}, right: {x:1,y:0} }[s.dir];
+  const next = { x: head.x + delta.x, y: head.y + delta.y };
+  const hitWall = next.x < 0 || next.y < 0 || next.x >= s.size || next.y >= s.size;
+  const hitSelf = s.snake.some(function(part){ return part.x === next.x && part.y === next.y; });
+  if(hitWall || hitSelf){
+    s.over = true;
+    stopLiveMiniGames();
+    renderSnakeMini();
+    return;
+  }
+  s.snake.unshift(next);
+  if(next.x === s.food.x && next.y === s.food.y){
+    s.score += 10;
+    moves++;
+    updateHUD();
+    s.food = makeSnakeFood(s.size, s.snake);
+  }else{
+    s.snake.pop();
+  }
+  renderSnakeMini();
+}
+
+function renderSnakeMini(){
+  ensureSnakeState();
+  const s = state.snake;
+  const cells = [];
+  for(let y=0; y<s.size; y++){
+    for(let x=0; x<s.size; x++){
+      let type = '';
+      if(s.food.x === x && s.food.y === y) type = ' food';
+      s.snake.forEach(function(part, idx){ if(part.x === x && part.y === y) type = idx === 0 ? ' head' : ' body'; });
+      cells.push('<span class="snake-cell' + type + '"></span>');
+    }
+  }
+  board.innerHTML = '<section class="mini-game snake-mini"><h2>Snake</h2>' +
+    '<div class="snake-grid">' + cells.join('') + '</div>' +
+    '<p class="mini-status">' + (s.over ? 'Game over' : 'Eat pixels, dodge walls.') + ' | Score ' + s.score + '</p>' +
+    '<div class="snake-controls"><button data-dir="up">Up</button><button data-dir="left">Left</button><button data-dir="down">Down</button><button data-dir="right">Right</button></div>' +
+    '<div class="mini-actions"><button id="snakeRestart">Restart</button></div></section>';
+  board.querySelectorAll('[data-dir]').forEach(function(button){ button.addEventListener('click', function(){ setSnakeDir(button.dataset.dir); }); });
+  document.querySelector('#snakeRestart').addEventListener('click', function(){
+    state.snake = null;
+    moves = 0;
+    updateHUD();
+    stopLiveMiniGames();
+    renderSnakeMini();
+  });
+  document.onkeydown = function(event){
+    if(game !== 'snake') return;
+    const keys = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', w: 'up', s: 'down', a: 'left', d: 'right' };
+    if(keys[event.key]){
+      event.preventDefault();
+      setSnakeDir(keys[event.key]);
+    }
+  };
+  if(!s.over && !snakeInt){
+    const speed = difficulty === 'hard' ? 130 : difficulty === 'easy' ? 220 : 170;
+    snakeInt = setInterval(tickSnake, speed);
+  }
+}
+
 function renderQuickGame(){
   const found = findArcadeGame(game);
   if(!found) return;
   const selected = found.game;
+  if(selected.kind !== 'snake') stopLiveMiniGames();
   if(selected.kind === 'poker') return renderPokerMini(selected);
   if(selected.kind === 'blackjack') return renderBlackjackMini(selected);
   if(selected.kind === 'highcard') return renderHighCardMini(selected);
   if(selected.kind === 'roulette') return renderRouletteMini(selected);
+  if(selected.kind === 'sicbo') return renderSicBoMini(selected);
   if(selected.kind === 'dice') return renderDiceMini(selected);
   if(selected.kind === 'baccarat') return renderBaccaratMini(selected);
+  if(selected.kind === 'retro-slot') return renderRetroSlotMini(selected);
   if(selected.kind === 'slots') return renderSlotMini(selected);
+  if(selected.kind === 'snake') return renderSnakeMini(selected);
   renderArcadeMini(selected);
 }
 const ROOMS = [
@@ -878,8 +1223,9 @@ const ROOMS = [
       { id: 'klondike', name: 'Klondike', table: 'Table 1', available: true },
       { id: 'tripeaks', name: 'Tri-Peaks', table: 'Table 2', available: true },
       { id: 'freecell', name: 'FreeCell', table: 'Table 3', available: true },
-      { id: 'war', name: 'War', table: 'Table 4', kind: 'highcard', available: true },
-      { id: 'high-card', name: 'High Card', table: 'Table 5', kind: 'highcard', available: true },
+      { id: 'pyramid', name: 'Pyramid', table: 'Table 4', available: true },
+      { id: 'war', name: 'War', table: 'Table 5', kind: 'highcard', available: true },
+      { id: 'high-card', name: 'High Card', table: 'Table 6', kind: 'highcard', available: true },
     ],
   },
   {
@@ -891,6 +1237,7 @@ const ROOMS = [
       { id: 'roulette', name: 'Roulette', table: 'Wheel 1', kind: 'roulette', available: true },
       { id: 'blackjack', name: 'Blackjack', table: 'Table 1', kind: 'blackjack', available: true },
       { id: 'craps', name: 'Craps', table: 'Dice 1', kind: 'dice', available: true },
+      { id: 'sic-bo', name: 'Sic Bo', table: 'Dice 2', kind: 'sicbo', available: true },
       { id: 'baccarat', name: 'Baccarat', table: 'Table 2', kind: 'baccarat', available: true },
       { id: 'casino-war', name: 'Casino War', table: 'Table 3', kind: 'highcard', available: true },
     ],
@@ -925,6 +1272,7 @@ const ROOMS = [
       { id: 'arcade-jackpot', name: 'Arcade Jackpot', table: 'Slot 6', kind: 'slots', symbols: ['Bolt','Star','7','Gem','BAR'], available: true },
       { id: 'ocean-pearls', name: 'Ocean Pearls', table: 'Slot 7', kind: 'slots', symbols: ['Pearl','Wave','Shell','Gem','7'], available: true },
       { id: 'forest-fortune', name: 'Forest Fortune', table: 'Slot 8', kind: 'slots', symbols: ['Leaf','Acorn','Moon','Gem','7'], available: true },
+      { id: 'retro-arcade-slot', name: 'RetroArcade Reels', table: 'Slot 9', kind: 'retro-slot', symbols: ['PIXEL','JOY','CRT','7','CHERRY','COIN'], available: true },
     ],
   },
   {
@@ -944,6 +1292,7 @@ const ROOMS = [
       { id: 'brick-wall', name: 'Brick Wall', table: 'Cabinet 9', kind: 'arcade', mode: 'brick', prompt: 'Break the wall and keep the ball alive.', available: true },
       { id: 'frog-crossing', name: 'Frog Crossing', table: 'Cabinet 10', kind: 'arcade', mode: 'frog', prompt: 'Hop lanes and reach the safe side.', available: true },
       { id: 'moon-patrol', name: 'Moon Patrol', table: 'Cabinet 11', kind: 'arcade', mode: 'moon', prompt: 'Jump craters and patrol the moon road.', available: true },
+      { id: 'snake', name: 'Snake', table: 'Cabinet 12', kind: 'snake', mode: 'snake', prompt: 'Eat pixels and dodge your own tail.', available: true },
     ],
   },
 ];
@@ -962,6 +1311,7 @@ function setBreadcrumb(html){
 }
 
 function renderLounge(){
+  stopLiveMiniGames();
   currentRoom = null;
   document.body.className = document.body.className.replace(/\bdeck-\w+\b/g, '').trim();
   document.body.classList.add('deck-arcade');
@@ -988,6 +1338,7 @@ function renderLounge(){
 }
 
 function renderRoom(roomId){
+  stopLiveMiniGames();
   currentRoom = ROOMS.find(function(room){ return room.id === roomId; });
   if(!currentRoom) return renderLounge();
   gameGridWrap.classList.remove('hidden');

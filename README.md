@@ -16,13 +16,13 @@
 
 | Area | Games |
 |---|---|
-| **Card Tables** | Klondike, Tri-Peaks, FreeCell, War, High Card |
-| **Table Games** | Roulette, Blackjack, Craps, Baccarat, Casino War |
+| **Card Tables** | Klondike, Tri-Peaks, FreeCell, Pyramid, War, High Card |
+| **Table Games** | Roulette, Blackjack, Craps, Sic Bo, Baccarat, Casino War |
 | **Poker Tables** | Video Poker, Texas Holdem, Five Card Draw, Three Card Poker, Seven Card Stud, Omaha, Caribbean Stud, Red Dog |
-| **Slot Machines** | Classic 3-Reel, Lucky Sevens, Fruit Spin, Diamond Deluxe, Treasure Wheel, Arcade Jackpot, Ocean Pearls, Forest Fortune |
-| **Classic Arcade** | Maze Chase, Barrel Climb, Tunnel Digger, Pixel Plumber, Bug Trail, Pyramid Hopper, Jungle Pit Run, Space Blaster, Brick Wall, Frog Crossing, Moon Patrol |
+| **Slot Machines** | Classic 3-Reel, Lucky Sevens, Fruit Spin, Diamond Deluxe, Treasure Wheel, Arcade Jackpot, Ocean Pearls, Forest Fortune, RetroArcade Reels |
+| **Classic Arcade** | Maze Chase, Barrel Climb, Tunnel Digger, Pixel Plumber, Bug Trail, Pyramid Hopper, Jungle Pit Run, Space Blaster, Brick Wall, Frog Crossing, Moon Patrol, Snake |
 
-The solitaire games keep their full card rules. The casino, slot, and arcade cabinets use lightweight built-in mini-game loops so every visible choice is playable.
+Klondike, Tri-Peaks, FreeCell, and Pyramid use card-table rules. Sic Bo, RetroArcade Reels, and Snake have direct player choices; the remaining casino and cabinet entries are lightweight mini-game loops.
 
 ---
 
