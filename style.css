@@ -1,5 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap');
-:root{--bg:#0d001a;--neon-p:#b080a0;--neon-c:#00fff0;--neon-y:#ffef00}
+:root{--bg:#0b1d14;--neon-p:#7CFFB2;--neon-c:#1aff66;--neon-y:#ffef00}
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:#fff;font-family:'Space Mono',monospace;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:16px;transition:background .3s ease;background-size:cover;background-position:center;background-attachment:fixed}
 body::before{content:'';position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:-1}
@@ -8,6 +8,30 @@ header{text-align:center;margin:12px 0 20px}
 h1{font-family:'Press Start 2P',monospace;color:var(--neon-p);text-shadow:none;font-size:1.4rem}
 .tag{color:var(--neon-c);margin-top:8px;font-size:.85rem}
 .game-select{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;justify-content:center}
+.hidden{display:none !important}
+.cabinet-grid{width:min(980px,100%);display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin:0 auto 12px;padding:0 8px}
+.cabinet{appearance:none;border:1px solid rgba(255,255,255,.28);border-radius:12px;background:linear-gradient(180deg,rgba(8,24,18,.86),rgba(4,10,8,.9));color:#fff;font-family:'Space Mono',monospace;box-shadow:0 18px 44px rgba(0,0,0,.35);backdrop-filter:blur(8px);position:relative;overflow:hidden}
+.room-card,.game-card{min-height:220px;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:10px;padding:22px;text-align:left;cursor:pointer;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,filter .18s ease}
+.room-card:hover,.game-card:not(.locked):hover{transform:translateY(-4px);border-color:var(--neon-c);box-shadow:0 22px 54px rgba(0,0,0,.45),0 0 22px color-mix(in srgb,var(--neon-c) 38%,transparent)}
+.cabinet-icon{font-family:'Press Start 2P',monospace;font-size:.72rem;letter-spacing:0;color:var(--neon-c);text-transform:uppercase}
+.cabinet-title{font-family:'Press Start 2P',monospace;font-size:.82rem;line-height:1.5;color:var(--neon-p)}
+.cabinet-desc{font-size:.85rem;line-height:1.45;color:rgba(255,255,255,.78)}
+.cabinet-count,.play-tag,.soon-tag{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0;color:var(--neon-c)}
+.game-card.locked{opacity:.54;cursor:not-allowed;filter:saturate(.65)}
+.soon-tag{color:#ffcc66}.play-tag{color:#9dffbf}
+.arcade-hint{width:min(980px,100%);margin:6px auto 0;text-align:center;color:rgba(255,255,255,.7);font-size:.82rem;text-shadow:0 2px 8px rgba(0,0,0,.8)}
+.breadcrumb{margin-top:10px;color:rgba(255,255,255,.78);font-size:.82rem}.breadcrumb a{color:var(--neon-c);text-decoration:underline;text-underline-offset:3px}.breadcrumb a:hover{color:#fff}
+.game-title-label{font-family:'Press Start 2P',monospace;color:var(--neon-p);font-size:.7rem}
+.cabinet::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.78));z-index:0}
+.cabinet>*{position:relative;z-index:1}
+.room-card[data-room="cards"]{background-image:url('https://images.unsplash.com/photo-1511193311914-0346f16efe90?w=1200&q=80');background-size:cover;background-position:center}
+.room-card[data-room="poker"]{background-image:url('https://images.unsplash.com/photo-1606167668584-78701c57f13d?w=1200&q=80');background-size:cover;background-position:center}
+.room-card[data-room="slots"]{background-image:url('https://images.unsplash.com/photo-1596838132731-3301c3fd4317?w=1200&q=80');background-size:cover;background-position:center}
+.game-card{background-image:linear-gradient(135deg,rgba(10,52,34,.96),rgba(3,16,10,.96)),radial-gradient(circle at top right,rgba(255,212,122,.18),transparent 45%)}
+#play-area{width:min(1180px,100%);padding:18px;border:1px solid rgba(255,255,255,.18);border-radius:14px;background:linear-gradient(180deg,rgba(5,20,13,.58),rgba(2,8,5,.76));box-shadow:0 24px 70px rgba(0,0,0,.45);backdrop-filter:blur(8px)}
+#board{border-radius:14px;background:radial-gradient(circle at 50% 0,rgba(255,255,255,.1),transparent 34%),linear-gradient(145deg,rgba(13,74,43,.92),rgba(3,32,18,.94));box-shadow:inset 0 0 0 1px rgba(255,255,255,.11),inset 0 22px 48px rgba(255,255,255,.04),0 18px 50px rgba(0,0,0,.38)}
+.card{box-shadow:0 5px 13px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,255,255,.82)}
+.card.back{box-shadow:0 7px 15px rgba(0,0,0,.42),inset 0 0 0 1px rgba(255,255,255,.16)}
 .game-btn{background:rgba(26,11,46,.85);border:2px solid var(--neon-c);color:var(--neon-c);padding:10px 18px;border-radius:8px;cursor:pointer;font-family:'Space Mono',monospace;font-weight:700;backdrop-filter:blur(4px)}
 .game-btn:hover,.game-btn.active{background:var(--neon-c);color:#000;box-shadow:0 0 14px var(--neon-c)}
 .controls{display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center;margin-bottom:16px;font-size:.9rem;background:rgba(0,0,0,.35);padding:10px 18px;border-radius:10px;backdrop-filter:blur(6px)}
@@ -42,13 +66,12 @@ h1{font-family:'Press Start 2P',monospace;color:var(--neon-p);text-shadow:none;f
 .tableau-col .card:nth-child(14){z-index:14}
 .tableau-col .card:nth-child(15){z-index:15}
 .tableau-col .card:nth-child(16){z-index:16}
-.tableau-col .card:nth_child(17){z-index:17}
+.tableau-col .card:nth-child(17){z-index:17}
 .tableau-col .card:nth-child(18){z-index:18}
 .tableau-col .card:nth-child(19){z-index:19}
 .tableau-col .card:nth-child(20){z-index:20}
 
 /* === DECK BACKS === */
-.deck-neon .card.back { background:#3a0066; background-image: repeating-linear-gradient(45deg,#6a00b3 0 8px,transparent 8px 16px), radial-gradient(circle at 50% 50%, #ff2ad6 0 2px, transparent 3px); background-size: auto, 16px 16px; border-color:#ff2ad6 }
 
 /* OCEAN – waves + starfish/shells */
 .deck-ocean .card.back { background:#003b5c; border-color:#00fff0;
@@ -80,7 +103,6 @@ h1{font-family:'Press Start 2P',monospace;color:var(--neon-p);text-shadow:none;f
 .deck-classic .card.back { background:#1a3d66; background-image: repeating-linear-gradient(45deg, #3366aa 0 6px, transparent 6px 12px), repeating-linear-gradient(-45deg, #3366aa 0 6px, transparent 6px 12px); border-color:#6699dd }
 
 /* === SCENIC PAGE BACKGROUNDS === */
-body.deck-neon   { background-image: url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1920&q=80'); --neon-p:#ff2ad6; --neon-c:#00fff0; }
 body.deck-ocean  { background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=80'); --neon-p:#4ddfff; --neon-c:#00fff0; }
 body.deck-forest { background-image: url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1920&q=80'); --neon-p:#7CFFB2; --neon-c:#1aff66; }
 body.deck-meadow { background-image: url('https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=1920&q=80'); --neon-p:#b8ff7a; --neon-c:#a8e654; }

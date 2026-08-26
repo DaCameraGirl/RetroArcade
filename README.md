@@ -6,27 +6,27 @@
 ![CSS](https://img.shields.io/badge/CSS-30.5%25-1572B6?style=for-the-badge&logo=css&logoColor=white)
 ![HTML](https://img.shields.io/badge/HTML-4.9%25-E34F26?style=for-the-badge&logo=html5&logoColor=white)
 
-**Arcade-themed solitaire puzzle collection**
+**Nature casino lounge with solitaire tables and future poker and slots rooms**
 
 </div>
 
 ---
 
-## 🎮 Games Included
+## 🎮 Lounge Rooms
 
-| | Game | |
+| Room | Status | Games |
 |---|---|---|
-| ♣️ | **Klondike** | The classic solitaire everyone knows |
-| ⛰️ | **Tri-Peaks** | Clear three pyramid peaks |
-| ♦️ | **FreeCell** | Strategic, all cards visible from the start |
+| **Card Tables** | Live | Klondike, Tri-Peaks, FreeCell |
+| **Poker Room** | Coming soon | Texas Hold'em, Video Poker |
+| **Slots Floor** | Coming soon | Classic 3-Reel |
 
-All three games support **Easy / Medium / Hard** difficulty levels.
+The live card games support **Easy / Medium / Hard** difficulty levels and shared nature deck themes.
 
 ---
 
 ## 🚀 Play Now
 
-**Live demo:** Enable GitHub Pages on `main` / root → open `index.html`
+**Live demo:** https://dacameragirl.github.io/RetroArcade/
 
 Or clone and open locally:
 ```bash

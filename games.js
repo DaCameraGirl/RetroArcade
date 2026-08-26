@@ -659,7 +659,7 @@ function startTimer(){
 }
 
 function applyDeck(){
-  const d = (document.querySelector('#deck') && document.querySelector('#deck').value) || 'neon';
+  const d = (document.querySelector('#deck') && document.querySelector('#deck').value) || 'forest';
   document.body.className = document.body.className.replace(/\bdeck-\w+\b/g, '').trim();
   document.body.classList.add('deck-' + d);
 }
@@ -684,21 +684,148 @@ function newGame(){
   else newFreeCell();
 }
 
-document.querySelectorAll('.game-btn').forEach(b=>{
-  b.addEventListener('click', ()=>{
-    document.querySelectorAll('.game-btn').forEach(x => x.classList.remove('active'));
-    b.classList.add('active');
-    game = b.dataset.game;
-    newGame();
+
+const ROOMS = [
+  {
+    id: 'cards',
+    icon: 'Cards',
+    name: 'Card Tables',
+    desc: 'Solitaire classics ready to play',
+    games: [
+      { id: 'klondike', name: 'Klondike', available: true },
+      { id: 'tripeaks', name: 'Tri-Peaks', available: true },
+      { id: 'freecell', name: 'FreeCell', available: true },
+    ],
+  },
+  {
+    id: 'poker',
+    icon: 'Poker',
+    name: 'Poker Room',
+    desc: 'Texas Hold\'em and video poker tables',
+    games: [
+      { id: 'holdem', name: 'Texas Hold\'em', available: false },
+      { id: 'videopoker', name: 'Video Poker', available: false },
+    ],
+  },
+  {
+    id: 'slots',
+    icon: 'Slots',
+    name: 'Slots Floor',
+    desc: 'Classic reels and lucky pulls',
+    games: [
+      { id: 'classic-slots', name: 'Classic 3-Reel', available: false },
+    ],
+  },
+];
+
+const arcadeGrid = document.querySelector('#game-grid');
+const gameGridWrap = document.querySelector('#game-grid-wrap');
+const playArea = document.querySelector('#play-area');
+const breadcrumb = document.querySelector('#breadcrumb');
+const lobbySubtitle = document.querySelector('#lobby-subtitle');
+const arcadeHint = document.querySelector('.arcade-hint');
+let currentRoom = null;
+
+function setBreadcrumb(html){
+  breadcrumb.innerHTML = html;
+  breadcrumb.classList.toggle('hidden', !html);
+}
+
+function renderLounge(){
+  currentRoom = null;
+  clearInterval(timerInt);
+  gameGridWrap.classList.remove('hidden');
+  playArea.classList.add('hidden');
+  document.querySelector('#win').classList.add('hidden');
+  lobbySubtitle.textContent = 'Pick a room';
+  if(arcadeHint) arcadeHint.textContent = 'Choose a room, then pick a table or machine.';
+  setBreadcrumb('');
+
+  arcadeGrid.innerHTML = ROOMS.map(function(room){
+    return '<button class="cabinet room-card" type="button" data-room="' + room.id + '">' +
+      '<span class="cabinet-icon">' + room.icon + '</span>' +
+      '<span class="cabinet-title">' + room.name + '</span>' +
+      '<span class="cabinet-desc">' + room.desc + '</span>' +
+      '<span class="cabinet-count">' + room.games.filter(function(g){ return g.available; }).length + ' live games</span>' +
+      '</button>';
+  }).join('');
+
+  arcadeGrid.querySelectorAll('[data-room]').forEach(function(card){
+    card.addEventListener('click', function(){ renderRoom(card.dataset.room); });
   });
+}
+
+function renderRoom(roomId){
+  currentRoom = ROOMS.find(function(room){ return room.id === roomId; }) || ROOMS[0];
+  clearInterval(timerInt);
+  gameGridWrap.classList.remove('hidden');
+  playArea.classList.add('hidden');
+  document.querySelector('#win').classList.add('hidden');
+  lobbySubtitle.textContent = currentRoom.name;
+  if(arcadeHint) arcadeHint.textContent = currentRoom.desc;
+  setBreadcrumb('<a href="#" id="bc-lobby">Arcade</a> / ' + currentRoom.name);
+  document.querySelector('#bc-lobby').addEventListener('click', function(event){
+    event.preventDefault();
+    renderLounge();
+  });
+
+  arcadeGrid.innerHTML = currentRoom.games.map(function(item){
+    var locked = item.available ? '' : ' locked';
+    var disabled = item.available ? '' : ' disabled';
+    var tagClass = item.available ? 'play-tag' : 'soon-tag';
+    var tagText = item.available ? 'PLAY' : 'Coming Soon';
+    return '<button class="cabinet game-card' + locked + '" type="button" data-game="' + item.id + '"' + disabled + '>' +
+      '<span class="cabinet-title">' + item.name + '</span>' +
+      '<span class="' + tagClass + '">' + tagText + '</span>' +
+      '</button>';
+  }).join('');
+
+  arcadeGrid.querySelectorAll('[data-game]:not(.locked)').forEach(function(card){
+    card.addEventListener('click', function(){ launchGame(card.dataset.game); });
+  });
+}
+
+function launchGame(gameId){
+  var selected = currentRoom && currentRoom.games.find(function(item){ return item.id === gameId; });
+  if(!selected || !selected.available) return;
+  game = selected.id;
+  gameGridWrap.classList.add('hidden');
+  playArea.classList.remove('hidden');
+  lobbySubtitle.textContent = selected.name;
+  document.querySelector('#game-title').textContent = selected.name;
+  setBreadcrumb('<a href="#" id="bc-lobby">Arcade</a> / <a href="#" id="bc-room">' + currentRoom.name + '</a> / ' + selected.name);
+  document.querySelector('#bc-lobby').addEventListener('click', function(event){
+    event.preventDefault();
+    renderLounge();
+  });
+  document.querySelector('#bc-room').addEventListener('click', function(event){
+    event.preventDefault();
+    renderRoom(currentRoom.id);
+  });
+  newGame();
+}
+
+document.querySelector('#backBtn').addEventListener('click', function(){
+  if(!playArea.classList.contains('hidden') && currentRoom){
+    renderRoom(currentRoom.id);
+    return;
+  }
+  renderLounge();
 });
 
-$('#newGame').addEventListener('click', newGame);
-var deckSel = document.querySelector('#deck'); if(deckSel) deckSel.addEventListener('change', function(){ applyDeck(); renderCurrent(); });
-$('#undo').addEventListener('click', doUndo);
-$('#playAgain').addEventListener('click', ()=>{
-  $('#win').classList.add('hidden');
+document.querySelector('#newGame').addEventListener('click', newGame);
+var deckSel = document.querySelector('#deck');
+if(deckSel){
+  deckSel.addEventListener('change', function(){
+    applyDeck();
+    if(!playArea.classList.contains('hidden')) renderCurrent();
+  });
+}
+document.querySelector('#undo').addEventListener('click', doUndo);
+document.querySelector('#playAgain').addEventListener('click', function(){
+  document.querySelector('#win').classList.add('hidden');
   newGame();
 });
+document.querySelector('#backToArcade').addEventListener('click', renderLounge);
 
-newGame();
+renderLounge();
