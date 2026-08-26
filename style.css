@@ -42,7 +42,7 @@ h1{font-family:'Press Start 2P',monospace;color:var(--neon-p);text-shadow:none;f
 .tableau-col .card:nth-child(14){z-index:14}
 .tableau-col .card:nth-child(15){z-index:15}
 .tableau-col .card:nth-child(16){z-index:16}
-.tableau-col .card:nth-child(17){z-index:17}
+.tableau-col .card:nth_child(17){z-index:17}
 .tableau-col .card:nth-child(18){z-index:18}
 .tableau-col .card:nth-child(19){z-index:19}
 .tableau-col .card:nth-child(20){z-index:20}
@@ -85,7 +85,7 @@ body.deck-ocean  { background-image: url('https://images.unsplash.com/photo-1507
 body.deck-forest { background-image: url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1920&q=80'); --neon-p:#7CFFB2; --neon-c:#1aff66; }
 body.deck-meadow { background-image: url('https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=1920&q=80'); --neon-p:#b8ff7a; --neon-c:#a8e654; }
 body.deck-sunset { background-image: url('https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?w=1920&q=80'); --neon-p:#ffcc33; --neon-c:#ff8800; }
-body.deck-classic{ background-image: url('https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1920&q=80'); --neon-p:#7ab8ff; --neon-c:#6699dd; }
+body.deck-classic{ background-image: url('https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?w=1920&q=80'); --neon-p:#ffd47a; --neon-c:#ffaa33; }
 
 /* theme-tinted controls so everything matches */
 body.deck-ocean .game-btn,
@@ -114,9 +114,9 @@ body.deck-sunset .game-btn.active { background:#ff8800; color:#2a0a00 }
 
 body.deck-classic .game-btn,
 body.deck-classic .controls select,
-body.deck-classic .controls button { border-color:#6699dd; }
+body.deck-classic .controls button { border-color:#ffaa33 }
 body.deck-classic .game-btn:hover,
-body.deck-classic .game-btn.active { background:#6699dd; color:#0a1428 }
+body.deck-classic .game-btn.active { background:#ffaa33; color:#1a0a00 }
 
 .peaks{display:flex;flex-direction:column;align-items:center;gap:4px}
 .peak-row{display:flex;gap:6px}
