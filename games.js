@@ -733,6 +733,8 @@ function setBreadcrumb(html){
 
 function renderLounge(){
   currentRoom = null;
+  document.body.className = document.body.className.replace(/\bdeck-\w+\b/g, '').trim();
+  document.body.classList.add('deck-arcade');
   clearInterval(timerInt);
   gameGridWrap.classList.remove('hidden');
   playArea.classList.add('hidden');
