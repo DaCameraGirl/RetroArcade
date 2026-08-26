@@ -32,13 +32,13 @@ h1{font-family:'Press Start 2P',monospace;color:var(--neon-p);text-shadow:none;f
 .cabinet-grid{width:min(980px,100%);display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin:0 auto 12px;padding:0 8px}
 .cabinet{appearance:none;border:1px solid rgba(255,255,255,.28);border-radius:12px;background:linear-gradient(180deg,rgba(8,24,18,.86),rgba(4,10,8,.9));color:#fff;font-family:'Space Mono',monospace;box-shadow:0 18px 44px rgba(0,0,0,.35);backdrop-filter:blur(8px);position:relative;overflow:hidden}
 .room-card,.game-card{min-height:220px;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:10px;padding:22px;text-align:left;cursor:pointer;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,filter .18s ease}
-.room-card:hover,.game-card:not(.locked):hover{transform:translateY(-4px);border-color:var(--neon-c);box-shadow:0 22px 54px rgba(0,0,0,.45),0 0 22px color-mix(in srgb,var(--neon-c) 38%,transparent)}
+.room-card:hover,.game-card:hover{transform:translateY(-4px);border-color:var(--neon-c);box-shadow:0 22px 54px rgba(0,0,0,.45),0 0 22px color-mix(in srgb,var(--neon-c) 38%,transparent)}
 .cabinet-icon{font-family:'Press Start 2P',monospace;font-size:.72rem;letter-spacing:0;color:var(--neon-c);text-transform:uppercase}
 .cabinet-title{font-family:'Press Start 2P',monospace;font-size:.82rem;line-height:1.5;color:var(--neon-p)}
 .cabinet-desc{font-size:.85rem;line-height:1.45;color:rgba(255,255,255,.78)}
-.cabinet-count,.play-tag,.soon-tag{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0;color:var(--neon-c)}
-.game-card.locked{opacity:.54;cursor:not-allowed;filter:saturate(.65)}
-.soon-tag{color:#ffcc66}.play-tag{color:#9dffbf}
+.cabinet-count,.play-tag{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0;color:var(--neon-c)}
+
+.play-tag{color:#9dffbf}
 .arcade-hint{width:min(980px,100%);margin:6px auto 0;text-align:center;color:rgba(255,255,255,.7);font-size:.82rem;text-shadow:0 2px 8px rgba(0,0,0,.8)}
 .breadcrumb{margin-top:10px;color:rgba(255,255,255,.78);font-size:.82rem}.breadcrumb a{color:var(--neon-c);text-decoration:underline;text-underline-offset:3px}.breadcrumb a:hover{color:#fff}
 .game-title-label{font-family:'Press Start 2P',monospace;color:var(--neon-p);font-size:.7rem}
@@ -186,3 +186,14 @@ body.deck-forest{--scene:url('https://images.unsplash.com/photo-1441974231531-c6
 body.deck-meadow{--scene:url('https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=1920&q=80');--table-glow:rgba(98,96,42,.7)}
 body.deck-sunset{--scene:url('https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?w=1920&q=80');--table-glow:rgba(123,62,24,.76)}
 body.deck-classic{--scene:url('https://images.unsplash.com/photo-1511193311914-0346f16efe90?w=1920&q=80');--table-glow:rgba(103,61,28,.76)}
+.casino-floor{width:min(1040px,100%);min-height:560px;position:relative;display:block;margin:0 auto 10px;padding:0;border-radius:18px;overflow:hidden;background:linear-gradient(180deg,rgba(7,4,10,.12),rgba(5,2,7,.62) 48%,rgba(2,1,3,.96) 100%),url('https://images.unsplash.com/photo-1596838132731-3301c3fd4317?w=1600&q=82');background-size:cover;background-position:center;box-shadow:0 28px 90px rgba(0,0,0,.58),inset 0 0 0 1px rgba(255,255,255,.16)}
+.casino-floor::before{content:"";position:absolute;left:50%;bottom:-220px;width:128%;height:72%;transform:translateX(-50%);border-radius:50% 50% 0 0;background:radial-gradient(ellipse at 50% 16%,rgba(255,216,156,.2),transparent 22%),radial-gradient(ellipse at 50% 12%,rgba(100,46,20,.98),rgba(40,18,8,.98) 64%,rgba(8,4,2,.99) 100%);box-shadow:inset 0 28px 80px rgba(255,255,255,.08),inset 0 -50px 90px rgba(0,0,0,.62),0 -22px 50px rgba(0,0,0,.4)}
+.casino-floor::after{content:"RETRO ARCADE";position:absolute;left:50%;top:30px;transform:translateX(-50%);font-family:'Press Start 2P',monospace;font-size:clamp(.8rem,2.2vw,1.55rem);color:#ffd46f;text-shadow:0 0 12px rgba(255,70,154,.82),0 0 28px rgba(103,199,255,.56);white-space:nowrap}
+.floor-game{appearance:none;position:absolute;width:clamp(132px,18vw,190px);min-height:104px;border:0;border-radius:50% 50% 12px 12px;background:radial-gradient(ellipse at 50% 24%,rgba(255,238,195,.22),transparent 25%),radial-gradient(ellipse at 50% 50%,rgba(83,40,18,.98),rgba(36,16,8,.98) 72%,rgba(13,6,3,.99) 100%);color:#fff;font-family:'Space Mono',monospace;box-shadow:0 18px 30px rgba(0,0,0,.48),inset 0 9px 22px rgba(255,255,255,.08),inset 0 -18px 34px rgba(0,0,0,.45);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:14px 12px;transition:transform .18s ease,filter .18s ease,box-shadow .18s ease}
+.floor-game::before{content:"";position:absolute;inset:-9px;border-radius:50% 50% 16px 16px;border:1px solid rgba(255,212,111,.38);box-shadow:0 0 18px rgba(255,93,158,.16);pointer-events:none}
+.floor-game:hover{transform:translateY(-7px) scale(1.03);filter:brightness(1.12);box-shadow:0 26px 42px rgba(0,0,0,.58),0 0 24px rgba(255,93,158,.28),inset 0 9px 22px rgba(255,255,255,.11),inset 0 -18px 34px rgba(0,0,0,.45)}
+.station-klondike{left:11%;bottom:92px}.station-tripeaks{left:50%;bottom:42px;transform:translateX(-50%) scale(1.08)}.station-tripeaks:hover{transform:translateX(-50%) translateY(-7px) scale(1.11)}.station-freecell{right:11%;bottom:92px}
+.table-label{font-family:'Press Start 2P',monospace;font-size:.54rem;color:#67c7ff;text-transform:uppercase}.table-name{font-family:'Press Start 2P',monospace;font-size:clamp(.62rem,1.3vw,.88rem);line-height:1.45;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.9)}
+.casino-floor .play-tag{color:#ffd46f;text-shadow:0 0 10px rgba(255,212,111,.45)}
+body.deck-arcade header{margin-bottom:12px}body.deck-arcade .arcade-hint{margin-top:10px;color:rgba(255,255,255,.76)}
+@media(max-width:720px){.casino-floor{min-height:620px}.floor-game{width:148px}.station-klondike{left:50%;bottom:320px;transform:translateX(-50%)}.station-klondike:hover{transform:translateX(-50%) translateY(-7px) scale(1.03)}.station-tripeaks{bottom:178px}.station-freecell{right:auto;left:50%;bottom:38px;transform:translateX(-50%)}.station-freecell:hover{transform:translateX(-50%) translateY(-7px) scale(1.03)}}

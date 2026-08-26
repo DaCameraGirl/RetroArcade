@@ -690,30 +690,11 @@ const ROOMS = [
     id: 'cards',
     icon: 'Cards',
     name: 'Card Tables',
-    desc: 'Solitaire classics ready to play',
+    desc: 'Choose a table and play now',
     games: [
-      { id: 'klondike', name: 'Klondike', available: true },
-      { id: 'tripeaks', name: 'Tri-Peaks', available: true },
-      { id: 'freecell', name: 'FreeCell', available: true },
-    ],
-  },
-  {
-    id: 'poker',
-    icon: 'Poker',
-    name: 'Poker Room',
-    desc: 'Texas Hold\'em and video poker tables',
-    games: [
-      { id: 'holdem', name: 'Texas Hold\'em', available: false },
-      { id: 'videopoker', name: 'Video Poker', available: false },
-    ],
-  },
-  {
-    id: 'slots',
-    icon: 'Slots',
-    name: 'Slots Floor',
-    desc: 'Classic reels and lucky pulls',
-    games: [
-      { id: 'classic-slots', name: 'Classic 3-Reel', available: false },
+      { id: 'klondike', name: 'Klondike', table: 'Table 1', available: true },
+      { id: 'tripeaks', name: 'Tri-Peaks', table: 'Table 2', available: true },
+      { id: 'freecell', name: 'FreeCell', table: 'Table 3', available: true },
     ],
   },
 ];
@@ -743,46 +724,17 @@ function renderLounge(){
   if(arcadeHint) arcadeHint.textContent = 'Choose a room, then pick a table or machine.';
   setBreadcrumb('');
 
-  arcadeGrid.innerHTML = ROOMS.map(function(room){
-    return '<button class="cabinet room-card" type="button" data-room="' + room.id + '">' +
-      '<span class="cabinet-icon">' + room.icon + '</span>' +
-      '<span class="cabinet-title">' + room.name + '</span>' +
-      '<span class="cabinet-desc">' + room.desc + '</span>' +
-      '<span class="cabinet-count">' + room.games.filter(function(g){ return g.available; }).length + ' live games</span>' +
+  currentRoom = ROOMS[0];
+  arcadeGrid.classList.add('casino-floor');
+  arcadeGrid.innerHTML = currentRoom.games.map(function(item, index){
+    return '<button class="floor-game station-' + item.id + '" type="button" data-game="' + item.id + '">' +
+      '<span class="table-label">' + item.table + '</span>' +
+      '<span class="table-name">' + item.name + '</span>' +
+      '<span class="play-tag">PLAY</span>' +
       '</button>';
   }).join('');
 
-  arcadeGrid.querySelectorAll('[data-room]').forEach(function(card){
-    card.addEventListener('click', function(){ renderRoom(card.dataset.room); });
-  });
-}
-
-function renderRoom(roomId){
-  currentRoom = ROOMS.find(function(room){ return room.id === roomId; }) || ROOMS[0];
-  clearInterval(timerInt);
-  gameGridWrap.classList.remove('hidden');
-  playArea.classList.add('hidden');
-  document.querySelector('#win').classList.add('hidden');
-  lobbySubtitle.textContent = currentRoom.name;
-  if(arcadeHint) arcadeHint.textContent = currentRoom.desc;
-  setBreadcrumb('<a href="#" id="bc-lobby">Arcade</a> / ' + currentRoom.name);
-  document.querySelector('#bc-lobby').addEventListener('click', function(event){
-    event.preventDefault();
-    renderLounge();
-  });
-
-  arcadeGrid.innerHTML = currentRoom.games.map(function(item){
-    var locked = item.available ? '' : ' locked';
-    var disabled = item.available ? '' : ' disabled';
-    var tagClass = item.available ? 'play-tag' : 'soon-tag';
-    var tagText = item.available ? 'PLAY' : 'Coming Soon';
-    return '<button class="cabinet game-card' + locked + '" type="button" data-game="' + item.id + '"' + disabled + '>' +
-      '<span class="cabinet-title">' + item.name + '</span>' +
-      '<span class="' + tagClass + '">' + tagText + '</span>' +
-      '</button>';
-  }).join('');
-
-  arcadeGrid.querySelectorAll('[data-game]:not(.locked)').forEach(function(card){
+  arcadeGrid.querySelectorAll('[data-game]').forEach(function(card){
     card.addEventListener('click', function(){ launchGame(card.dataset.game); });
   });
 }
@@ -791,6 +743,7 @@ function launchGame(gameId){
   var selected = currentRoom && currentRoom.games.find(function(item){ return item.id === gameId; });
   if(!selected || !selected.available) return;
   game = selected.id;
+  arcadeGrid.classList.remove('casino-floor');
   gameGridWrap.classList.add('hidden');
   playArea.classList.remove('hidden');
   lobbySubtitle.textContent = selected.name;
@@ -802,14 +755,14 @@ function launchGame(gameId){
   });
   document.querySelector('#bc-room').addEventListener('click', function(event){
     event.preventDefault();
-    renderRoom(currentRoom.id);
+    renderLounge();
   });
   newGame();
 }
 
 document.querySelector('#backBtn').addEventListener('click', function(){
   if(!playArea.classList.contains('hidden') && currentRoom){
-    renderRoom(currentRoom.id);
+    renderLounge();
     return;
   }
   renderLounge();

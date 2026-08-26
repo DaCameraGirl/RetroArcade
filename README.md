@@ -6,19 +6,17 @@
 ![CSS](https://img.shields.io/badge/CSS-30.5%25-1572B6?style=for-the-badge&logo=css&logoColor=white)
 ![HTML](https://img.shields.io/badge/HTML-4.9%25-E34F26?style=for-the-badge&logo=html5&logoColor=white)
 
-**Neon casino arcade lobby with realistic table-style card games**
+**Realistic casino arcade floor with playable solitaire tables**
 
 </div>
 
 ---
 
-## 🎮 Lounge Rooms
+## 🎮 Playable Tables
 
-| Room | Status | Games |
+| Table area | Status | Games |
 |---|---|---|
 | **Card Tables** | Live | Klondike, Tri-Peaks, FreeCell |
-| **Poker Room** | Coming soon | Texas Hold'em, Video Poker |
-| **Slots Floor** | Coming soon | Classic 3-Reel |
 
 The live card games support **Easy / Medium / Hard** difficulty levels and shared nature deck themes.
 
