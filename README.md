@@ -6,19 +6,23 @@
 ![CSS](https://img.shields.io/badge/CSS-30.5%25-1572B6?style=for-the-badge&logo=css&logoColor=white)
 ![HTML](https://img.shields.io/badge/HTML-4.9%25-E34F26?style=for-the-badge&logo=html5&logoColor=white)
 
-**Realistic casino arcade floor with playable solitaire tables**
+**Realistic casino arcade floor with playable card tables, poker, slots, table games, and classic arcade cabinets**
 
 </div>
 
 ---
 
-## 🎮 Playable Tables
+## Playable Casino Floor
 
-| Table area | Status | Games |
-|---|---|---|
-| **Card Tables** | Live | Klondike, Tri-Peaks, FreeCell |
+| Area | Games |
+|---|---|
+| **Card Tables** | Klondike, Tri-Peaks, FreeCell, War, High Card |
+| **Table Games** | Roulette, Blackjack, Craps, Baccarat, Casino War |
+| **Poker Tables** | Video Poker, Texas Holdem, Five Card Draw, Three Card Poker, Seven Card Stud, Omaha, Caribbean Stud, Red Dog |
+| **Slot Machines** | Classic 3-Reel, Lucky Sevens, Fruit Spin, Diamond Deluxe, Treasure Wheel, Arcade Jackpot, Ocean Pearls, Forest Fortune |
+| **Classic Arcade** | Maze Chase, Barrel Climb, Tunnel Digger, Pixel Plumber, Bug Trail, Pyramid Hopper, Jungle Pit Run, Space Blaster, Brick Wall, Frog Crossing, Moon Patrol |
 
-The live card games support **Easy / Medium / Hard** difficulty levels and shared nature deck themes.
+The solitaire games keep their full card rules. The casino, slot, and arcade cabinets use lightweight built-in mini-game loops so every visible choice is playable.
 
 ---
 

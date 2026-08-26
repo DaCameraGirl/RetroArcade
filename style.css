@@ -197,3 +197,468 @@ body.deck-classic{--scene:url('https://images.unsplash.com/photo-1511193311914-0
 .casino-floor .play-tag{color:#ffd46f;text-shadow:0 0 10px rgba(255,212,111,.45)}
 body.deck-arcade header{margin-bottom:12px}body.deck-arcade .arcade-hint{margin-top:10px;color:rgba(255,255,255,.76)}
 @media(max-width:720px){.casino-floor{min-height:620px}.floor-game{width:148px}.station-klondike{left:50%;bottom:320px;transform:translateX(-50%)}.station-klondike:hover{transform:translateX(-50%) translateY(-7px) scale(1.03)}.station-tripeaks{bottom:178px}.station-freecell{right:auto;left:50%;bottom:38px;transform:translateX(-50%)}.station-freecell:hover{transform:translateX(-50%) translateY(-7px) scale(1.03)}}
+/* Full-screen casino lobby, overrides the compact poster layout */
+body.deck-arcade {
+  padding: 0;
+  align-items: stretch;
+  overflow-x: hidden;
+}
+
+body.deck-arcade header {
+  position: absolute;
+  top: 22px;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  margin: 0;
+  padding: 0 16px;
+  pointer-events: none;
+}
+
+body.deck-arcade h1 {
+  font-size: clamp(1.05rem, 3vw, 2.05rem);
+  text-shadow: 0 0 14px rgba(255,93,158,.55), 0 2px 0 rgba(0,0,0,.75);
+}
+
+body.deck-arcade #lobby-subtitle {
+  margin-top: 14px;
+  font-size: clamp(.7rem, 1.2vw, .9rem);
+  color: #75d8ff;
+  text-shadow: 0 2px 9px rgba(0,0,0,.9);
+}
+
+body.deck-arcade #game-grid-wrap {
+  width: 100vw;
+  min-height: 100vh;
+  margin: 0;
+  position: relative;
+  display: block;
+}
+
+body.deck-arcade .casino-floor {
+  width: 100vw;
+  min-height: 100vh;
+  margin: 0;
+  border-radius: 0;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.07), inset 0 -160px 170px rgba(2,1,5,.92);
+  background:
+    linear-gradient(180deg, rgba(8,3,12,.26) 0%, rgba(8,3,12,.2) 34%, rgba(5,2,8,.78) 76%, rgba(2,1,4,.96) 100%),
+    url('https://images.unsplash.com/photo-1596838132731-3301c3fd4317?w=1920&q=84');
+  background-size: cover;
+  background-position: center center;
+}
+
+body.deck-arcade .casino-floor::before {
+  bottom: -20vh;
+  width: 112vw;
+  height: 52vh;
+  opacity: .94;
+}
+
+body.deck-arcade .casino-floor::after {
+  content: "";
+  inset: 0;
+  left: 0;
+  top: 0;
+  transform: none;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 50% 18%, rgba(255,212,111,.16), transparent 28%),
+    radial-gradient(ellipse at 16% 72%, rgba(255,93,158,.14), transparent 32%),
+    radial-gradient(ellipse at 84% 72%, rgba(103,199,255,.13), transparent 32%);
+}
+
+body.deck-arcade .floor-game {
+  width: clamp(168px, 16vw, 250px);
+  min-height: clamp(118px, 14vh, 170px);
+  z-index: 12;
+  backdrop-filter: blur(2px);
+}
+
+body.deck-arcade .station-klondike {
+  left: clamp(24px, 13vw, 190px);
+  bottom: clamp(88px, 15vh, 180px);
+}
+
+body.deck-arcade .station-tripeaks {
+  left: 50%;
+  bottom: clamp(58px, 10vh, 120px);
+  transform: translateX(-50%) scale(1.06);
+}
+
+body.deck-arcade .station-tripeaks:hover {
+  transform: translateX(-50%) translateY(-7px) scale(1.09);
+}
+
+body.deck-arcade .station-freecell {
+  right: clamp(24px, 13vw, 190px);
+  bottom: clamp(88px, 15vh, 180px);
+}
+
+body.deck-arcade .arcade-hint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 22px;
+  z-index: 28;
+  width: min(720px, calc(100vw - 32px));
+  margin: 0 auto;
+  color: rgba(255,255,255,.78);
+}
+
+body.deck-arcade footer {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  body.deck-arcade header {
+    top: 16px;
+  }
+
+  body.deck-arcade .casino-floor {
+    min-height: 760px;
+    background-position: center top;
+  }
+
+  body.deck-arcade .floor-game {
+    width: min(230px, calc(100vw - 42px));
+    min-height: 112px;
+  }
+
+  body.deck-arcade .station-klondike,
+  body.deck-arcade .station-tripeaks,
+  body.deck-arcade .station-freecell {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+  }
+
+  body.deck-arcade .station-klondike {
+    bottom: 410px;
+  }
+
+  body.deck-arcade .station-tripeaks {
+    bottom: 260px;
+  }
+
+  body.deck-arcade .station-freecell {
+    bottom: 110px;
+  }
+
+  body.deck-arcade .station-klondike:hover,
+  body.deck-arcade .station-tripeaks:hover,
+  body.deck-arcade .station-freecell:hover {
+    transform: translateX(-50%) translateY(-6px) scale(1.02);
+  }
+}
+
+/* Multi-zone casino arcade floor */
+body.deck-arcade header {
+  pointer-events: auto;
+}
+
+body.deck-arcade .lounge-floor {
+  display: block;
+}
+
+.zone-door {
+  appearance: none;
+  position: absolute;
+  width: clamp(160px, 18vw, 260px);
+  min-height: clamp(120px, 15vh, 190px);
+  border: 1px solid rgba(255,212,111,.42);
+  border-radius: 18px;
+  color: #fff;
+  font-family: 'Space Mono', monospace;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 20px;
+  overflow: hidden;
+  box-shadow: 0 24px 52px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.16);
+  text-align: left;
+  z-index: 14;
+  transition: transform .18s ease, filter .18s ease, box-shadow .18s ease;
+}
+
+.zone-door::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.84));
+  z-index: 0;
+}
+
+.zone-door > * {
+  position: relative;
+  z-index: 1;
+}
+
+.zone-door:hover {
+  transform: translateY(-8px) scale(1.02);
+  filter: brightness(1.12);
+  box-shadow: 0 32px 68px rgba(0,0,0,.68), 0 0 28px rgba(255,93,158,.25), inset 0 1px 0 rgba(255,255,255,.2);
+}
+
+.zone-icon {
+  font-family: 'Press Start 2P', monospace;
+  font-size: .56rem;
+  color: #75d8ff;
+  text-transform: uppercase;
+}
+
+.zone-name {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(.64rem, 1.2vw, .92rem);
+  line-height: 1.45;
+  text-shadow: 0 2px 10px rgba(0,0,0,.9);
+}
+
+.zone-desc {
+  color: #ffd46f;
+  font-size: .76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.zone-cards { left: 7vw; top: 28vh; background: radial-gradient(circle at 50% 18%, rgba(255,255,255,.18), transparent 28%), linear-gradient(145deg, #1b5a34, #120706 76%); }
+.zone-tablegames { left: 29vw; top: 24vh; background: radial-gradient(circle at 50% 20%, rgba(255,212,111,.26), transparent 30%), linear-gradient(145deg, #5c1919, #130606 76%); }
+.zone-poker { right: 7vw; top: 28vh; background: radial-gradient(circle at 50% 20%, rgba(255,255,255,.2), transparent 28%), linear-gradient(145deg, #173c55, #080713 76%); }
+.zone-slots { left: 19vw; bottom: 12vh; background: radial-gradient(circle at 50% 18%, rgba(255,215,0,.3), transparent 28%), linear-gradient(145deg, #5d2468, #10040f 76%); }
+.zone-classics { right: 19vw; bottom: 12vh; background: radial-gradient(circle at 50% 20%, rgba(103,199,255,.25), transparent 30%), linear-gradient(145deg, #182c6f, #070513 76%); }
+
+body.deck-arcade .room-floor {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  align-content: center;
+  gap: 24px;
+  padding: 150px 5vw 92px;
+  overflow-y: auto;
+}
+
+body.deck-arcade .room-floor .floor-game {
+  position: relative;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  transform: none;
+  width: auto;
+  min-height: 138px;
+  border-radius: 18px;
+}
+
+body.deck-arcade .room-floor .floor-game:hover,
+body.deck-arcade .room-floor .station-tripeaks:hover,
+body.deck-arcade .room-floor .station-klondike:hover,
+body.deck-arcade .room-floor .station-freecell:hover {
+  transform: translateY(-7px) scale(1.02);
+}
+
+body.deck-arcade .room-tablegames .floor-game,
+body.deck-arcade .room-poker .floor-game,
+body.deck-arcade .room-cards .floor-game {
+  border-radius: 50% 50% 16px 16px;
+  background: radial-gradient(ellipse at 50% 24%, rgba(255,238,195,.24), transparent 25%), radial-gradient(ellipse at 50% 50%, rgba(86,42,18,.98), rgba(31,13,7,.98) 72%, rgba(8,3,2,.99) 100%);
+}
+
+body.deck-arcade .room-slots .floor-game {
+  border-radius: 16px 16px 8px 8px;
+  min-height: 190px;
+  background: linear-gradient(180deg, rgba(255,255,255,.14), transparent 16%), linear-gradient(145deg, #5a1b73, #140414 78%);
+}
+
+body.deck-arcade .room-slots .floor-game::after {
+  content: "777";
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  top: 20px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: #08030b;
+  color: #ffd46f;
+  font-family: 'Press Start 2P', monospace;
+  font-size: .9rem;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.18), 0 0 18px rgba(255,212,111,.2);
+}
+
+body.deck-arcade .room-slots .floor-game .table-label {
+  margin-top: 64px;
+}
+
+body.deck-arcade .room-classics {
+  grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+}
+
+body.deck-arcade .room-classics .floor-game {
+  min-height: 226px;
+  border-radius: 18px 18px 8px 8px;
+  padding-top: 92px;
+  background: linear-gradient(180deg, rgba(255,255,255,.14), transparent 18%), linear-gradient(145deg, #243078, #110521 78%);
+  box-shadow: 0 24px 48px rgba(0,0,0,.62), inset 0 -18px 36px rgba(0,0,0,.45);
+}
+
+body.deck-arcade .room-classics .floor-game::after {
+  content: "";
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  top: 18px;
+  height: 70px;
+  border-radius: 10px;
+  background: radial-gradient(circle at 35% 42%, #ffd46f 0 8px, transparent 9px), radial-gradient(circle at 64% 54%, #67c7ff 0 7px, transparent 8px), linear-gradient(135deg, #090315, #18204d);
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.14), 0 0 20px rgba(103,199,255,.18);
+}
+
+.mini-game {
+  min-height: 430px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  color: #fff;
+  text-align: center;
+  text-shadow: 0 2px 8px rgba(0,0,0,.8);
+}
+
+.mini-game h2 {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(.85rem, 2vw, 1.2rem);
+  color: #ffd46f;
+}
+
+.mini-status,
+.score-display {
+  color: #75d8ff;
+  font-weight: 700;
+}
+
+.mini-hand,
+.versus-hand,
+.dice-row,
+.slot-reels {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.mini-card {
+  width: 74px;
+  height: 104px;
+  border-radius: 10px;
+  background: linear-gradient(145deg, #fff, #e7dfcf);
+  color: #111;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  box-shadow: 0 12px 20px rgba(0,0,0,.44);
+}
+
+.mini-card.red { color: #a22; }
+.mini-card span { font-size: 1.2rem; }
+
+.versus-hand > div {
+  display: grid;
+  gap: 8px;
+  color: #ffd46f;
+}
+
+.slot-reels span,
+.dice-row span,
+.roulette-wheel {
+  min-width: 86px;
+  min-height: 86px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: #0b0612;
+  color: #ffd46f;
+  font-family: 'Press Start 2P', monospace;
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.15), 0 15px 26px rgba(0,0,0,.46);
+}
+
+.roulette-wheel {
+  width: 156px;
+  height: 156px;
+  border-radius: 50%;
+  font-size: 1.8rem;
+}
+
+.roulette-wheel.red { background: radial-gradient(circle, #c21d38, #250207); }
+.roulette-wheel.black { background: radial-gradient(circle, #232323, #020202); }
+.roulette-wheel.green { background: radial-gradient(circle, #1a8f4b, #031509); }
+
+.pixel-stage {
+  width: min(560px, 88vw);
+  height: 260px;
+  position: relative;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #090315, #151c46);
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.12), 0 18px 42px rgba(0,0,0,.48);
+  overflow: hidden;
+}
+
+.pixel-stage::before {
+  content: "";
+  position: absolute;
+  inset: 24px;
+  background: repeating-linear-gradient(90deg, transparent 0 34px, rgba(255,255,255,.08) 35px 37px), repeating-linear-gradient(0deg, transparent 0 34px, rgba(255,255,255,.08) 35px 37px);
+}
+
+.pixel-player,
+.pixel-target,
+.pixel-danger {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+}
+
+.pixel-player { left: 18%; bottom: 22%; background: #ffd46f; }
+.pixel-target { right: 20%; top: 24%; background: #67c7ff; }
+.pixel-danger { left: 52%; top: 46%; background: #ff5d9e; }
+
+.mini-actions button {
+  background: rgba(26,11,46,.92);
+  border: 1px solid #ffd46f;
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-family: 'Space Mono', monospace;
+  cursor: pointer;
+}
+
+@media (max-width: 760px) {
+  .zone-door {
+    position: relative;
+    left: auto;
+    right: auto;
+    top: auto;
+    bottom: auto;
+    width: min(280px, calc(100vw - 44px));
+    min-height: 112px;
+  }
+
+  body.deck-arcade .lounge-floor {
+    display: grid;
+    grid-template-columns: 1fr;
+    justify-items: center;
+    align-content: center;
+    gap: 18px;
+    padding: 130px 0 80px;
+  }
+
+  body.deck-arcade .room-floor {
+    grid-template-columns: 1fr;
+    padding: 130px 22px 80px;
+  }
+}

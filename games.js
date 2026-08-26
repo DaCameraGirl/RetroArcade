@@ -667,34 +667,283 @@ function renderCurrent(){
   applyDeck();
   if(game === 'klondike') renderKlondike();
   else if(game === 'tripeaks') renderTriPeaks();
-  else renderFreeCell();
+  else if(game === 'freecell') renderFreeCell();
+  else renderQuickGame();
 }
-
 function newGame(){
   moves = 0;
   undoStack = [];
   fcSel = null;
   kSel = null;
+  state = {};
   difficulty = $('#difficulty').value;
   startTimer();
   updateHUD();
   $('#win').classList.add('hidden');
   if(game === 'klondike') newKlondike();
   else if(game === 'tripeaks') newTriPeaks();
-  else newFreeCell();
+  else if(game === 'freecell') newFreeCell();
+  else renderQuickGame();
+}
+/* ==================== CASINO / ARCADE MINI-GAMES ==================== */
+
+function findArcadeGame(gameId){
+  for(const room of ROOMS){
+    const found = room.games.find(function(item){ return item.id === gameId; });
+    if(found) return { room: room, game: found };
+  }
+  return null;
 }
 
+function miniCard(c){
+  return '<div class="mini-card ' + (c.color === 'red' ? 'red' : '') + '">' + c.rank + '<span>' + c.suit + '</span></div>';
+}
 
+function pokerScore(hand){
+  const vals = hand.map(function(c){ return c.val; }).sort(function(a,b){ return a-b; });
+  const suits = hand.map(function(c){ return c.suit; });
+  const counts = {};
+  vals.forEach(function(v){ counts[v] = (counts[v] || 0) + 1; });
+  const groups = Object.values(counts).sort(function(a,b){ return b-a; });
+  const flush = suits.every(function(s){ return s === suits[0]; });
+  const lowAce = vals.join(',') === '1,2,3,4,5';
+  const straight = lowAce || vals.every(function(v,i){ return i === 0 || v === vals[i-1] + 1; });
+  if(straight && flush) return 'Straight flush';
+  if(groups[0] === 4) return 'Four of a kind';
+  if(groups[0] === 3 && groups[1] === 2) return 'Full house';
+  if(flush) return 'Flush';
+  if(straight) return 'Straight';
+  if(groups[0] === 3) return 'Three of a kind';
+  if(groups[0] === 2 && groups[1] === 2) return 'Two pair';
+  if(groups[0] === 2) return 'Pair';
+  return 'High card';
+}
+
+function renderPokerMini(selected){
+  const hand = buildDeck().slice(0, selected.handSize || 5);
+  const score = pokerScore(hand);
+  moves++;
+  updateHUD();
+  board.innerHTML = '<section class="mini-game poker-mini"><h2>' + selected.name + '</h2>' +
+    '<p class="mini-status">' + score + '</p>' +
+    '<div class="mini-hand">' + hand.map(miniCard).join('') + '</div>' +
+    '<div class="mini-actions"><button id="miniDeal">Deal again</button></div></section>';
+  document.querySelector('#miniDeal').addEventListener('click', function(){ renderPokerMini(selected); });
+}
+
+function blackjackTotal(hand){
+  let total = 0;
+  let aces = 0;
+  hand.forEach(function(c){
+    if(c.val === 1){ aces++; total += 11; }
+    else total += Math.min(c.val, 10);
+  });
+  while(total > 21 && aces){ total -= 10; aces--; }
+  return total;
+}
+
+function renderBlackjackMini(selected){
+  const deck = buildDeck();
+  const player = [deck.pop(), deck.pop()];
+  const dealer = [deck.pop(), deck.pop()];
+  const total = blackjackTotal(player);
+  const dealerTotal = blackjackTotal(dealer);
+  let result = 'Push';
+  if(total === 21 && dealerTotal !== 21) result = 'Blackjack';
+  else if(dealerTotal > 21 || total > dealerTotal) result = 'Player wins';
+  else if(total < dealerTotal) result = 'Dealer wins';
+  moves++;
+  updateHUD();
+  board.innerHTML = '<section class="mini-game poker-mini"><h2>' + selected.name + '</h2>' +
+    '<p class="mini-status">' + result + ' | You ' + total + ' | Dealer ' + dealerTotal + '</p>' +
+    '<div class="mini-hand">' + player.map(miniCard).join('') + '</div>' +
+    '<div class="mini-actions"><button id="miniDeal">Play hand</button></div></section>';
+  document.querySelector('#miniDeal').addEventListener('click', function(){ renderBlackjackMini(selected); });
+}
+
+function renderHighCardMini(selected){
+  const deck = buildDeck();
+  const player = deck.pop();
+  const house = deck.pop();
+  const result = player.val === house.val ? 'Tie' : (player.val > house.val ? 'You win' : 'House wins');
+  moves++;
+  updateHUD();
+  board.innerHTML = '<section class="mini-game poker-mini"><h2>' + selected.name + '</h2>' +
+    '<p class="mini-status">' + result + '</p>' +
+    '<div class="versus-hand"><div><span>You</span>' + miniCard(player) + '</div><div><span>House</span>' + miniCard(house) + '</div></div>' +
+    '<div class="mini-actions"><button id="miniDeal">Play round</button></div></section>';
+  document.querySelector('#miniDeal').addEventListener('click', function(){ renderHighCardMini(selected); });
+}
+
+function renderRouletteMini(selected){
+  const n = Math.floor(Math.random() * 37);
+  const color = n === 0 ? 'green' : (n % 2 ? 'red' : 'black');
+  moves++;
+  updateHUD();
+  board.innerHTML = '<section class="mini-game roulette-mini"><h2>' + selected.name + '</h2>' +
+    '<div class="roulette-wheel ' + color + '">' + n + '</div>' +
+    '<p class="mini-status">' + color.toUpperCase() + '</p>' +
+    '<div class="mini-actions"><button id="miniSpin">Spin wheel</button></div></section>';
+  document.querySelector('#miniSpin').addEventListener('click', function(){ renderRouletteMini(selected); });
+}
+
+function renderDiceMini(selected){
+  const a = 1 + Math.floor(Math.random() * 6);
+  const b = 1 + Math.floor(Math.random() * 6);
+  const total = a + b;
+  moves++;
+  updateHUD();
+  board.innerHTML = '<section class="mini-game dice-mini"><h2>' + selected.name + '</h2>' +
+    '<div class="dice-row"><span>' + a + '</span><span>' + b + '</span></div>' +
+    '<p class="mini-status">Roll total ' + total + '</p>' +
+    '<div class="mini-actions"><button id="miniRoll">Roll again</button></div></section>';
+  document.querySelector('#miniRoll').addEventListener('click', function(){ renderDiceMini(selected); });
+}
+
+function renderBaccaratMini(selected){
+  const deck = buildDeck();
+  const player = [deck.pop(), deck.pop()];
+  const banker = [deck.pop(), deck.pop()];
+  const score = function(hand){ return hand.reduce(function(sum,c){ return sum + Math.min(c.val, 10); }, 0) % 10; };
+  const ps = score(player);
+  const bs = score(banker);
+  const result = ps === bs ? 'Tie' : (ps > bs ? 'Player wins' : 'Banker wins');
+  moves++;
+  updateHUD();
+  board.innerHTML = '<section class="mini-game poker-mini"><h2>' + selected.name + '</h2>' +
+    '<p class="mini-status">' + result + ' | Player ' + ps + ' | Banker ' + bs + '</p>' +
+    '<div class="versus-hand"><div><span>Player</span>' + player.map(miniCard).join('') + '</div><div><span>Banker</span>' + banker.map(miniCard).join('') + '</div></div>' +
+    '<div class="mini-actions"><button id="miniDeal">Deal again</button></div></section>';
+  document.querySelector('#miniDeal').addEventListener('click', function(){ renderBaccaratMini(selected); });
+}
+
+function renderSlotMini(selected){
+  const symbols = selected.symbols || ['7','BAR','Cherry','Bell','Gem','Star'];
+  const reels = [0,1,2].map(function(){ return symbols[Math.floor(Math.random() * symbols.length)]; });
+  let result = 'Try again';
+  if(reels[0] === reels[1] && reels[1] === reels[2]) result = 'Jackpot';
+  else if(reels[0] === reels[1] || reels[1] === reels[2] || reels[0] === reels[2]) result = 'Small win';
+  moves++;
+  updateHUD();
+  board.innerHTML = '<section class="mini-game slot-mini"><h2>' + selected.name + '</h2>' +
+    '<div class="slot-reels">' + reels.map(function(r){ return '<span>' + r + '</span>'; }).join('') + '</div>' +
+    '<p class="mini-status">' + result + '</p>' +
+    '<div class="mini-actions"><button id="miniSpin">Spin</button></div></section>';
+  document.querySelector('#miniSpin').addEventListener('click', function(){ renderSlotMini(selected); });
+}
+
+function renderArcadeMini(selected){
+  state.arcadeScore = state.arcadeScore || 0;
+  board.innerHTML = '<section class="mini-game cabinet-mini mode-' + selected.mode + '"><h2>' + selected.name + '</h2>' +
+    '<div class="pixel-stage"><span class="pixel-player"></span><span class="pixel-target"></span><span class="pixel-danger"></span></div>' +
+    '<p class="mini-status">' + selected.prompt + '</p>' +
+    '<div class="score-display">Score ' + state.arcadeScore + '</div>' +
+    '<div class="mini-actions"><button id="miniPlay">Play move</button><button id="miniReset">Reset</button></div></section>';
+  document.querySelector('#miniPlay').addEventListener('click', function(){
+    const hit = Math.random() > (difficulty === 'hard' ? .42 : difficulty === 'easy' ? .24 : .33);
+    state.arcadeScore += hit ? 10 : -3;
+    if(state.arcadeScore < 0) state.arcadeScore = 0;
+    moves++;
+    updateHUD();
+    renderArcadeMini(selected);
+  });
+  document.querySelector('#miniReset').addEventListener('click', function(){
+    state.arcadeScore = 0;
+    moves = 0;
+    updateHUD();
+    renderArcadeMini(selected);
+  });
+}
+
+function renderQuickGame(){
+  const found = findArcadeGame(game);
+  if(!found) return;
+  const selected = found.game;
+  if(selected.kind === 'poker') return renderPokerMini(selected);
+  if(selected.kind === 'blackjack') return renderBlackjackMini(selected);
+  if(selected.kind === 'highcard') return renderHighCardMini(selected);
+  if(selected.kind === 'roulette') return renderRouletteMini(selected);
+  if(selected.kind === 'dice') return renderDiceMini(selected);
+  if(selected.kind === 'baccarat') return renderBaccaratMini(selected);
+  if(selected.kind === 'slots') return renderSlotMini(selected);
+  renderArcadeMini(selected);
+}
 const ROOMS = [
   {
     id: 'cards',
     icon: 'Cards',
     name: 'Card Tables',
-    desc: 'Choose a table and play now',
+    desc: 'Solitaire and quick card games',
     games: [
       { id: 'klondike', name: 'Klondike', table: 'Table 1', available: true },
       { id: 'tripeaks', name: 'Tri-Peaks', table: 'Table 2', available: true },
       { id: 'freecell', name: 'FreeCell', table: 'Table 3', available: true },
+      { id: 'war', name: 'War', table: 'Table 4', kind: 'highcard', available: true },
+      { id: 'high-card', name: 'High Card', table: 'Table 5', kind: 'highcard', available: true },
+    ],
+  },
+  {
+    id: 'tablegames',
+    icon: 'Tables',
+    name: 'Table Games',
+    desc: 'Roulette, blackjack, dice, and baccarat',
+    games: [
+      { id: 'roulette', name: 'Roulette', table: 'Wheel 1', kind: 'roulette', available: true },
+      { id: 'blackjack', name: 'Blackjack', table: 'Table 1', kind: 'blackjack', available: true },
+      { id: 'craps', name: 'Craps', table: 'Dice 1', kind: 'dice', available: true },
+      { id: 'baccarat', name: 'Baccarat', table: 'Table 2', kind: 'baccarat', available: true },
+      { id: 'casino-war', name: 'Casino War', table: 'Table 3', kind: 'highcard', available: true },
+    ],
+  },
+  {
+    id: 'poker',
+    icon: 'Poker',
+    name: 'Poker Tables',
+    desc: 'Holdem, draw, stud, and video poker',
+    games: [
+      { id: 'video-poker', name: 'Video Poker', table: 'Poker 1', kind: 'poker', available: true },
+      { id: 'texas-holdem', name: 'Texas Holdem', table: 'Poker 2', kind: 'poker', handSize: 7, available: true },
+      { id: 'five-card-draw', name: 'Five Card Draw', table: 'Poker 3', kind: 'poker', available: true },
+      { id: 'three-card-poker', name: 'Three Card Poker', table: 'Poker 4', kind: 'poker', handSize: 3, available: true },
+      { id: 'seven-card-stud', name: 'Seven Card Stud', table: 'Poker 5', kind: 'poker', handSize: 7, available: true },
+      { id: 'omaha', name: 'Omaha', table: 'Poker 6', kind: 'poker', handSize: 7, available: true },
+      { id: 'caribbean-stud', name: 'Caribbean Stud', table: 'Poker 7', kind: 'poker', available: true },
+      { id: 'red-dog', name: 'Red Dog', table: 'Poker 8', kind: 'highcard', available: true },
+    ],
+  },
+  {
+    id: 'slots',
+    icon: 'Slots',
+    name: 'Slot Machines',
+    desc: 'Rows of playable slot cabinets',
+    games: [
+      { id: 'classic-slots', name: 'Classic 3-Reel', table: 'Slot 1', kind: 'slots', symbols: ['7','BAR','Cherry','Bell','Lemon'], available: true },
+      { id: 'lucky-sevens', name: 'Lucky Sevens', table: 'Slot 2', kind: 'slots', symbols: ['7','7','BAR','Star','Gem'], available: true },
+      { id: 'fruit-spin', name: 'Fruit Spin', table: 'Slot 3', kind: 'slots', symbols: ['Cherry','Lemon','Plum','Melon','Bell'], available: true },
+      { id: 'diamond-deluxe', name: 'Diamond Deluxe', table: 'Slot 4', kind: 'slots', symbols: ['Gem','Crown','7','BAR','Bell'], available: true },
+      { id: 'treasure-wheel', name: 'Treasure Wheel', table: 'Slot 5', kind: 'slots', symbols: ['Gold','Key','Chest','Gem','7'], available: true },
+      { id: 'arcade-jackpot', name: 'Arcade Jackpot', table: 'Slot 6', kind: 'slots', symbols: ['Bolt','Star','7','Gem','BAR'], available: true },
+      { id: 'ocean-pearls', name: 'Ocean Pearls', table: 'Slot 7', kind: 'slots', symbols: ['Pearl','Wave','Shell','Gem','7'], available: true },
+      { id: 'forest-fortune', name: 'Forest Fortune', table: 'Slot 8', kind: 'slots', symbols: ['Leaf','Acorn','Moon','Gem','7'], available: true },
+    ],
+  },
+  {
+    id: 'classics',
+    icon: 'Arcade',
+    name: 'Classic Arcade',
+    desc: 'Stand-up retro cabinet games',
+    games: [
+      { id: 'maze-chase', name: 'Maze Chase', table: 'Cabinet 1', kind: 'arcade', mode: 'maze', prompt: 'Dodge the ghosts and grab the dots.', available: true },
+      { id: 'barrel-climb', name: 'Barrel Climb', table: 'Cabinet 2', kind: 'arcade', mode: 'barrel', prompt: 'Jump the barrels and climb the ramps.', available: true },
+      { id: 'tunnel-digger', name: 'Tunnel Digger', table: 'Cabinet 3', kind: 'arcade', mode: 'dig', prompt: 'Dig tunnels and clear the underground board.', available: true },
+      { id: 'pixel-plumber', name: 'Pixel Plumber', table: 'Cabinet 4', kind: 'arcade', mode: 'run', prompt: 'Run, jump, and grab coins.', available: true },
+      { id: 'bug-trail', name: 'Bug Trail', table: 'Cabinet 5', kind: 'arcade', mode: 'bug', prompt: 'Blast the crawling bug chain before it reaches you.', available: true },
+      { id: 'pyramid-hopper', name: 'Pyramid Hopper', table: 'Cabinet 6', kind: 'arcade', mode: 'pyramid', prompt: 'Hop the pyramid tiles and dodge the bounce balls.', available: true },
+      { id: 'jungle-pit-run', name: 'Jungle Pit Run', table: 'Cabinet 7', kind: 'arcade', mode: 'jungle', prompt: 'Swing over pits and grab treasure.', available: true },
+      { id: 'space-blaster', name: 'Space Blaster', table: 'Cabinet 8', kind: 'arcade', mode: 'space', prompt: 'Blast invaders before they reach you.', available: true },
+      { id: 'brick-wall', name: 'Brick Wall', table: 'Cabinet 9', kind: 'arcade', mode: 'brick', prompt: 'Break the wall and keep the ball alive.', available: true },
+      { id: 'frog-crossing', name: 'Frog Crossing', table: 'Cabinet 10', kind: 'arcade', mode: 'frog', prompt: 'Hop lanes and reach the safe side.', available: true },
+      { id: 'moon-patrol', name: 'Moon Patrol', table: 'Cabinet 11', kind: 'arcade', mode: 'moon', prompt: 'Jump craters and patrol the moon road.', available: true },
     ],
   },
 ];
@@ -720,14 +969,40 @@ function renderLounge(){
   gameGridWrap.classList.remove('hidden');
   playArea.classList.add('hidden');
   document.querySelector('#win').classList.add('hidden');
-  lobbySubtitle.textContent = 'Pick a room';
-  if(arcadeHint) arcadeHint.textContent = 'Choose a room, then pick a table or machine.';
+  lobbySubtitle.textContent = 'Pick a floor';
+  if(arcadeHint) arcadeHint.textContent = 'Choose cards, table games, poker, slots, or classic arcade.';
   setBreadcrumb('');
 
-  currentRoom = ROOMS[0];
-  arcadeGrid.classList.add('casino-floor');
-  arcadeGrid.innerHTML = currentRoom.games.map(function(item, index){
-    return '<button class="floor-game station-' + item.id + '" type="button" data-game="' + item.id + '">' +
+  arcadeGrid.className = 'cabinet-grid casino-floor lounge-floor';
+  arcadeGrid.innerHTML = ROOMS.map(function(room){
+    return '<button class="zone-door zone-' + room.id + '" type="button" data-room="' + room.id + '">' +
+      '<span class="zone-icon">' + room.icon + '</span>' +
+      '<span class="zone-name">' + room.name + '</span>' +
+      '<span class="zone-desc">' + room.games.length + ' games</span>' +
+      '</button>';
+  }).join('');
+
+  arcadeGrid.querySelectorAll('[data-room]').forEach(function(card){
+    card.addEventListener('click', function(){ renderRoom(card.dataset.room); });
+  });
+}
+
+function renderRoom(roomId){
+  currentRoom = ROOMS.find(function(room){ return room.id === roomId; });
+  if(!currentRoom) return renderLounge();
+  gameGridWrap.classList.remove('hidden');
+  playArea.classList.add('hidden');
+  lobbySubtitle.textContent = currentRoom.name;
+  if(arcadeHint) arcadeHint.textContent = 'Pick a game.';
+  setBreadcrumb('<a href="#" id="bc-lobby">Arcade</a> / ' + currentRoom.name);
+  document.querySelector('#bc-lobby').addEventListener('click', function(event){
+    event.preventDefault();
+    renderLounge();
+  });
+
+  arcadeGrid.className = 'cabinet-grid casino-floor room-floor room-' + currentRoom.id;
+  arcadeGrid.innerHTML = currentRoom.games.map(function(item){
+    return '<button class="floor-game game-choice station-' + item.id + '" type="button" data-game="' + item.id + '">' +
       '<span class="table-label">' + item.table + '</span>' +
       '<span class="table-name">' + item.name + '</span>' +
       '<span class="play-tag">PLAY</span>' +
@@ -740,8 +1015,10 @@ function renderLounge(){
 }
 
 function launchGame(gameId){
-  var selected = currentRoom && currentRoom.games.find(function(item){ return item.id === gameId; });
+  const found = findArcadeGame(gameId);
+  const selected = found && found.game;
   if(!selected || !selected.available) return;
+  currentRoom = found.room;
   game = selected.id;
   arcadeGrid.classList.remove('casino-floor');
   gameGridWrap.classList.add('hidden');
@@ -755,14 +1032,22 @@ function launchGame(gameId){
   });
   document.querySelector('#bc-room').addEventListener('click', function(event){
     event.preventDefault();
-    renderLounge();
+    renderRoom(currentRoom.id);
   });
   newGame();
 }
 
+function backToCurrentRoom(){
+  if(currentRoom){
+    renderRoom(currentRoom.id);
+    return;
+  }
+  renderLounge();
+}
+
 document.querySelector('#backBtn').addEventListener('click', function(){
-  if(!playArea.classList.contains('hidden') && currentRoom){
-    renderLounge();
+  if(!playArea.classList.contains('hidden')){
+    backToCurrentRoom();
     return;
   }
   renderLounge();
@@ -781,6 +1066,6 @@ document.querySelector('#playAgain').addEventListener('click', function(){
   document.querySelector('#win').classList.add('hidden');
   newGame();
 });
-document.querySelector('#backToArcade').addEventListener('click', renderLounge);
+document.querySelector('#backToArcade').addEventListener('click', backToCurrentRoom);
 
 renderLounge();
