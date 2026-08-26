@@ -12,6 +12,7 @@ let undoStack = [];
 let state = {};
 let timerInt, seconds = 0;
 let snakeInt = null;
+let snakeGame = null;
 let frogInt = null;
 
 const $ = s => document.querySelector(s);
@@ -815,6 +816,10 @@ function stopLiveMiniGames(){
   clearInterval(frogInt);
   snakeInt = null;
   frogInt = null;
+  if(snakeGame){
+    snakeGame.destroy(true);
+    snakeGame = null;
+  }
   document.onkeydown = null;
 }
 
@@ -1092,234 +1097,37 @@ function renderRetroSlotMini(selected){
   });
 }
 
-function makeSnakeFood(size, snake){
-  let food;
-  do{
-    food = { x: Math.floor(Math.random() * size), y: Math.floor(Math.random() * size) };
-  }while(snake.some(function(part){ return part.x === food.x && part.y === food.y; }));
-  return food;
-}
-
-function ensureSnakeState(){
-  if(state.snake) return;
-  const size = 18;
-  const snake = [{x: 8, y: 9}, {x: 7, y: 9}, {x: 6, y: 9}, {x: 5, y: 9}];
-  state.snake = {
-    size: size,
-    snake: snake,
-    food: makeSnakeFood(size, snake),
-    dir: 'right',
-    nextDir: 'right',
-    score: 0,
-    hi: parseInt(localStorage.getItem('retroArcadeSnakeHi') || '0', 10),
-    over: false,
-    started: true,
-    message: 'Eat apples. Do not bite your tail.',
-  };
-}
-
-function setSnakeDir(dir){
-  ensureSnakeState();
-  const opposite = { up: 'down', down: 'up', left: 'right', right: 'left' };
-  if(opposite[dir] === state.snake.dir) return;
-  state.snake.nextDir = dir;
-}
-
-function tickSnake(){
-  ensureSnakeState();
-  const s = state.snake;
-  if(s.over){
-    drawSnakeGame();
-    return;
-  }
-  s.dir = s.nextDir;
-  const head = s.snake[0];
-  const delta = {
-    up: {x: 0, y: -1},
-    down: {x: 0, y: 1},
-    left: {x: -1, y: 0},
-    right: {x: 1, y: 0},
-  }[s.dir];
-  const next = { x: head.x + delta.x, y: head.y + delta.y };
-  const hitWall = next.x < 0 || next.y < 0 || next.x >= s.size || next.y >= s.size;
-  const hitSelf = s.snake.some(function(part){ return part.x === next.x && part.y === next.y; });
-  if(hitWall || hitSelf){
-    s.over = true;
-    s.message = hitWall ? 'You hit the brush line.' : 'You bit your tail.';
-    if(s.score > s.hi){
-      s.hi = s.score;
-      localStorage.setItem('retroArcadeSnakeHi', String(s.hi));
-    }
-    drawSnakeGame();
-    return;
-  }
-  s.snake.unshift(next);
-  if(next.x === s.food.x && next.y === s.food.y){
-    s.score += 10;
-    moves++;
-    updateHUD();
-    s.food = makeSnakeFood(s.size, s.snake);
-    s.message = 'Crunch. Keep going.';
-  }else{
-    s.snake.pop();
-  }
-  drawSnakeGame();
-}
-
-function drawSnakeTree(ctx, x, y, scale, tint){
-  ctx.fillStyle = tint || '#122f1c';
-  ctx.fillRect(x - 3 * scale, y - 36 * scale, 6 * scale, 36 * scale);
-  ctx.fillStyle = '#0f4324';
-  ctx.beginPath();
-  ctx.moveTo(x, y - 70 * scale);
-  ctx.lineTo(x - 28 * scale, y - 24 * scale);
-  ctx.lineTo(x + 28 * scale, y - 24 * scale);
-  ctx.closePath();
-  ctx.fill();
-  ctx.fillStyle = '#1c6b35';
-  ctx.beginPath();
-  ctx.moveTo(x, y - 92 * scale);
-  ctx.lineTo(x - 22 * scale, y - 48 * scale);
-  ctx.lineTo(x + 22 * scale, y - 48 * scale);
-  ctx.closePath();
-  ctx.fill();
-}
-
-function drawSnakeGame(){
-  const canvas = document.querySelector('#snakeCanvas');
-  if(!canvas || !canvas.getContext || !state.snake) return;
-  const ctx = canvas.getContext('2d');
-  const s = state.snake;
-  const w = canvas.width;
-  const h = canvas.height;
-  const hudH = 58;
-  const pad = 28;
-  const boardSize = Math.min(w - pad * 2, h - hudH - pad * 1.5);
-  const cell = Math.floor(boardSize / s.size);
-  const play = cell * s.size;
-  const ox = Math.floor((w - play) / 2);
-  const oy = hudH + Math.floor((h - hudH - play) / 2);
-
-  ctx.imageSmoothingEnabled = false;
-  const sky = ctx.createLinearGradient(0, 0, 0, h);
-  sky.addColorStop(0, '#07140f');
-  sky.addColorStop(.38, '#12351f');
-  sky.addColorStop(1, '#07100a');
-  ctx.fillStyle = sky;
-  ctx.fillRect(0, 0, w, h);
-
-  for(let i=0; i<9; i++){
-    drawSnakeTree(ctx, 30 + i * 72, oy + play + 38, .75 + (i % 3) * .13, i % 2 ? '#12331c' : '#0e2818');
-  }
-
-  ctx.fillStyle = 'rgba(5, 18, 8, .84)';
-  ctx.fillRect(0, 0, w, hudH);
-  ctx.fillStyle = '#bfffd0';
-  ctx.font = '18px monospace';
-  ctx.fillText('SNAKE  SCORE ' + s.score, 18, 25);
-  ctx.fillText('HI ' + s.hi, 18, 48);
-  ctx.fillStyle = '#ffd46f';
-  ctx.textAlign = 'right';
-  ctx.fillText(s.over ? 'GAME OVER' : 'FOREST RUN', w - 18, 25);
-  ctx.fillText(s.message, w - 18, 48);
-  ctx.textAlign = 'left';
-
-  ctx.fillStyle = 'rgba(9, 44, 18, .92)';
-  ctx.fillRect(ox - 10, oy - 10, play + 20, play + 20);
-  ctx.strokeStyle = 'rgba(191,255,208,.45)';
-  ctx.lineWidth = 3;
-  ctx.strokeRect(ox - 10, oy - 10, play + 20, play + 20);
-
-  for(let y=0; y<s.size; y++){
-    for(let x=0; x<s.size; x++){
-      ctx.fillStyle = (x + y) % 2 ? '#133f21' : '#174a26';
-      ctx.fillRect(ox + x * cell, oy + y * cell, cell, cell);
-      if((x * 7 + y * 5) % 19 === 0){
-        ctx.fillStyle = 'rgba(255,212,111,.12)';
-        ctx.fillRect(ox + x * cell + cell * .62, oy + y * cell + cell * .2, 3, 3);
-      }
-    }
-  }
-
-  const fx = ox + s.food.x * cell;
-  const fy = oy + s.food.y * cell;
-  ctx.fillStyle = '#ff4d5d';
-  ctx.beginPath();
-  ctx.arc(fx + cell / 2, fy + cell / 2, cell * .32, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = '#7cffb2';
-  ctx.fillRect(fx + cell * .5, fy + cell * .18, cell * .09, cell * .16);
-
-  for(let i=s.snake.length - 1; i>=0; i--){
-    const part = s.snake[i];
-    const px = ox + part.x * cell;
-    const py = oy + part.y * cell;
-    const isHead = i === 0;
-    const radius = isHead ? cell * .42 : cell * .36;
-    const grad = ctx.createRadialGradient(px + cell * .36, py + cell * .3, 2, px + cell / 2, py + cell / 2, radius);
-    grad.addColorStop(0, isHead ? '#f1ffd4' : '#b5ff91');
-    grad.addColorStop(.45, isHead ? '#64d85f' : '#40ad4a');
-    grad.addColorStop(1, '#125f2c');
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.arc(px + cell / 2, py + cell / 2, radius, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(2,16,6,.45)';
-    ctx.stroke();
-    if(isHead){
-      ctx.fillStyle = '#061006';
-      const eyeY = py + cell * .38;
-      ctx.fillRect(px + cell * .35, eyeY, 4, 4);
-      ctx.fillRect(px + cell * .61, eyeY, 4, 4);
-    }
-  }
-
-  if(s.over){
-    ctx.fillStyle = 'rgba(0,0,0,.68)';
-    ctx.fillRect(82, 230, w - 164, 110);
-    ctx.fillStyle = '#ffd46f';
-    ctx.font = '28px monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText('GAME OVER', w / 2, 276);
-    ctx.fillStyle = '#bfffd0';
-    ctx.font = '16px monospace';
-    ctx.fillText('Press Restart or New Game', w / 2, 310);
-    ctx.textAlign = 'left';
-  }
-}
-
 function renderSnakeMini(){
-  ensureSnakeState();
-  const s = state.snake;
-  board.innerHTML = '<section class="mini-game snake-mini forest-snake-game"><h2>Forest Snake</h2>' +
-    '<div class="snake-canvas-wrap"><canvas id="snakeCanvas" width="640" height="700"></canvas></div>' +
-    '<p class="mini-status">Arrow keys or WASD to slither. Eat apples and avoid the brush line.</p>' +
-    '<div class="snake-controls"><button data-dir="up">Up</button><button data-dir="left">Left</button><button data-dir="down">Down</button><button data-dir="right">Right</button></div>' +
+  board.innerHTML = '<section class="mini-game snake-mini forest-snake-game"><h2>Garden Snake</h2>' +
+    '<div class="snake-canvas-wrap"><div id="snakePhaser" class="snake-phaser-stage"></div></div>' +
+    '<p class="mini-status">Use arrow keys or WASD to guide the garden snake. Press R to restart.</p>' +
+    '<div class="snake-controls" aria-label="Snake controls"><button data-dir="up" aria-label="Up">↑</button><button data-dir="left" aria-label="Left">←</button><button data-dir="down" aria-label="Down">↓</button><button data-dir="right" aria-label="Right">→</button></div>' +
     '<div class="mini-actions"><button id="snakeRestart">Restart</button></div></section>';
+
+  if(!window.RetroArcadeSnake || !window.Phaser){
+    document.querySelector('#snakePhaser').innerHTML = '<div class="engine-missing">Phaser did not load. Check the network and refresh.</div>';
+    return;
+  }
+
+  snakeGame = window.RetroArcadeSnake.start({
+    parent: 'snakePhaser',
+    difficulty: difficulty,
+    onScore: function(){
+      moves++;
+      updateHUD();
+    },
+  });
+
   board.querySelectorAll('[data-dir]').forEach(function(button){
-    button.addEventListener('click', function(){ setSnakeDir(button.dataset.dir); });
+    button.addEventListener('click', function(){
+      if(snakeGame && snakeGame.input) snakeGame.input(button.dataset.dir);
+    });
   });
   document.querySelector('#snakeRestart').addEventListener('click', function(){
-    state.snake = null;
     moves = 0;
     updateHUD();
-    stopLiveMiniGames();
-    renderSnakeMini();
+    if(snakeGame && snakeGame.restart) snakeGame.restart();
   });
-  document.onkeydown = function(event){
-    if(game !== 'snake') return;
-    const key = event.key.toLowerCase();
-    const keys = { arrowup: 'up', arrowdown: 'down', arrowleft: 'left', arrowright: 'right', w: 'up', s: 'down', a: 'left', d: 'right' };
-    if(keys[key]){
-      event.preventDefault();
-      setSnakeDir(keys[key]);
-    }
-  };
-  drawSnakeGame();
-  if(!s.over && !snakeInt){
-    const speed = difficulty === 'hard' ? 105 : difficulty === 'easy' ? 170 : 135;
-    snakeInt = setInterval(tickSnake, speed);
-  }
 }
 function ensureFrogState(){
   if(state.frog) return;

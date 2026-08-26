@@ -760,26 +760,6 @@ body.deck-arcade .room-classics .floor-game::after {
   box-shadow: 0 0 22px rgba(103,199,255,.28), inset 0 0 0 2px rgba(103,199,255,.18);
 }
 
-.snake-grid {
-  width: min(420px, 88vw);
-  aspect-ratio: 1;
-  display: grid;
-  grid-template-columns: repeat(14, 1fr);
-  gap: 3px;
-  padding: 12px;
-  border-radius: 12px;
-  background: #070311;
-  box-shadow: inset 0 0 0 2px rgba(255,255,255,.12), 0 18px 42px rgba(0,0,0,.48);
-}
-
-.snake-cell {
-  border-radius: 3px;
-  background: rgba(255,255,255,.08);
-}
-
-.snake-cell.body { background: #75d8ff; }
-.snake-cell.head { background: #ffd46f; }
-.snake-cell.food { background: #ff5d9e; box-shadow: 0 0 10px rgba(255,93,158,.72); }
 
 .snake-controls button {
   min-width: 76px;
@@ -940,44 +920,71 @@ body.deck-arcade .room-classics .floor-game::after {
 }
 
 
-/* Forest Snake canvas game */
+/* Phaser Garden Snake game */
 .forest-snake-game {
-  min-height: 680px;
+  min-height: 760px;
   padding: 10px 0 28px;
 }
 
 .forest-snake-game h2 {
-  color: #bfffd0;
-  text-shadow: 0 0 16px rgba(124,255,178,.42), 0 3px 0 rgba(0,0,0,.8);
+  color: #d8ffb8;
+  text-shadow: 0 0 16px rgba(124,255,178,.34), 0 3px 0 rgba(0,0,0,.8);
 }
 
 .snake-canvas-wrap {
-  width: min(560px, 90vw);
-  padding: 14px;
+  width: min(980px, calc(100vw - 28px));
+  padding: clamp(8px, 1.5vw, 16px);
   border-radius: 18px;
-  background: linear-gradient(145deg, rgba(14,52,25,.96), rgba(5,13,7,.98));
-  box-shadow: 0 28px 54px rgba(0,0,0,.54), inset 0 0 0 2px rgba(191,255,208,.18), inset 0 -26px 48px rgba(0,0,0,.42);
+  background:
+    linear-gradient(145deg, rgba(40,72,35,.96), rgba(8,18,10,.98)),
+    radial-gradient(circle at 50% 0%, rgba(216,255,184,.12), transparent 58%);
+  box-shadow: 0 30px 72px rgba(0,0,0,.58), inset 0 0 0 2px rgba(191,255,208,.16), inset 0 -26px 48px rgba(0,0,0,.42);
 }
 
-#snakeCanvas {
+.snake-phaser-stage,
+#snakePhaser {
   width: 100%;
-  display: block;
-  aspect-ratio: 640 / 700;
+  aspect-ratio: 3 / 2;
+  min-height: 360px;
   border-radius: 14px;
-  background: #07140f;
-  image-rendering: pixelated;
-  box-shadow: inset 0 0 0 2px rgba(255,255,255,.12), inset 0 0 42px rgba(0,0,0,.75), 0 0 30px rgba(124,255,178,.12);
+  overflow: hidden;
+  background: #07140c;
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.1), inset 0 0 58px rgba(0,0,0,.68), 0 0 32px rgba(124,255,178,.12);
+}
+
+#snakePhaser canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+  border-radius: 14px;
+}
+
+.engine-missing {
+  min-height: 360px;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  color: #ffd46f;
+  font-family: 'Space Mono', monospace;
+  text-align: center;
 }
 
 .forest-snake-game .mini-status {
-  max-width: min(560px, 90vw);
-  color: #bfffd0;
+  max-width: min(760px, 90vw);
+  color: #d8ffb8;
+}
+
+.forest-snake-game .snake-controls {
+  margin-top: 12px;
 }
 
 .forest-snake-game .snake-controls button {
-  background: linear-gradient(180deg, #1d6332, #08210f);
+  min-width: 64px;
+  min-height: 46px;
+  background: linear-gradient(180deg, #2b7438, #08210f);
   border-color: rgba(191,255,208,.62);
   color: #e8ffe8;
+  font-size: 1.15rem;
   box-shadow: 0 8px 18px rgba(0,0,0,.3);
 }
 
