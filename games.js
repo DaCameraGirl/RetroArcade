@@ -12,6 +12,7 @@ let undoStack = [];
 let state = {};
 let timerInt, seconds = 0;
 let snakeInt = null;
+let frogInt = null;
 
 const $ = s => document.querySelector(s);
 const board = $('#board');
@@ -811,7 +812,10 @@ function startTimer(){
 
 function stopLiveMiniGames(){
   clearInterval(snakeInt);
+  clearInterval(frogInt);
   snakeInt = null;
+  frogInt = null;
+  document.onkeydown = null;
 }
 
 function applyDeck(){
@@ -1196,11 +1200,309 @@ function renderSnakeMini(){
   }
 }
 
+
+function ensureFrogState(){
+  if(state.frog) return;
+  const savedHi = parseInt(localStorage.getItem('retroArcadeFrogHi') || '0', 10);
+  state.frog = {
+    credits: 0,
+    mode: 'attract',
+    score: 0,
+    hi: savedHi,
+    lives: 3,
+    time: 60,
+    tick: 0,
+    frog: { col: 5, row: 12, x: 5.5, y: 12.5 },
+    homes: [false, false, false, false, false],
+    lanes: [
+      { row: 1, type: 'log', speed: .055, width: 2.4, items: [{x:0}, {x:4.5}, {x:8.8}] },
+      { row: 2, type: 'log', speed: -.045, width: 1.8, items: [{x:1.5}, {x:5.8}, {x:9.4}] },
+      { row: 3, type: 'log', speed: .065, width: 2.8, items: [{x:.8}, {x:6.2}] },
+      { row: 4, type: 'log', speed: -.052, width: 2.2, items: [{x:0}, {x:4.2}, {x:8.3}] },
+      { row: 5, type: 'log', speed: .04, width: 1.7, items: [{x:2.4}, {x:6.7}, {x:10.2}] },
+      { row: 8, type: 'car', speed: -.07, width: 1.15, items: [{x:1}, {x:4.6}, {x:8.2}] },
+      { row: 9, type: 'car', speed: .09, width: 1.3, items: [{x:.4}, {x:5.8}, {x:9.5}] },
+      { row: 10, type: 'car', speed: -.055, width: 1.8, items: [{x:2.2}, {x:7.3}] },
+      { row: 11, type: 'car', speed: .075, width: 1.05, items: [{x:0}, {x:3.2}, {x:6.4}, {x:9.6}] },
+    ],
+    message: 'INSERT COIN'
+  };
+}
+
+function resetFrogRun(frog){
+  frog.frog = { col: 5, row: 12, x: 5.5, y: 12.5 };
+  frog.time = 60;
+}
+
+function coinFrog(){
+  ensureFrogState();
+  state.frog.credits++;
+  state.frog.message = 'PRESS START';
+  renderFrogCrossing();
+}
+
+function startFrog(){
+  ensureFrogState();
+  const frog = state.frog;
+  if(frog.mode === 'playing') return;
+  if(frog.credits <= 0){
+    frog.message = 'INSERT COIN';
+    renderFrogCrossing();
+    return;
+  }
+  frog.credits--;
+  frog.mode = 'playing';
+  frog.score = 0;
+  frog.lives = 3;
+  frog.homes = [false, false, false, false, false];
+  frog.message = 'GO';
+  resetFrogRun(frog);
+  renderFrogCrossing();
+}
+
+function endFrogLife(reason){
+  const frog = state.frog;
+  frog.lives--;
+  frog.message = reason;
+  if(frog.lives <= 0){
+    frog.mode = 'gameover';
+    frog.message = frog.credits > 0 ? 'GAME OVER - PRESS START' : 'GAME OVER';
+    if(frog.score > frog.hi){
+      frog.hi = frog.score;
+      localStorage.setItem('retroArcadeFrogHi', String(frog.hi));
+    }
+    return;
+  }
+  resetFrogRun(frog);
+}
+
+function frogHop(dx, dy){
+  ensureFrogState();
+  const frog = state.frog;
+  if(frog.mode !== 'playing') return;
+  const nextCol = Math.max(0, Math.min(10, frog.frog.col + dx));
+  const nextRow = Math.max(0, Math.min(12, frog.frog.row + dy));
+  frog.frog.col = nextCol;
+  frog.frog.row = nextRow;
+  frog.frog.x = nextCol + .5;
+  frog.frog.y = nextRow + .5;
+  frog.score += dy < 0 ? 10 : 1;
+  moves++;
+  updateHUD();
+  checkFrogPosition();
+  drawFrogCrossing();
+}
+
+function wrapLaneItem(item, lane){
+  item.x += lane.speed;
+  if(lane.speed > 0 && item.x > 11.5) item.x = -lane.width - .5;
+  if(lane.speed < 0 && item.x < -lane.width - .5) item.x = 11.5;
+}
+
+function checkFrogPosition(){
+  const frog = state.frog;
+  if(frog.mode !== 'playing') return;
+  const row = frog.frog.row;
+  if(row === 0){
+    const homeCols = [1, 3, 5, 7, 9];
+    const home = homeCols.findIndex(function(col){ return Math.abs(frog.frog.x - (col + .5)) < .72; });
+    if(home < 0 || frog.homes[home]){
+      endFrogLife('MISSED HOME');
+      return;
+    }
+    frog.homes[home] = true;
+    frog.score += 100;
+    frog.message = 'FROG HOME';
+    if(frog.homes.every(Boolean)){
+      frog.mode = 'win';
+      frog.score += frog.lives * 250 + Math.max(0, Math.ceil(frog.time)) * 10;
+      frog.message = 'ALL FROGS HOME';
+      if(frog.score > frog.hi){
+        frog.hi = frog.score;
+        localStorage.setItem('retroArcadeFrogHi', String(frog.hi));
+      }
+      stopLiveMiniGames();
+      showWin();
+      return;
+    }
+    resetFrogRun(frog);
+    return;
+  }
+  const lane = frog.lanes.find(function(item){ return item.row === row; });
+  if(!lane) return;
+  if(lane.type === 'car'){
+    const hit = lane.items.some(function(item){ return frog.frog.x > item.x && frog.frog.x < item.x + lane.width; });
+    if(hit) endFrogLife('ROADKILL');
+    return;
+  }
+  if(lane.type === 'log'){
+    const ride = lane.items.find(function(item){ return frog.frog.x > item.x && frog.frog.x < item.x + lane.width; });
+    if(!ride){
+      endFrogLife('SPLASH');
+      return;
+    }
+  }
+}
+
+function tickFrog(){
+  ensureFrogState();
+  const frog = state.frog;
+  if(frog.mode === 'playing'){
+    frog.tick++;
+    frog.time -= .05;
+    frog.lanes.forEach(function(lane){ lane.items.forEach(function(item){ wrapLaneItem(item, lane); }); });
+    const lane = frog.lanes.find(function(item){ return item.row === frog.frog.row; });
+    if(lane && lane.type === 'log') frog.frog.x += lane.speed;
+    if(frog.frog.x < 0 || frog.frog.x > 11) endFrogLife('SPLASH');
+    if(frog.time <= 0) endFrogLife('TIME UP');
+    checkFrogPosition();
+  }
+  drawFrogCrossing();
+}
+
+function drawRoundedRect(ctx, x, y, w, h, r){
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.fill();
+}
+
+function drawFrogCrossing(){
+  const canvas = document.querySelector('#frogCanvas');
+  if(!canvas || !canvas.getContext) return;
+  const ctx = canvas.getContext('2d');
+  const frog = state.frog;
+  const w = canvas.width;
+  const h = canvas.height;
+  const top = 44;
+  const cols = 11;
+  const rows = 13;
+  const cell = Math.floor(Math.min(w / cols, (h - top) / rows));
+  const ox = Math.floor((w - cols * cell) / 2);
+  const oy = top;
+  ctx.imageSmoothingEnabled = false;
+  ctx.fillStyle = '#061016';
+  ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = '#0b0612';
+  ctx.fillRect(0, 0, w, top);
+  ctx.fillStyle = '#75d8ff';
+  ctx.font = '16px monospace';
+  ctx.fillText('1UP ' + frog.score, 14, 25);
+  ctx.fillText('HI ' + frog.hi, 166, 25);
+  ctx.fillText('CREDIT ' + frog.credits, 332, 25);
+  ctx.fillStyle = '#ffd46f';
+  ctx.fillText('TIME ' + Math.max(0, Math.ceil(frog.time)), 474, 25);
+
+  for(let row=0; row<rows; row++){
+    let fill = '#102c18';
+    if(row === 0) fill = '#173513';
+    if(row >= 1 && row <= 5) fill = '#08345b';
+    if(row === 6 || row === 7 || row === 12) fill = '#20391e';
+    if(row >= 8 && row <= 11) fill = '#1b1c25';
+    ctx.fillStyle = fill;
+    ctx.fillRect(ox, oy + row * cell, cols * cell, cell);
+    if(row >= 8 && row <= 11){
+      ctx.strokeStyle = 'rgba(255,255,255,.14)';
+      ctx.setLineDash([12, 10]);
+      ctx.beginPath();
+      ctx.moveTo(ox, oy + row * cell + cell / 2);
+      ctx.lineTo(ox + cols * cell, oy + row * cell + cell / 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  }
+
+  const homeCols = [1, 3, 5, 7, 9];
+  homeCols.forEach(function(col, idx){
+    ctx.fillStyle = frog.homes[idx] ? '#7cffb2' : '#050b07';
+    drawRoundedRect(ctx, ox + col * cell + 5, oy + 5, cell - 10, cell - 10, 8);
+  });
+
+  frog.lanes.forEach(function(lane){
+    lane.items.forEach(function(item){
+      const x = ox + item.x * cell;
+      const y = oy + lane.row * cell + 8;
+      const ww = lane.width * cell;
+      if(lane.type === 'log'){
+        ctx.fillStyle = '#8b5a2b';
+        drawRoundedRect(ctx, x, y, ww, cell - 16, 7);
+        ctx.fillStyle = 'rgba(255,212,111,.35)';
+        ctx.fillRect(x + 12, y + 8, ww - 24, 4);
+      }else{
+        ctx.fillStyle = lane.speed > 0 ? '#ff5d9e' : '#ffd46f';
+        drawRoundedRect(ctx, x, y, ww, cell - 16, 6);
+        ctx.fillStyle = '#061016';
+        ctx.fillRect(x + 8, y + 6, 14, 8);
+        ctx.fillRect(x + ww - 22, y + 6, 14, 8);
+      }
+    });
+  });
+
+  if(frog.mode === 'playing'){
+    const fx = ox + frog.frog.x * cell;
+    const fy = oy + frog.frog.y * cell;
+    ctx.fillStyle = '#7cffb2';
+    drawRoundedRect(ctx, fx - cell * .34, fy - cell * .32, cell * .68, cell * .64, 8);
+    ctx.fillStyle = '#061016';
+    ctx.fillRect(fx - 9, fy - 8, 5, 5);
+    ctx.fillRect(fx + 4, fy - 8, 5, 5);
+  }
+
+  ctx.fillStyle = '#ffd46f';
+  ctx.font = '15px monospace';
+  ctx.fillText('LIVES ' + frog.lives, 14, h - 14);
+  if(frog.mode !== 'playing' || frog.message !== 'GO'){
+    const blink = Math.floor(Date.now() / 420) % 2 === 0;
+    if(frog.mode !== 'attract' || blink){
+      ctx.fillStyle = 'rgba(0,0,0,.72)';
+      ctx.fillRect(120, 260, 400, 64);
+      ctx.fillStyle = frog.mode === 'gameover' ? '#ff5d9e' : '#ffd46f';
+      ctx.font = '22px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(frog.message, w / 2, 300);
+      ctx.textAlign = 'left';
+    }
+  }
+}
+
+function renderFrogCrossing(){
+  ensureFrogState();
+  const frog = state.frog;
+  board.innerHTML = '<section class="mini-game frog-cabinet-game">' +
+    '<div class="cabinet-3d frog-cabinet"><div class="cabinet-side left"></div><div class="cabinet-side right"></div>' +
+    '<div class="cabinet-marquee">FROG CROSSING</div>' +
+    '<div class="cabinet-screen"><canvas id="frogCanvas" width="640" height="760"></canvas></div>' +
+    '<div class="cabinet-controls"><button id="frogCoin">COIN</button><button id="frogStart">START</button><span>' + frog.message + '</span></div>' +
+    '</div><p class="mini-status">5 coin, 1 start, arrows/WASD hop. Get every frog home.</p></section>';
+  document.querySelector('#frogCoin').addEventListener('click', coinFrog);
+  document.querySelector('#frogStart').addEventListener('click', startFrog);
+  document.onkeydown = function(event){
+    if(game !== 'frog-crossing') return;
+    const key = event.key.toLowerCase();
+    if(key === '5') { event.preventDefault(); coinFrog(); return; }
+    if(key === '1') { event.preventDefault(); startFrog(); return; }
+    const hops = { arrowup: [0,-1], w: [0,-1], arrowdown: [0,1], s: [0,1], arrowleft: [-1,0], a: [-1,0], arrowright: [1,0], d: [1,0] };
+    if(hops[key]){
+      event.preventDefault();
+      frogHop(hops[key][0], hops[key][1]);
+    }
+  };
+  drawFrogCrossing();
+  if(!frogInt) frogInt = setInterval(tickFrog, 50);
+}
+
 function renderQuickGame(){
   const found = findArcadeGame(game);
   if(!found) return;
   const selected = found.game;
-  if(selected.kind !== 'snake') stopLiveMiniGames();
+  if(selected.kind !== 'snake' && selected.kind !== 'frog') stopLiveMiniGames();
   if(selected.kind === 'poker') return renderPokerMini(selected);
   if(selected.kind === 'blackjack') return renderBlackjackMini(selected);
   if(selected.kind === 'highcard') return renderHighCardMini(selected);
@@ -1211,6 +1513,7 @@ function renderQuickGame(){
   if(selected.kind === 'retro-slot') return renderRetroSlotMini(selected);
   if(selected.kind === 'slots') return renderSlotMini(selected);
   if(selected.kind === 'snake') return renderSnakeMini(selected);
+  if(selected.kind === 'frog') return renderFrogCrossing(selected);
   renderArcadeMini(selected);
 }
 const ROOMS = [
@@ -1290,7 +1593,7 @@ const ROOMS = [
       { id: 'jungle-pit-run', name: 'Jungle Pit Run', table: 'Cabinet 7', kind: 'arcade', mode: 'jungle', prompt: 'Swing over pits and grab treasure.', available: true },
       { id: 'space-blaster', name: 'Space Blaster', table: 'Cabinet 8', kind: 'arcade', mode: 'space', prompt: 'Blast invaders before they reach you.', available: true },
       { id: 'brick-wall', name: 'Brick Wall', table: 'Cabinet 9', kind: 'arcade', mode: 'brick', prompt: 'Break the wall and keep the ball alive.', available: true },
-      { id: 'frog-crossing', name: 'Frog Crossing', table: 'Cabinet 10', kind: 'arcade', mode: 'frog', prompt: 'Hop lanes and reach the safe side.', available: true },
+      { id: 'frog-crossing', name: 'Frog Crossing', table: 'Cabinet 10', kind: 'frog', mode: 'frog', prompt: 'Hop lanes and reach the safe side.', available: true },
       { id: 'moon-patrol', name: 'Moon Patrol', table: 'Cabinet 11', kind: 'arcade', mode: 'moon', prompt: 'Jump craters and patrol the moon road.', available: true },
       { id: 'snake', name: 'Snake', table: 'Cabinet 12', kind: 'snake', mode: 'snake', prompt: 'Eat pixels and dodge your own tail.', available: true },
     ],

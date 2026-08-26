@@ -22,7 +22,7 @@
 | **Slot Machines** | Classic 3-Reel, Lucky Sevens, Fruit Spin, Diamond Deluxe, Treasure Wheel, Arcade Jackpot, Ocean Pearls, Forest Fortune, RetroArcade Reels |
 | **Classic Arcade** | Maze Chase, Barrel Climb, Tunnel Digger, Pixel Plumber, Bug Trail, Pyramid Hopper, Jungle Pit Run, Space Blaster, Brick Wall, Frog Crossing, Moon Patrol, Snake |
 
-Klondike, Tri-Peaks, FreeCell, and Pyramid use card-table rules. Sic Bo, RetroArcade Reels, and Snake have direct player choices; the remaining casino and cabinet entries are lightweight mini-game loops.
+Klondike, Tri-Peaks, FreeCell, and Pyramid use card-table rules. Frog Crossing is a canvas arcade cabinet with coin/start controls, traffic, logs, lives, homes, score, and local hi-score. Sic Bo, RetroArcade Reels, and Snake have direct player choices; the remaining casino and cabinet entries are lightweight mini-game loops.
 
 ---
 

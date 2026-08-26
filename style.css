@@ -792,3 +792,136 @@ body.deck-arcade .room-classics .floor-game::after {
   .pyramid-row { gap: 5px; }
   .retro-reel { min-width: 72px; }
 }
+
+
+/* Frog Crossing cabinet */
+.frog-cabinet-game {
+  min-height: 620px;
+  padding: 10px 0 24px;
+}
+
+.cabinet-3d {
+  width: min(560px, 92vw);
+  position: relative;
+  perspective: 900px;
+  transform-style: preserve-3d;
+  margin: 0 auto;
+  filter: drop-shadow(0 34px 42px rgba(0,0,0,.58));
+}
+
+.frog-cabinet {
+  padding: 20px 20px 24px;
+  border-radius: 22px 22px 28px 28px;
+  background: linear-gradient(145deg, #152a25, #080611 70%);
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.12), inset 0 -22px 42px rgba(0,0,0,.62);
+}
+
+.cabinet-side {
+  position: absolute;
+  top: 78px;
+  bottom: 56px;
+  width: 76px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #1f5a3f, #10101b 74%);
+  opacity: .88;
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+
+.cabinet-side.left {
+  left: -50px;
+  transform: rotateY(72deg) translateZ(-12px);
+}
+
+.cabinet-side.right {
+  right: -50px;
+  transform: rotateY(-72deg) translateZ(-12px);
+}
+
+.cabinet-marquee {
+  min-height: 58px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 12px;
+  border-radius: 12px 12px 8px 8px;
+  background: linear-gradient(90deg, #08130c, #173a29 45%, #08130c);
+  color: #ffd46f;
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(.72rem, 2.4vw, 1.05rem);
+  text-shadow: 0 0 10px currentColor, 0 3px 0 rgba(0,0,0,.8);
+  transform: rotateX(30deg) translateZ(24px);
+  box-shadow: inset 0 0 0 2px rgba(255,212,111,.26), 0 0 30px rgba(124,255,178,.22);
+}
+
+.cabinet-screen {
+  position: relative;
+  padding: 16px;
+  border-radius: 22px;
+  background: #050509;
+  transform: rotateX(10deg) translateZ(18px);
+  box-shadow: 0 0 40px rgba(0,255,255,.18), inset 0 0 60px rgba(0,0,0,.9), inset 0 0 0 3px rgba(255,255,255,.1);
+  overflow: hidden;
+}
+
+.cabinet-screen::after {
+  content: "";
+  position: absolute;
+  inset: 16px;
+  pointer-events: none;
+  border-radius: 14px;
+  background: repeating-linear-gradient(transparent, transparent 3px, rgba(255,255,255,.045) 4px), radial-gradient(ellipse at 50% 30%, rgba(255,255,255,.12), transparent 42%);
+  mix-blend-mode: screen;
+}
+
+#frogCanvas {
+  width: 100%;
+  display: block;
+  aspect-ratio: 640 / 760;
+  border-radius: 14px;
+  background: #061016;
+  image-rendering: pixelated;
+}
+
+.cabinet-controls {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  gap: 10px;
+  align-items: center;
+  margin-top: 18px;
+  padding: 14px;
+  border-radius: 14px 14px 20px 20px;
+  background: linear-gradient(180deg, #17101c, #08050a);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.1);
+}
+
+.cabinet-controls button {
+  min-width: 86px;
+  min-height: 42px;
+  border: 1px solid rgba(255,212,111,.7);
+  border-radius: 999px;
+  background: radial-gradient(circle at 35% 28%, #fff2aa, #d7285e 42%, #62051e 100%);
+  color: #fff;
+  font-family: 'Press Start 2P', monospace;
+  font-size: .55rem;
+  cursor: pointer;
+  box-shadow: 0 8px 0 #24000a, 0 14px 18px rgba(0,0,0,.42);
+}
+
+.cabinet-controls button:active {
+  transform: translateY(5px);
+  box-shadow: 0 3px 0 #24000a, 0 8px 12px rgba(0,0,0,.38);
+}
+
+.cabinet-controls span {
+  color: #75d8ff;
+  font-size: .78rem;
+  font-weight: 700;
+  text-align: right;
+}
+
+@media(max-width:600px){
+  .frog-cabinet { padding: 14px 12px 18px; }
+  .cabinet-side { display: none; }
+  .cabinet-controls { grid-template-columns: 1fr 1fr; }
+  .cabinet-controls span { grid-column: 1 / -1; text-align: center; }
+}
