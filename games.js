@@ -13,6 +13,7 @@ let state = {};
 let timerInt, seconds = 0;
 let snakeInt = null;
 let snakeGame = null;
+let slotGame = null;
 let frogInt = null;
 
 const $ = s => document.querySelector(s);
@@ -820,6 +821,10 @@ function stopLiveMiniGames(){
     snakeGame.destroy(true);
     snakeGame = null;
   }
+  if(slotGame){
+    slotGame.destroy();
+    slotGame = null;
+  }
   document.onkeydown = null;
 }
 
@@ -1035,65 +1040,19 @@ function renderComingSoon(selected){
     '<p class="mini-status">This cabinet is being rebuilt as a real game.</p></section>';
 }
 
-function ensureRetroSlotState(selected){
-  if(state.retroSlot) return;
-  const symbols = selected.symbols || ['PIXEL','JOY','CRT','7','CHERRY','COIN'];
-  state.retroSlot = {
-    symbols: symbols,
-    reels: Array.from({length: 5}, function(){ return symbols[Math.floor(Math.random() * symbols.length)]; }),
-    holds: [false, false, false, false, false],
-    bonusSpins: 0,
-    result: 'Hold any reels, then spin.'
-  };
-}
-
-function scoreRetroSlot(slot){
-  const counts = {};
-  slot.reels.forEach(function(symbol){ counts[symbol] = (counts[symbol] || 0) + 1; });
-  const best = Math.max.apply(null, Object.values(counts));
-  const retroBonus = slot.reels.includes('JOY') && slot.reels.includes('PIXEL') && slot.reels.includes('CRT');
-  if(best >= 5) return 'Mega jackpot';
-  if(best >= 4){
-    slot.bonusSpins = Math.max(slot.bonusSpins, 3);
-    return 'Hold & Spin bonus armed';
-  }
-  if(best >= 3) return 'Line hit';
-  if(retroBonus) return 'Retro bonus';
-  return 'No win';
-}
-
 function renderRetroSlotMini(selected){
-  ensureRetroSlotState(selected);
-  const slot = state.retroSlot;
-  board.innerHTML = '<section class="mini-game slot-mini retro-slot-mini"><h2>' + selected.name + '</h2>' +
-    '<div class="slot-reels retro-reels">' + slot.reels.map(function(r, i){ return '<button class="retro-reel ' + (slot.holds[i] ? 'held' : '') + '" data-reel="' + i + '"><span>' + r + '</span><small>' + (slot.holds[i] ? 'HELD' : 'HOLD') + '</small></button>'; }).join('') + '</div>' +
-    '<p class="mini-status">' + slot.result + (slot.bonusSpins ? ' | Bonus spins ' + slot.bonusSpins : '') + '</p>' +
-    '<div class="mini-actions"><button id="miniSpin">Spin</button><button id="clearHolds">Clear holds</button></div></section>';
-  board.querySelectorAll('[data-reel]').forEach(function(button){
-    button.addEventListener('click', function(){
-      const idx = parseInt(button.dataset.reel, 10);
-      slot.holds[idx] = !slot.holds[idx];
-      renderRetroSlotMini(selected);
-    });
-  });
-  document.querySelector('#clearHolds').addEventListener('click', function(){
-    slot.holds = [false, false, false, false, false];
-    slot.result = 'Holds cleared.';
-    renderRetroSlotMini(selected);
-  });
-  document.querySelector('#miniSpin').addEventListener('click', function(){
-    slot.reels = slot.reels.map(function(symbol, i){
-      if(slot.holds[i]) return symbol;
-      return slot.symbols[Math.floor(Math.random() * slot.symbols.length)];
-    });
-    if(slot.bonusSpins > 0){
-      slot.bonusSpins--;
-      slot.holds = slot.reels.map(function(symbol){ return symbol === '7' || symbol === 'JOY'; });
+  board.innerHTML = '<div id="retroSlotMount"></div>';
+  if(!window.RetroArcadeSlots){
+    board.innerHTML = '<section class="mini-game coming-soon-game"><h2>' + selected.name + '</h2><p class="mini-status">Slot engine did not load. Refresh and try again.</p></section>';
+    return;
+  }
+  slotGame = window.RetroArcadeSlots.mount({
+    parent: 'retroSlotMount',
+    selected: selected,
+    onSpin: function(){
+      moves++;
+      updateHUD();
     }
-    slot.result = scoreRetroSlot(slot);
-    moves++;
-    updateHUD();
-    renderRetroSlotMini(selected);
   });
 }
 

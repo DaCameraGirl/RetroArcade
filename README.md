@@ -22,7 +22,7 @@
 | **Slot Machines** | RetroArcade Reels |
 | **Classic Arcade** | Frog Crossing, Snake |
 
-Klondike, Tri-Peaks, FreeCell, and Pyramid use card-table rules. Frog Crossing is a canvas arcade cabinet with coin/start controls, traffic, logs, lives, homes, score, and local hi-score. Sic Bo and RetroArcade Reels have direct player choices. Snake is now a dedicated Phaser 3/WebGL game module with a garden scene, sprite-based snake animation, collision scenery, particles, camera follow, score, and local hi-score. Placeholder mini-game loops are no longer listed as playable games.
+Klondike, Tri-Peaks, FreeCell, and Pyramid use card-table rules. Frog Crossing is a canvas arcade cabinet with coin/start controls, traffic, logs, lives, homes, score, and local hi-score. Sic Bo has direct dice-bet choices. RetroArcade Reels is now a dedicated slot-machine module with a physical cabinet, animated reel strips, Arcade Chips balance, bet controls, hold buttons, paytable, win lights, and coin feedback. Snake is a dedicated Phaser 3/WebGL game module with a garden scene, sprite-based snake animation, collision scenery, particles, camera follow, score, and local hi-score. Placeholder mini-game loops are no longer listed as playable games.
 
 ---
 
@@ -43,6 +43,7 @@ cd RetroArcade
 
 - **JavaScript** – Game logic & interactions
 - **Phaser 3** – 2D/2.5D arcade runtime for Snake and future cabinet games
+- **Dedicated game modules** – Slots and Snake now mount inside the shared RetroArcade shell
 - **CSS** – Retro arcade styling
 - **HTML** – Clean, semantic markup
 
