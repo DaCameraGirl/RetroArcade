@@ -2983,6 +2983,17 @@ body.deck-arcade #play-area.room-poker .controls {
 }
 
 
+
+.draw-btn.danger {
+  color: #fff2e2;
+  border-color: rgba(255, 126, 91, .48);
+  background: linear-gradient(180deg, #6f241d, #2c0d0a);
+}
+
+.draw-btn.danger:hover {
+  border-color: rgba(255, 170, 128, .75);
+  box-shadow: 0 0 18px rgba(255, 118, 78, .26), inset 0 1px 0 rgba(255,255,255,.12);
+}
 .draw-btn:disabled {
   opacity: .5;
   cursor: wait;

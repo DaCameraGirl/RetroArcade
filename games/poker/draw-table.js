@@ -13,8 +13,8 @@
   const SEAT_AVATARS = ['YOU','MK','RO','CH','DE','VC'];
   const BET_STEP = 25;
   const PLAYER_TURN_SECONDS = 10;
-  const BOT_ACTION_DELAY = 1200;
-  const BOT_REVEAL_DELAY = 650;
+  const BOT_ACTION_DELAY = 2600;
+  const BOT_REVEAL_DELAY = 1400;
 
   let mounted = null;
 
@@ -75,6 +75,8 @@
       this.currentPlayer = 0;
       this.lastResult = '';
       this.lastWinner = null;
+      this.highBet = 0;
+      this.lastRaiseBy = null;
       for(let i = 1; i < this.maxSeats; i++) this.joinSeat(i);
     }
 
@@ -108,6 +110,8 @@
       this.pot = 0;
       this.lastResult = '';
       this.lastWinner = null;
+      this.highBet = 0;
+      this.lastRaiseBy = null;
       this.activeSeats().forEach(function(index){
         const seat = this.seats[index];
         seat.hand = [];
@@ -166,6 +170,8 @@
       player.chips -= amount;
       player.currentBet = amount;
       player.lastAction = amount ? 'Bet ' + formatChips(amount) : 'Checks';
+      this.highBet = amount;
+      this.lastRaiseBy = amount ? 0 : null;
       this.pot += amount;
       this.phase = 'bot-betting';
       this.lastResult = 'Dealer is moving action around the table.';
@@ -173,31 +179,74 @@
       return amount;
     }
 
-    botBet(index, playerAmount){
+    botBet(index){
       if(this.phase !== 'bot-betting') return '';
       const seat = this.seats[index];
       if(!seat || seat.folded) return '';
       const ev = evaluateHand(seat.hand);
-      let botBet = 0;
-      let action = 'Checks';
-      if(playerAmount > 0){
-        const shouldCall = ev.rankValue >= 1 || Math.random() > 0.45;
-        if(shouldCall){
-          botBet = Math.min(seat.chips, playerAmount);
-          action = 'Calls ' + formatChips(botBet);
-        }else{
-          seat.folded = true;
-          action = 'Folds';
-        }
-      }else if(ev.rankValue >= 2){
-        botBet = Math.min(seat.chips, 25 + Math.floor(Math.random() * 3) * 25);
-        action = 'Bets ' + formatChips(botBet);
+      const toCall = Math.max(0, this.highBet - seat.currentBet);
+      let action = toCall ? 'Calls ' + formatChips(toCall) : 'Checks';
+      const hasMadeHand = ev.rankValue >= 1;
+      const hasStrongHand = ev.rankValue >= 2;
+      const hasMonster = ev.rankValue >= 3;
+      const canRaise = seat.chips > toCall + BET_STEP;
+      const wantsRaise = canRaise && (hasMonster || (hasStrongHand && Math.random() < 0.7) || (hasMadeHand && Math.random() < 0.28) || Math.random() < 0.08);
+
+      if(toCall > 0 && !hasMadeHand && Math.random() < 0.55){
+        seat.folded = true;
+        seat.lastAction = 'Folds';
+        return 'Folds';
       }
-      seat.currentBet = botBet;
-      seat.chips -= botBet;
+
+      if(wantsRaise){
+        const raiseStep = BET_STEP * (1 + Math.floor(Math.random() * 2));
+        const totalBet = Math.min(seat.currentBet + toCall + raiseStep, seat.currentBet + seat.chips);
+        const added = totalBet - seat.currentBet;
+        seat.chips -= added;
+        seat.currentBet = totalBet;
+        this.pot += added;
+        this.highBet = totalBet;
+        this.lastRaiseBy = index;
+        action = toCall ? 'Raises to ' + formatChips(totalBet) : 'Bets ' + formatChips(totalBet);
+      }else if(toCall > 0){
+        const added = Math.min(toCall, seat.chips);
+        seat.chips -= added;
+        seat.currentBet += added;
+        this.pot += added;
+        action = 'Calls ' + formatChips(added);
+      }else if(hasStrongHand && Math.random() < 0.4){
+        const openBet = Math.min(seat.chips, BET_STEP * (1 + Math.floor(Math.random() * 3)));
+        seat.chips -= openBet;
+        seat.currentBet = openBet;
+        this.pot += openBet;
+        this.highBet = openBet;
+        this.lastRaiseBy = index;
+        action = 'Bets ' + formatChips(openBet);
+      }
+
       seat.lastAction = action;
-      this.pot += botBet;
       return action;
+    }
+
+    playerCallRaise(){
+      if(this.phase !== 'player-response') return 0;
+      const player = this.seats[0];
+      const amount = Math.max(0, Math.min(this.highBet - player.currentBet, player.chips));
+      player.chips -= amount;
+      player.currentBet += amount;
+      player.lastAction = 'Calls ' + formatChips(amount);
+      this.pot += amount;
+      this.phase = 'showdown-pending';
+      saveBank(player.chips);
+      return amount;
+    }
+
+    playerFoldToRaise(){
+      if(this.phase !== 'player-response') return;
+      const player = this.seats[0];
+      player.folded = true;
+      player.lastAction = 'Folds';
+      this.phase = 'showdown-pending';
     }
 
     showdown(){
@@ -223,6 +272,8 @@
       this.lastResult = '';
       this.lastWinner = null;
       this.currentPlayer = 0;
+      this.highBet = 0;
+      this.lastRaiseBy = null;
     }
   }
 
@@ -295,6 +346,15 @@
     if(!mounted) return;
     const game = mounted.game;
     if(!mounted.botQueue.length){
+      if(game.highBet > game.seats[0].currentBet && !game.seats[0].folded){
+        game.phase = 'player-response';
+        game.currentPlayer = 0;
+        const owed = game.highBet - game.seats[0].currentBet;
+        const raiser = game.lastRaiseBy !== null && game.seats[game.lastRaiseBy] ? game.seats[game.lastRaiseBy].name : 'The table';
+        game.lastResult = raiser + ' raised. Call ' + formatChips(owed) + ' or fold.';
+        render();
+        return;
+      }
       game.currentPlayer = -1;
       game.lastResult = 'Dealer reveals the hands.';
       render();
@@ -314,7 +374,7 @@
     render();
     queueAction(function(){
       if(!mounted || game.phase !== 'bot-betting') return;
-      const action = game.botBet(index, mounted.playerBetAmount);
+      const action = game.botBet(index);
       game.lastResult = seat.name + ' ' + action.toLowerCase() + '.';
       render();
       queueAction(advanceBotQueue, BOT_REVEAL_DELAY);
@@ -337,14 +397,17 @@
     const status = mounted.message || (game.phase === 'idle' ? 'Deal a hand. Ante is 10 Arcade Chips.' :
       game.phase === 'draw' ? (selected.size ? selected.size + ' selected to discard.' : 'Select cards to discard or stand pat.') :
       game.phase === 'bet' ? 'Your turn. Bet or check.' :
-      game.phase === 'bot-betting' ? game.lastResult : game.lastResult);
+      game.phase === 'bot-betting' ? game.lastResult :
+      game.phase === 'player-response' ? game.lastResult : game.lastResult);
     const mainLabel = game.phase === 'idle' ? 'Deal Hand' :
       game.phase === 'draw' ? (selected.size ? 'Draw ' + selected.size : 'Stand Pat') :
       game.phase === 'bet' ? 'Bet ' + formatChips(mounted.uiBet) :
+      game.phase === 'player-response' ? 'Call ' + formatChips(Math.max(0, game.highBet - player.currentBet)) :
       game.phase === 'bot-betting' ? 'Action...' : 'Next Hand';
     const mainDisabled = game.phase === 'bot-betting' ? ' disabled' : '';
     const secondary = game.phase === 'draw' ? '<button type="button" class="draw-btn" id="drawKeep">Keep All</button>' :
-      game.phase === 'bet' ? '<button type="button" class="draw-btn" id="drawCheck">Check</button>' : '';
+      game.phase === 'bet' ? '<button type="button" class="draw-btn" id="drawCheck">Check</button>' :
+      game.phase === 'player-response' ? '<button type="button" class="draw-btn danger" id="drawFold">Fold</button>' : '';
     const betControls = game.phase === 'bet' ? '<div class="draw-bet-controls"><button type="button" id="drawBetDown">-</button><span>' + formatChips(mounted.uiBet) + '</span><button type="button" id="drawBetUp">+</button></div>' : '';
     mounted.parent.innerHTML = '<section class="draw-poker-game" aria-label="5-card draw poker table">' +
       '<div class="draw-topbar"><strong>Poker Room - Table 1</strong><span>5-Card Draw</span><span>Arcade Chips <b>' + formatChips(player.chips) + '</b></span></div>' +
@@ -401,6 +464,11 @@
         startPlayerTimer();
       }else if(game.phase === 'bet'){
         startBotSequence(mounted.uiBet);
+      }else if(game.phase === 'player-response'){
+        game.playerCallRaise();
+        game.showdown();
+        if(typeof mounted.onHandComplete === 'function') mounted.onHandComplete({ message: game.lastResult });
+        render();
       }else if(game.phase === 'showdown'){
         clearActionTimers();
         game.resetHand();
@@ -419,6 +487,14 @@
     if(check) check.addEventListener('click', function(){
       mounted.message = '';
       startBotSequence(0);
+    });
+    const fold = root.querySelector('#drawFold');
+    if(fold) fold.addEventListener('click', function(){
+      mounted.message = '';
+      mounted.game.playerFoldToRaise();
+      mounted.game.showdown();
+      if(typeof mounted.onHandComplete === 'function') mounted.onHandComplete({ message: mounted.game.lastResult });
+      render();
     });
     const up = root.querySelector('#drawBetUp');
     if(up) up.addEventListener('click', function(){ mounted.uiBet = Math.min(mounted.game.seats[0].chips, mounted.uiBet + BET_STEP); render(); });
