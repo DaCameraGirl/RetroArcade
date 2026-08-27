@@ -1306,7 +1306,7 @@ function drawFrogCrossing(){
         ctx.fillStyle = 'rgba(255,212,111,.35)';
         ctx.fillRect(x + 12, y + 8, ww - 24, 4);
       }else{
-        ctx.fillStyle = lane.speed > 0 ? '#ff5d9e' : '#ffd46f';
+        ctx.fillStyle = lane.speed > 0 ? '#e33f32' : '#ffd46f';
         drawRoundedRect(ctx, x, y, ww, cell - 16, 6);
         ctx.fillStyle = '#061016';
         ctx.fillRect(x + 8, y + 6, 14, 8);
@@ -1333,7 +1333,7 @@ function drawFrogCrossing(){
     if(frog.mode !== 'attract' || blink){
       ctx.fillStyle = 'rgba(0,0,0,.72)';
       ctx.fillRect(120, 260, 400, 64);
-      ctx.fillStyle = frog.mode === 'gameover' ? '#ff5d9e' : '#ffd46f';
+      ctx.fillStyle = frog.mode === 'gameover' ? '#e33f32' : '#ffd46f';
       ctx.font = '22px monospace';
       ctx.textAlign = 'center';
       ctx.fillText(frog.message, w / 2, 300);
