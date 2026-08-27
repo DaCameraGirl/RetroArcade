@@ -13,13 +13,14 @@
 
   let mounted = null;
   let timers = [];
+  let cardUid = 0;
 
   function freshDeck(){
     const deck = [];
     for(let shoe = 0; shoe < 4; shoe++){
       SUITS.forEach(function(suit){
         RANKS.forEach(function(rank, idx){
-          deck.push({ rank: rank, suit: suit.mark, suitName: suit.name, color: suit.color, val: idx + 1 });
+          deck.push({ uid: ++cardUid, rank: rank, suit: suit.mark, suitName: suit.name, color: suit.color, val: idx + 1 });
         });
       });
     }
@@ -77,11 +78,16 @@
     timers = [];
   }
 
-  function cardHtml(card, hidden, index){
+  function markFresh(state, cards){
+    state.freshCards = cards.map(function(card){ return card.uid; });
+  }
+
+  function cardHtml(card, hidden, index, fresh){
+    const freshClass = fresh ? ' deal-new' : '';
     if(hidden){
-      return '<div class="bj-card bj-card-back" style="--i:' + index + '"><div class="bj-card-back-inner">RA</div></div>';
+      return '<div class="bj-card bj-card-back' + freshClass + '" style="--i:' + index + '"><div class="bj-card-back-inner">RA</div></div>';
     }
-    return '<div class="bj-card ' + (card.color === 'red' ? 'red' : 'black') + '" style="--i:' + index + '">' +
+    return '<div class="bj-card ' + (card.color === 'red' ? 'red' : 'black') + freshClass + '" style="--i:' + index + '">' +
       '<span class="bj-corner top">' + card.rank + '<small>' + card.suit + '</small></span>' +
       '<strong class="bj-suit bj-' + card.suitName + '">' + card.suit + '</strong>' +
       '<span class="bj-corner bottom">' + card.rank + '<small>' + card.suit + '</small></span>' +
@@ -99,8 +105,9 @@
   function tableHtml(state){
     const dealerVisible = state.phase !== 'player';
     const wager = state.phase === 'player' || state.phase === 'dealer' ? state.roundBet : state.bet;
-    const dealerCards = state.dealer.map(function(card, i){ return cardHtml(card, state.phase === 'player' && i === 1, i); }).join('');
-    const playerCards = state.player.map(function(card, i){ return cardHtml(card, false, i); }).join('');
+    const freshCards = state.freshCards || [];
+    const dealerCards = state.dealer.map(function(card, i){ return cardHtml(card, state.phase === 'player' && i === 1, i, freshCards.includes(card.uid)); }).join('');
+    const playerCards = state.player.map(function(card, i){ return cardHtml(card, false, i, freshCards.includes(card.uid)); }).join('');
     const dealerTotal = dealerVisible ? handTotal(state.dealer) : handTotal([state.dealer[0]]);
     const playerTotal = handTotal(state.player);
     const canAct = state.phase === 'player';
@@ -118,8 +125,9 @@
         '<div><small>Current Bet</small><strong id="bjBet">' + formatChips(wager) + '</strong></div>' +
         '<div><small>Last Paid</small><strong id="bjPaid">' + formatChips(state.lastPaid || 0) + '</strong></div>' +
       '</div>' +
-      '<div class="blackjack-table-felt ' + (state.phase === 'settled' ? 'hand-settled' : '') + '">' +
+      '<div class="blackjack-table-felt ' + (state.phase === 'settled' ? 'hand-settled' : '') + (state.celebrateWin ? ' bj-win-celebrate' : '') + '">' +
         '<div class="bj-table-rail"></div>' +
+        (state.celebrateWin ? '<div class="bj-win-burst" aria-hidden="true"><span style="--spark-rotate:0deg"></span><span style="--spark-rotate:58deg"></span><span style="--spark-rotate:126deg"></span><span style="--spark-rotate:206deg"></span><span style="--spark-rotate:284deg"></span><strong>WIN</strong></div>' : '') +
         '<div class="bj-table-title"><span>RETROARCADE</span><strong>BLACKJACK</strong><em>Dealer stands on 17</em></div>' +
         '<div class="bj-shoe"><span></span><strong>SHOE</strong></div>' +
         '<div class="bj-discard"><span></span><strong>DISCARD</strong></div>' +
@@ -148,6 +156,8 @@
     if(!mounted) return;
     mounted.parent.innerHTML = tableHtml(mounted.state);
     bindControls();
+    mounted.state.freshCards = [];
+    mounted.state.celebrateWin = false;
   }
 
   function setMessage(message){
@@ -175,6 +185,8 @@
     state.dealer = [draw(state), draw(state)];
     state.phase = 'player';
     state.message = 'Your move.';
+    state.celebrateWin = false;
+    markFresh(state, state.player.concat(state.dealer));
     saveBank(state);
     render();
     if(isBlackjack(state.player) || isBlackjack(state.dealer)) settle();
@@ -186,13 +198,16 @@
       setMessage(state.phase === 'settled' ? 'Hand is over. Deal the next hand.' : 'Deal a hand first.');
       return;
     }
-    state.player.push(draw(state));
-    state.message = 'Card dealt.';
-    render();
+    const card = draw(state);
+    state.player.push(card);
+    markFresh(state, [card]);
     if(handTotal(state.player) > 21){
       state.message = 'Bust. Dealer takes the bet.';
       settle();
+      return;
     }
+    state.message = 'Card dealt.';
+    render();
   }
 
   function playerDouble(){
@@ -211,10 +226,11 @@
     }
     state.balance -= state.bet;
     state.roundBet += state.bet;
-    state.player.push(draw(state));
+    const card = draw(state);
+    state.player.push(card);
+    markFresh(state, [card]);
     state.message = 'Double down.';
     saveBank(state);
-    render();
     if(handTotal(state.player) > 21) settle();
     else dealerPlay();
   }
@@ -231,7 +247,9 @@
     function step(){
       if(!mounted || mounted.state !== state) return;
       if(handTotal(state.dealer) < 17){
-        state.dealer.push(draw(state));
+        const card = draw(state);
+        state.dealer.push(card);
+        markFresh(state, [card]);
         render();
         timers.push(window.setTimeout(step, 520));
       }else{
@@ -266,11 +284,13 @@
     }else{
       message = 'Dealer wins.';
     }
+    const playerWon = paid > state.roundBet;
     state.balance += paid;
     state.lastPaid = paid;
     state.phase = 'settled';
-    state.roundBet = 0;
     state.message = message;
+    state.celebrateWin = playerWon;
+    state.roundBet = 0;
     state.bet = Math.min(state.bet, state.balance || BETS[0]);
     if(!BETS.includes(state.bet)) state.bet = BETS.reduce(function(best, bet){ return bet <= state.balance ? bet : best; }, BETS[0]);
     saveBank(state);

@@ -1516,6 +1516,8 @@ function launchGame(gameId){
   arcadeGrid.classList.remove('casino-floor');
   gameGridWrap.classList.add('hidden');
   playArea.classList.remove('hidden');
+  playArea.className = playArea.className.replace(/\bplay-area-\w+\b/g, '').trim();
+  playArea.classList.add('play-area-' + selected.id);
   lobbySubtitle.textContent = selected.name;
   document.querySelector('#game-title').textContent = selected.name;
   setBreadcrumb('<a href="#" id="bc-lobby">Arcade</a> / <a href="#" id="bc-room">' + currentRoom.name + '</a> / ' + selected.name);

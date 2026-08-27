@@ -1428,13 +1428,42 @@ body.deck-arcade .room-classics .floor-game::after {
 
 
 /* Realistic Blackjack table */
+#play-area.play-area-blackjack {
+  width: min(1540px, calc(100vw - 28px));
+  max-width: none;
+  align-self: center;
+  padding: clamp(8px, 1.2vw, 16px);
+  background: linear-gradient(180deg, rgba(12,15,18,.92), rgba(3,4,5,.96));
+}
+
+#play-area.play-area-blackjack #board {
+  max-width: none;
+  min-height: calc(100vh - 220px);
+  padding: clamp(10px, 1.4vw, 20px);
+  background:
+    radial-gradient(ellipse at 50% 6%, rgba(255,218,144,.18), transparent 28%),
+    linear-gradient(180deg, rgba(4,2,4,.72), rgba(4,2,4,.9)),
+    var(--scene);
+  background-size: cover;
+  background-position: center;
+}
+
+#play-area.play-area-blackjack #board::before,
+#play-area.play-area-blackjack #board::after {
+  display: none;
+}
+
+#play-area.play-area-blackjack #board > * {
+  z-index: 2;
+}
+
 #blackjackMount {
   width: 100%;
 }
 
 .blackjack-game {
   position: relative;
-  min-height: 720px;
+  min-height: clamp(720px, calc(100vh - 250px), 840px);
   display: grid;
   grid-template-rows: auto 1fr auto;
   gap: 14px;
@@ -1496,7 +1525,7 @@ body.deck-arcade .room-classics .floor-game::after {
 .blackjack-table-felt {
   position: relative;
   z-index: 2;
-  min-height: 520px;
+  min-height: clamp(520px, calc(100vh - 430px), 620px);
   border-radius: 50% / 22%;
   padding: 34px clamp(16px, 4vw, 46px) 26px;
   background:
@@ -1607,7 +1636,7 @@ body.deck-arcade .room-classics .floor-game::after {
 
 .bj-card {
   position: relative;
-  width: clamp(72px, 9vw, 92px);
+  width: clamp(74px, 6.4vw, 106px);
   aspect-ratio: 5 / 7;
   border-radius: 9px;
   background:
@@ -1616,13 +1645,85 @@ body.deck-arcade .room-classics .floor-game::after {
   color: #171416;
   box-shadow: 0 12px 22px rgba(0,0,0,.34), inset 0 0 0 1px rgba(0,0,0,.1), inset 0 -7px 12px rgba(0,0,0,.08);
   transform: translateY(0) rotate(calc((var(--i) - 2) * 2deg));
+}
+
+.bj-card.deal-new {
   animation: bjDeal .28s ease-out both;
   animation-delay: calc(var(--i) * .05s);
+}
+
+.blackjack-table-felt.bj-win-celebrate {
+  animation: bjWinFelt .72s ease-out both;
+}
+
+.bj-win-burst {
+  position: absolute;
+  left: 50%;
+  top: 49%;
+  width: min(270px, 62vw);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.bj-win-burst strong {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  padding: 10px 16px;
+  border-radius: 999px;
+  color: #1e0b05;
+  background: linear-gradient(180deg, #fff4a8, #f0a427);
+  box-shadow: 0 0 30px rgba(255,212,111,.62), 0 12px 26px rgba(0,0,0,.34);
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(.72rem, 1.8vw, 1rem);
+  animation: bjWinPop .72s ease-out both;
+}
+
+.bj-win-burst span {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #fff3a0;
+  box-shadow: 0 0 10px currentColor, 30px -18px 0 #75d8ff, -28px 22px 0 #ff5d9e, 20px 34px 0 #8dff9a;
+  animation: bjSpark .82s ease-out both;
 }
 
 @keyframes bjDeal {
   from { transform: translate(80px, -80px) rotate(18deg) scale(.92); opacity: 0; }
   to { opacity: 1; }
+}
+
+@keyframes bjWinFelt {
+  0% { filter: brightness(1); }
+  38% { filter: brightness(1.24) saturate(1.2); }
+  100% { filter: brightness(1); }
+}
+
+@keyframes bjWinPop {
+  0% { transform: translate(-50%, -50%) scale(.64); opacity: 0; }
+  32% { transform: translate(-50%, -50%) scale(1.08); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+}
+
+@keyframes bjSpark {
+  0% { opacity: 0; transform: translate(-50%, -50%) rotate(var(--spark-rotate)) scale(.4); }
+  20% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -50%) rotate(var(--spark-rotate)) translateY(-116px) scale(1.4); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bj-card.deal-new,
+  .blackjack-table-felt.bj-win-celebrate,
+  .bj-win-burst strong,
+  .bj-win-burst span {
+    animation: none;
+  }
 }
 
 .bj-card.red { color: #b5122e; }
