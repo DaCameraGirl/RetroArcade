@@ -1653,7 +1653,60 @@ body.deck-arcade .room-classics .floor-game::after {
 }
 
 .blackjack-table-felt.bj-win-celebrate {
-  animation: bjWinFelt .72s ease-out both;
+  animation: bjWinFelt 1.7s ease-out both;
+}
+
+.bj-outcome-pop {
+  position: absolute;
+  left: 50%;
+  top: clamp(170px, 31%, 310px);
+  width: min(520px, calc(100% - 36px));
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  padding: 18px 20px;
+  transform: translate(-50%, -50%);
+  z-index: 8;
+  pointer-events: none;
+  text-align: center;
+  border-radius: 18px;
+  color: #fff7b2;
+  background: linear-gradient(180deg, rgba(28,22,14,.96), rgba(8,6,6,.96));
+  border: 1px solid rgba(255,224,138,.66);
+  box-shadow: 0 22px 52px rgba(0,0,0,.48), 0 0 36px rgba(255,212,111,.24), inset 0 1px 0 rgba(255,255,255,.14);
+  animation: bjOutcomePop .44s cubic-bezier(.2,.8,.2,1) both;
+}
+
+.bj-outcome-pop small {
+  color: rgba(255,255,255,.72);
+  font-family: 'Space Mono', monospace;
+  font-size: .72rem;
+  letter-spacing: .14em;
+}
+
+.bj-outcome-pop strong {
+  color: currentColor;
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(.74rem, 1.8vw, 1.05rem);
+  line-height: 1.55;
+  text-shadow: 0 2px 0 rgba(0,0,0,.72);
+}
+
+.bj-outcome-pop span {
+  color: rgba(255,255,255,.78);
+  font-size: .82rem;
+}
+
+.bj-outcome-pop.loss {
+  color: #ffd4d4;
+  border-color: rgba(255,93,112,.68);
+  box-shadow: 0 22px 52px rgba(0,0,0,.48), 0 0 34px rgba(255,60,80,.2), inset 0 1px 0 rgba(255,255,255,.12);
+}
+
+.bj-outcome-pop.push {
+  color: #d7efff;
+  border-color: rgba(117,216,255,.7);
+  box-shadow: 0 22px 52px rgba(0,0,0,.48), 0 0 34px rgba(117,216,255,.2), inset 0 1px 0 rgba(255,255,255,.12);
 }
 
 .bj-win-burst {
@@ -1679,7 +1732,7 @@ body.deck-arcade .room-classics .floor-game::after {
   box-shadow: 0 0 30px rgba(255,212,111,.62), 0 12px 26px rgba(0,0,0,.34);
   font-family: 'Press Start 2P', monospace;
   font-size: clamp(.72rem, 1.8vw, 1rem);
-  animation: bjWinPop .72s ease-out both;
+  animation: bjWinPop 1.55s ease-out both;
 }
 
 .bj-win-burst span {
@@ -1691,7 +1744,7 @@ body.deck-arcade .room-classics .floor-game::after {
   border-radius: 50%;
   background: #fff3a0;
   box-shadow: 0 0 10px currentColor, 30px -18px 0 #75d8ff, -28px 22px 0 #ff5d9e, 20px 34px 0 #8dff9a;
-  animation: bjSpark .82s ease-out both;
+  animation: bjSpark 1.65s ease-out both;
 }
 
 @keyframes bjDeal {
@@ -1701,14 +1754,20 @@ body.deck-arcade .room-classics .floor-game::after {
 
 @keyframes bjWinFelt {
   0% { filter: brightness(1); }
-  38% { filter: brightness(1.24) saturate(1.2); }
+  24% { filter: brightness(1.24) saturate(1.2); }
   100% { filter: brightness(1); }
+}
+
+@keyframes bjOutcomePop {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(.84); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
 
 @keyframes bjWinPop {
   0% { transform: translate(-50%, -50%) scale(.64); opacity: 0; }
-  32% { transform: translate(-50%, -50%) scale(1.08); opacity: 1; }
-  100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+  22% { transform: translate(-50%, -50%) scale(1.08); opacity: 1; }
+  78% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1.02); opacity: 0; }
 }
 
 @keyframes bjSpark {
@@ -1720,6 +1779,7 @@ body.deck-arcade .room-classics .floor-game::after {
 @media (prefers-reduced-motion: reduce) {
   .bj-card.deal-new,
   .blackjack-table-felt.bj-win-celebrate,
+  .bj-outcome-pop,
   .bj-win-burst strong,
   .bj-win-burst span {
     animation: none;
@@ -1832,6 +1892,51 @@ body.deck-arcade .room-classics .floor-game::after {
   text-align: center;
   background: rgba(0,0,0,.46);
   border: 1px solid rgba(255,255,255,.14);
+}
+
+.bj-result-strip {
+  position: relative;
+  z-index: 4;
+  width: min(760px, 100%);
+  min-height: 58px;
+  display: grid;
+  place-items: center;
+  gap: 3px;
+  margin: -4px auto 0;
+  padding: 10px 16px;
+  border-radius: 14px;
+  text-align: center;
+  color: #fff4c7;
+  background: linear-gradient(180deg, rgba(18,18,22,.94), rgba(7,6,8,.96));
+  border: 1px solid rgba(255,224,138,.32);
+  box-shadow: 0 14px 30px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+.bj-result-strip strong {
+  font-family: 'Space Mono', monospace;
+  font-size: clamp(.9rem, 1.8vw, 1.15rem);
+}
+
+.bj-result-strip span {
+  color: rgba(255,255,255,.72);
+  font-size: .78rem;
+}
+
+.bj-result-strip.loss {
+  color: #ffd1d1;
+  border-color: rgba(255,93,112,.42);
+  box-shadow: 0 14px 30px rgba(0,0,0,.32), inset 0 0 22px rgba(255,60,80,.11);
+}
+
+.bj-result-strip.win {
+  color: #fff7b2;
+  border-color: rgba(255,224,138,.62);
+  box-shadow: 0 14px 30px rgba(0,0,0,.32), 0 0 30px rgba(255,212,111,.24), inset 0 0 22px rgba(255,212,111,.14);
+}
+
+.bj-result-strip.push {
+  color: #d5ecff;
+  border-color: rgba(117,216,255,.44);
 }
 
 .bj-control-deck {

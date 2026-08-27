@@ -118,8 +118,14 @@
     const hitClass = canAct ? '' : ' is-disabled';
     const standClass = canAct ? '' : ' is-disabled';
     const doubleClass = canDouble ? '' : ' is-disabled';
+    const resultClass = state.outcome ? ' ' + state.outcome : '';
+    const resultMessage = state.resultMessage || state.message;
+    const outcomeLabel = state.outcome === 'win' ? 'YOU WIN' : state.outcome === 'push' ? 'PUSH' : state.outcome === 'loss' ? 'YOU LOSE' : 'HAND OVER';
+    const resultStrip = state.phase === 'settled' ? '<div class="bj-result-strip' + resultClass + '"><strong>' + resultMessage + '</strong><span>Dealer ' + dealerTotal + ' / You ' + playerTotal + '</span></div>' : '';
+    const outcomePop = state.phase === 'settled' ? '<div class="bj-outcome-pop' + resultClass + '" aria-live="polite"><small>' + outcomeLabel + '</small><strong>' + resultMessage + '</strong><span>Dealer ' + dealerTotal + ' / You ' + playerTotal + '</span></div>' : '';
     return '<section class="blackjack-game" aria-label="RetroArcade blackjack table">' +
       '<div class="bj-room-light"></div>' +
+      outcomePop +
       '<div class="bj-bank-panel">' +
         '<div><small>Arcade Chips</small><strong id="bjBalance">' + formatChips(state.balance) + '</strong></div>' +
         '<div><small>Current Bet</small><strong id="bjBet">' + formatChips(wager) + '</strong></div>' +
@@ -142,6 +148,7 @@
           '<div class="bj-cards">' + playerCards + '</div>' +
         '</div>' +
       '</div>' +
+      resultStrip +
       '<div class="bj-control-deck">' +
         '<div class="bj-bet-controls"><button id="bjBetDown" class="' + (!canDeal ? 'is-disabled' : '') + '" type="button">-</button>' + chipsHtml(state.bet) + '<button id="bjBetUp" class="' + (!canDeal ? 'is-disabled' : '') + '" type="button">+</button></div>' +
         '<button id="bjDeal" class="bj-primary' + dealClass + '" type="button">' + dealLabel + '</button>' +
@@ -185,6 +192,8 @@
     state.dealer = [draw(state), draw(state)];
     state.phase = 'player';
     state.message = 'Your move.';
+    state.resultMessage = '';
+    state.outcome = '';
     state.celebrateWin = false;
     markFresh(state, state.player.concat(state.dealer));
     saveBank(state);
@@ -265,30 +274,37 @@
     const dealer = handTotal(state.dealer);
     let paid = 0;
     let message = '';
+    let outcome = 'loss';
     if(player > 21){
-      message = 'Bust. Dealer wins.';
+      message = 'You bust with ' + player + '. Dealer wins.';
     }else if(isBlackjack(state.player) && !isBlackjack(state.dealer)){
       paid = Math.floor(state.roundBet * 2.5);
       message = 'Blackjack pays 3:2.';
+      outcome = 'win';
     }else if(isBlackjack(state.dealer) && !isBlackjack(state.player)){
-      message = 'Dealer blackjack.';
+      message = 'Dealer blackjack. Dealer wins.';
     }else if(dealer > 21){
       paid = state.roundBet * 2;
-      message = 'Dealer busts. You win.';
+      message = 'Dealer busts with ' + dealer + '. You win.';
+      outcome = 'win';
     }else if(player > dealer){
       paid = state.roundBet * 2;
-      message = 'You beat the dealer.';
+      message = 'You win ' + player + ' to ' + dealer + '.';
+      outcome = 'win';
     }else if(player === dealer){
       paid = state.roundBet;
-      message = 'Push. Bet returned.';
+      message = 'Push at ' + player + '. Bet returned.';
+      outcome = 'push';
     }else{
-      message = 'Dealer wins.';
+      message = 'Dealer wins ' + dealer + ' to ' + player + '.';
     }
-    const playerWon = paid > state.roundBet;
+    const playerWon = outcome === 'win';
     state.balance += paid;
     state.lastPaid = paid;
     state.phase = 'settled';
     state.message = message;
+    state.resultMessage = message;
+    state.outcome = outcome;
     state.celebrateWin = playerWon;
     state.roundBet = 0;
     state.bet = Math.min(state.bet, state.balance || BETS[0]);
@@ -341,6 +357,8 @@
         player: [],
         dealer: [],
         phase: 'idle',
+        outcome: '',
+        resultMessage: '',
         message: 'Place a bet and deal.',
       }
     };
