@@ -1460,6 +1460,20 @@ body.deck-arcade .room-classics .floor-game::after {
   background: linear-gradient(180deg, rgba(12,15,18,.92), rgba(3,4,5,.96));
 }
 
+body.deck-arcade #play-area.play-area-blackjack,
+body.deck-arcade #play-area.play-area-retro-arcade-slot {
+  width: calc(100vw - 28px);
+  max-width: 1560px;
+  margin-inline: auto;
+}
+
+body.deck-arcade #play-area.play-area-blackjack .controls,
+body.deck-arcade #play-area.play-area-retro-arcade-slot .controls {
+  width: 100%;
+  max-width: none;
+  justify-content: center;
+}
+
 #play-area.play-area-blackjack #board,
 #play-area.play-area-retro-arcade-slot #board {
   max-width: none;
@@ -1491,7 +1505,7 @@ body.deck-arcade .room-classics .floor-game::after {
 
 .blackjack-game {
   position: relative;
-  min-height: clamp(720px, calc(100vh - 250px), 840px);
+  min-height: clamp(760px, calc(100vh - 190px), 920px);
   display: grid;
   grid-template-rows: auto 1fr auto;
   gap: 14px;
@@ -1553,7 +1567,7 @@ body.deck-arcade .room-classics .floor-game::after {
 .blackjack-table-felt {
   position: relative;
   z-index: 2;
-  min-height: clamp(520px, calc(100vh - 430px), 620px);
+  min-height: clamp(560px, calc(100vh - 400px), 700px);
   border-radius: 50% / 22%;
   padding: 34px clamp(16px, 4vw, 46px) 26px;
   background:
@@ -1684,25 +1698,38 @@ body.deck-arcade .room-classics .floor-game::after {
   animation: bjWinFelt 1.7s ease-out both;
 }
 
-.bj-outcome-pop {
+.bj-outcome-layer {
   position: absolute;
-  left: 50%;
-  top: clamp(170px, 31%, 310px);
-  width: min(520px, calc(100% - 36px));
+  inset: 0;
+  z-index: 8;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 48%, rgba(255,224,138,.16), transparent 34%);
+  animation: bjOutcomeVeil 2.4s ease-out both;
+}
+
+.bj-outcome-layer.loss {
+  background: radial-gradient(ellipse at 50% 48%, rgba(227,63,50,.15), transparent 34%);
+}
+
+.bj-outcome-layer.push {
+  background: radial-gradient(ellipse at 50% 48%, rgba(117,216,255,.14), transparent 34%);
+}
+
+.bj-outcome-pop {
+  width: min(560px, calc(100% - 36px));
   display: grid;
   place-items: center;
   gap: 8px;
-  padding: 18px 20px;
-  transform: translate(-50%, -50%);
-  z-index: 8;
-  pointer-events: none;
+  padding: 22px 22px 20px;
   text-align: center;
   border-radius: 18px;
   color: #fff7b2;
   background: linear-gradient(180deg, rgba(28,22,14,.96), rgba(8,6,6,.96));
   border: 1px solid rgba(255,224,138,.66);
-  box-shadow: 0 22px 52px rgba(0,0,0,.48), 0 0 36px rgba(255,212,111,.24), inset 0 1px 0 rgba(255,255,255,.14);
-  animation: bjOutcomePop .44s cubic-bezier(.2,.8,.2,1) both;
+  box-shadow: 0 26px 70px rgba(0,0,0,.58), 0 0 44px rgba(255,212,111,.26), inset 0 1px 0 rgba(255,255,255,.14);
+  animation: bjOutcomePop 2.35s cubic-bezier(.2,.8,.2,1) both;
 }
 
 .bj-outcome-pop small {
@@ -1720,9 +1747,15 @@ body.deck-arcade .room-classics .floor-game::after {
   text-shadow: 0 2px 0 rgba(0,0,0,.72);
 }
 
-.bj-outcome-pop span {
+.bj-outcome-pop span,
+.bj-outcome-pop em {
   color: rgba(255,255,255,.78);
   font-size: .82rem;
+  font-style: normal;
+}
+
+.bj-outcome-pop em {
+  color: rgba(255,240,190,.86);
 }
 
 .bj-outcome-pop.loss {
@@ -1786,9 +1819,19 @@ body.deck-arcade .room-classics .floor-game::after {
   100% { filter: brightness(1); }
 }
 
+@keyframes bjOutcomeVeil {
+  0% { opacity: 0; }
+  12% { opacity: 1; }
+  82% { opacity: 1; }
+  100% { opacity: .72; }
+}
+
 @keyframes bjOutcomePop {
-  from { opacity: 0; transform: translate(-50%, -50%) scale(.84); }
-  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  0% { opacity: 0; transform: translateY(18px) scale(.84); }
+  14% { opacity: 1; transform: translateY(0) scale(1.04); }
+  28% { transform: translateY(0) scale(1); }
+  82% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: .96; transform: translateY(0) scale(1); }
 }
 
 @keyframes bjWinPop {
@@ -1807,6 +1850,7 @@ body.deck-arcade .room-classics .floor-game::after {
 @media (prefers-reduced-motion: reduce) {
   .bj-card.deal-new,
   .blackjack-table-felt.bj-win-celebrate,
+  .bj-outcome-layer,
   .bj-outcome-pop,
   .bj-win-burst strong,
   .bj-win-burst span {

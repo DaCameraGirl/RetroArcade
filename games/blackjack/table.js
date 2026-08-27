@@ -84,10 +84,11 @@
 
   function cardHtml(card, hidden, index, fresh){
     const freshClass = fresh ? ' deal-new' : '';
+    const cardKey = card && card.uid ? ' data-card-id="' + card.uid + '"' : '';
     if(hidden){
-      return '<div class="bj-card bj-card-back' + freshClass + '" style="--i:' + index + '"><div class="bj-card-back-inner">RA</div></div>';
+      return '<div class="bj-card bj-card-back' + freshClass + '"' + cardKey + ' style="--i:' + index + '"><div class="bj-card-back-inner">RA</div></div>';
     }
-    return '<div class="bj-card ' + (card.color === 'red' ? 'red' : 'black') + freshClass + '" style="--i:' + index + '">' +
+    return '<div class="bj-card ' + (card.color === 'red' ? 'red' : 'black') + freshClass + '"' + cardKey + ' style="--i:' + index + '">' +
       '<span class="bj-corner top">' + card.rank + '<small>' + card.suit + '</small></span>' +
       '<strong class="bj-suit bj-' + card.suitName + '">' + card.suit + '</strong>' +
       '<span class="bj-corner bottom">' + card.rank + '<small>' + card.suit + '</small></span>' +
@@ -121,8 +122,9 @@
     const resultClass = state.outcome ? ' ' + state.outcome : '';
     const resultMessage = state.resultMessage || state.message;
     const outcomeLabel = state.outcome === 'win' ? 'YOU WIN' : state.outcome === 'push' ? 'PUSH' : state.outcome === 'loss' ? 'YOU LOSE' : 'HAND OVER';
+    const outcomeHint = state.outcome === 'win' ? 'Arcade Chips paid to your bank.' : state.outcome === 'push' ? 'Your bet returns to the tray.' : state.outcome === 'loss' ? 'Dealer takes the wager.' : 'Hand complete.';
     const resultStrip = state.phase === 'settled' ? '<div class="bj-result-strip' + resultClass + '"><strong>' + resultMessage + '</strong><span>Dealer ' + dealerTotal + ' / You ' + playerTotal + '</span></div>' : '';
-    const outcomePop = state.phase === 'settled' ? '<div class="bj-outcome-pop' + resultClass + '" aria-live="polite"><small>' + outcomeLabel + '</small><strong>' + resultMessage + '</strong><span>Dealer ' + dealerTotal + ' / You ' + playerTotal + '</span></div>' : '';
+    const outcomePop = state.phase === 'settled' ? '<div class="bj-outcome-layer' + resultClass + '" aria-live="polite"><div class="bj-outcome-pop' + resultClass + '"><small>' + outcomeLabel + '</small><strong>' + resultMessage + '</strong><span>Dealer ' + dealerTotal + ' / You ' + playerTotal + '</span><em>' + outcomeHint + '</em></div></div>' : '';
     return '<section class="blackjack-game" aria-label="RetroArcade blackjack table">' +
       '<div class="bj-room-light"></div>' +
       outcomePop +
@@ -215,7 +217,7 @@
       settle();
       return;
     }
-    state.message = 'Card dealt.';
+    state.message = 'Hit dealt one card. Choose Hit or Stand.';
     render();
   }
 
