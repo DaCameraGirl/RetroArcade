@@ -14,6 +14,7 @@ let timerInt, seconds = 0;
 let snakeInt = null;
 let snakeGame = null;
 let slotGame = null;
+let blackjackGame = null;
 let frogInt = null;
 
 const $ = s => document.querySelector(s);
@@ -825,6 +826,10 @@ function stopLiveMiniGames(){
     slotGame.destroy();
     slotGame = null;
   }
+  if(blackjackGame){
+    blackjackGame.destroy();
+    blackjackGame = null;
+  }
   document.onkeydown = null;
 }
 
@@ -905,34 +910,20 @@ function renderPokerMini(selected){
   document.querySelector('#miniDeal').addEventListener('click', function(){ renderPokerMini(selected); });
 }
 
-function blackjackTotal(hand){
-  let total = 0;
-  let aces = 0;
-  hand.forEach(function(c){
-    if(c.val === 1){ aces++; total += 11; }
-    else total += Math.min(c.val, 10);
-  });
-  while(total > 21 && aces){ total -= 10; aces--; }
-  return total;
-}
-
 function renderBlackjackMini(selected){
-  const deck = buildDeck();
-  const player = [deck.pop(), deck.pop()];
-  const dealer = [deck.pop(), deck.pop()];
-  const total = blackjackTotal(player);
-  const dealerTotal = blackjackTotal(dealer);
-  let result = 'Push';
-  if(total === 21 && dealerTotal !== 21) result = 'Blackjack';
-  else if(dealerTotal > 21 || total > dealerTotal) result = 'Player wins';
-  else if(total < dealerTotal) result = 'Dealer wins';
-  moves++;
-  updateHUD();
-  board.innerHTML = '<section class="mini-game poker-mini"><h2>' + selected.name + '</h2>' +
-    '<p class="mini-status">' + result + ' | You ' + total + ' | Dealer ' + dealerTotal + '</p>' +
-    '<div class="mini-hand">' + player.map(miniCard).join('') + '</div>' +
-    '<div class="mini-actions"><button id="miniDeal">Play hand</button></div></section>';
-  document.querySelector('#miniDeal').addEventListener('click', function(){ renderBlackjackMini(selected); });
+  board.innerHTML = '<div id="blackjackMount"></div>';
+  if(!window.RetroArcadeBlackjack){
+    board.innerHTML = '<section class="mini-game coming-soon-game"><h2>' + selected.name + '</h2><p class="mini-status">Blackjack table engine did not load. Refresh and try again.</p></section>';
+    return;
+  }
+  blackjackGame = window.RetroArcadeBlackjack.mount({
+    parent: 'blackjackMount',
+    selected: selected,
+    onHandComplete: function(){
+      moves++;
+      updateHUD();
+    }
+  });
 }
 
 function renderHighCardMini(selected){
@@ -1422,6 +1413,7 @@ const ROOMS = [
     name: 'Table Games',
     desc: 'Roulette, blackjack, dice, and baccarat',
     games: [
+      { id: 'blackjack', name: 'Blackjack', table: 'Table 1', kind: 'blackjack', available: true },
       { id: 'sic-bo', name: 'Sic Bo', table: 'Dice 1', kind: 'sicbo', available: true },
     ],
   },
