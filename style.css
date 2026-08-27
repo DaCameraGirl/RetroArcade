@@ -1674,6 +1674,88 @@ body.deck-arcade #play-area.room-poker .controls {
 
 .dealer-zone { top: 108px; }
 .player-zone { bottom: 36px; }
+.split-player-zone {
+  width: min(900px, calc(100% - 42px));
+  bottom: 24px;
+}
+
+.bj-split-hands {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(12px, 2vw, 24px);
+  align-items: end;
+}
+
+.bj-split-hand {
+  position: relative;
+  min-height: 190px;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 8px;
+  padding: 12px 10px 20px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: radial-gradient(ellipse at 50% 0%, rgba(255,255,255,.12), transparent 45%), rgba(0,0,0,.22);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.05), 0 16px 28px rgba(0,0,0,.25);
+}
+
+.bj-split-hand.active {
+  border-color: rgba(117,216,255,.72);
+  box-shadow: 0 0 26px rgba(117,216,255,.28), inset 0 0 0 1px rgba(117,216,255,.32), 0 16px 28px rgba(0,0,0,.25);
+}
+
+.bj-split-hand.done {
+  opacity: .82;
+}
+
+.bj-split-hand.win {
+  border-color: rgba(255,224,138,.62);
+  box-shadow: 0 0 24px rgba(255,212,111,.22), inset 0 0 0 1px rgba(255,224,138,.2), 0 16px 28px rgba(0,0,0,.25);
+}
+
+.bj-split-hand.loss {
+  border-color: rgba(227,63,50,.5);
+}
+
+.bj-split-hand.push {
+  border-color: rgba(117,216,255,.5);
+}
+
+.bj-split-hand .bj-cards {
+  min-height: 112px;
+  gap: 6px;
+}
+
+.bj-split-hand .bj-card {
+  width: clamp(58px, 5.2vw, 82px);
+}
+
+.bj-split-bet {
+  min-height: 48px;
+  display: grid;
+  place-items: center;
+  transform: scale(.72);
+  transform-origin: top center;
+}
+
+.bj-split-result {
+  min-height: 24px;
+  display: inline-grid;
+  place-items: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  color: #fff4b8;
+  background: rgba(0,0,0,.45);
+  border: 1px solid rgba(255,255,255,.12);
+  font-size: .7rem;
+  text-align: center;
+}
+
+.bj-split-result.win { color: #fff2a8; }
+.bj-split-result.loss { color: #ffd1d1; }
+.bj-split-result.push { color: #d5ecff; }
 .bj-hand-zone.active .bj-seat-label {
   box-shadow: 0 0 24px rgba(117,216,255,.38), inset 0 0 0 1px rgba(117,216,255,.4);
 }
@@ -2119,6 +2201,19 @@ body.deck-arcade #play-area.room-poker .controls {
   }
   .dealer-zone { top: 126px; }
   .player-zone { bottom: 42px; }
+  .split-player-zone {
+    bottom: 28px;
+  }
+  .bj-split-hands {
+    gap: 8px;
+  }
+  .bj-split-hand {
+    min-height: 168px;
+    padding: 8px 6px 14px;
+  }
+  .bj-split-hand .bj-card {
+    width: clamp(46px, 12vw, 62px);
+  }
   .bj-cards {
     gap: 4px;
     min-height: 112px;
