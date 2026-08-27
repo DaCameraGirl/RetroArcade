@@ -3639,3 +3639,57 @@ body.deck-arcade #play-area.room-poker .controls {
     transform: translateY(0) rotate(calc((var(--i) - 1) * 2deg)) scale(1);
   }
 }
+
+
+/* 5-Card Draw cleaner card motion and sound-ready states */
+.draw-card-face-down {
+  cursor: default;
+  background:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.12) 0 5px, transparent 5px 10px),
+    linear-gradient(145deg, #2638a4, #070b3d);
+  color: #ffd46f;
+}
+
+.draw-card-face-down i {
+  width: 70%;
+  height: 74%;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  border: 2px solid rgba(255,255,255,.58);
+  font-family: 'Press Start 2P', monospace;
+  font-size: .66rem;
+  font-style: normal;
+}
+
+.draw-your-cards .draw-card.deal-new {
+  animation: drawCardLand .18s ease-out both;
+  animation-delay: 0s;
+}
+
+.draw-seat-cards .draw-card-back.deal-new {
+  animation: drawCardBackLand .12s ease-out both;
+  animation-delay: 0s;
+}
+
+@keyframes drawCardLand {
+  0% {
+    opacity: 0;
+    transform: translate3d(20px, -18px, 0) scale(.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes drawCardBackLand {
+  0% {
+    opacity: 0;
+    transform: translate3d(10px, -8px, 0) scale(.92);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}

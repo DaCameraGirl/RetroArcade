@@ -17,8 +17,11 @@
   const BOT_REVEAL_DELAY = 1400;
   const DEAL_CARD_DELAY = 95;
   const DRAW_ANIMATION_DELAY = 1200;
+  const CARD_REVEAL_CLEAR_DELAY = 420;
 
   let mounted = null;
+  let audioContext = null;
+  let cardUid = 0;
 
   function formatChips(value){
     return Math.round(value).toLocaleString('en-US');
@@ -35,6 +38,53 @@
 
   function saveBank(bankroll){
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ bankroll: bankroll }));
+  }
+
+  function getAudioContext(){
+    if(audioContext) return audioContext;
+    const AudioCtor = window.AudioContext || window.webkitAudioContext;
+    if(!AudioCtor) return null;
+    audioContext = new AudioCtor();
+    return audioContext;
+  }
+
+  function tone(freq, duration, type, volume, delay){
+    const ctx = getAudioContext();
+    if(!ctx) return;
+    if(ctx.state === 'suspended') ctx.resume();
+    const start = ctx.currentTime + (delay || 0);
+    const oscillator = ctx.createOscillator();
+    const gain = ctx.createGain();
+    oscillator.type = type || 'sine';
+    oscillator.frequency.setValueAtTime(freq, start);
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.exponentialRampToValueAtTime(volume || 0.045, start + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+    oscillator.connect(gain);
+    gain.connect(ctx.destination);
+    oscillator.start(start);
+    oscillator.stop(start + duration + 0.02);
+  }
+
+  function playSound(name, count){
+    if(!mounted) return;
+    try{
+      if(name === 'shuffle'){
+        for(let i = 0; i < 7; i++) tone(160 + i * 26, 0.045, 'triangle', 0.035, i * 0.028);
+      }else if(name === 'card'){
+        tone(430, 0.035, 'square', 0.018);
+        tone(650, 0.045, 'triangle', 0.012, 0.018);
+      }else if(name === 'draw'){
+        const n = Math.max(1, count || 1);
+        for(let i = 0; i < n; i++) tone(520 + i * 42, 0.052, 'triangle', 0.026, i * 0.055);
+      }else if(name === 'tick'){
+        tone(860, 0.035, 'sine', 0.018);
+      }else if(name === 'win'){
+        [523, 659, 784].forEach(function(freq, i){ tone(freq, 0.12, 'triangle', 0.035, i * 0.08); });
+      }
+    }catch(err){
+      // Sound is optional and can be blocked by browser audio policy.
+    }
   }
 
   function evaluateHand(hand){
@@ -91,7 +141,7 @@
       this.deck = [];
       SUITS.forEach(function(suit){
         RANKS.forEach(function(rank, index){
-          this.deck.push({ rank: rank, suit: suit.mark, color: suit.color, value: index });
+          this.deck.push({ rank: rank, suit: suit.mark, color: suit.color, value: index, uid: 'draw-' + (cardUid++) });
         }, this);
       }, this);
       for(let i = this.deck.length - 1; i > 0; i--){
@@ -284,6 +334,32 @@
     return '<button type="button" class="draw-card ' + (card.color === 'red' ? 'red' : 'black') + (selected ? ' selected' : '') + (fresh ? ' deal-new' : '') + '" data-card-index="' + index + '" style="--i:' + index + '"><span>' + card.rank + '</span><strong>' + card.suit + '</strong></button>';
   }
 
+  function playerCardBackHtml(index, fresh){
+    return '<span class="draw-card draw-card-face-down' + (fresh ? ' deal-new' : '') + '" style="--i:' + index + '"><i>RA</i></span>';
+  }
+
+  function playerCardsHtml(player, selected){
+    const freshCards = mounted && mounted.freshCardIds ? mounted.freshCardIds : [];
+    if(mounted && mounted.isDealing){
+      const count = dealtCountForSeat(0) || 0;
+      return Array.from({ length: count }, function(_, index){ return playerCardBackHtml(index, true); }).join('');
+    }
+    return player.hand.map(function(card, index){
+      return cardHtml(card, index, selected.has(index), freshCards.includes(card.uid));
+    }).join('');
+  }
+
+  function clearFreshCardsSoon(){
+    if(!mounted || !mounted.freshCardIds.length) return;
+    const timer = setTimeout(function(){
+      if(!mounted) return;
+      mounted.actionTimers = mounted.actionTimers.filter(function(item){ return item !== timer; });
+      mounted.freshCardIds = [];
+      render();
+    }, CARD_REVEAL_CLEAR_DELAY);
+    mounted.actionTimers.push(timer);
+  }
+
   function seatCardsHtml(seat, index, phase, visibleCount){
     if(!seat || !seat.hand.length) return '';
     if(index === 0) return '';
@@ -347,12 +423,15 @@
     function tickDeal(){
       if(!mounted || !mounted.isDealing) return;
       mounted.dealProgress += 1;
+      playSound('card');
       if(mounted.dealProgress >= mounted.dealTarget){
         mounted.isDealing = false;
         mounted.dealProgress = mounted.dealTarget;
         mounted.game.currentPlayer = 0;
         mounted.game.lastResult = 'Cards dealt. Choose your discards.';
+        mounted.freshCardIds = mounted.game.seats[0].hand.map(function(card){ return card.uid; });
         render();
+        clearFreshCardsSoon();
         return;
       }
       mounted.game.currentPlayer = currentDealSeat();
@@ -371,12 +450,17 @@
     render();
     queueAction(function(){
       if(!mounted || !mounted.isDrawAnimating) return;
+      const before = mounted.game.seats[0].hand.map(function(card){ return card.uid; });
       mounted.game.playerDraw(discardIdxs);
+      const after = mounted.game.seats[0].hand.map(function(card){ return card.uid; });
+      mounted.freshCardIds = after.filter(function(uid){ return !before.includes(uid); });
       mounted.selectedDiscard.clear();
       mounted.uiBet = Math.min(50, mounted.game.seats[0].chips);
       mounted.isDrawAnimating = false;
       mounted.pendingDiscardCount = 0;
+      playSound('draw', mounted.freshCardIds.length || 1);
       startPlayerTimer();
+      clearFreshCardsSoon();
     }, DRAW_ANIMATION_DELAY);
   }
 
@@ -390,6 +474,7 @@
         return;
       }
       mounted.playerSeconds -= 1;
+      playSound('tick');
       if(mounted.playerSeconds <= 0){
         startBotSequence(0);
         return;
@@ -426,6 +511,7 @@
       queueAction(function(){
         if(!mounted) return;
         game.showdown();
+        if(game.lastWinner === 0) playSound('win');
         if(typeof mounted.onHandComplete === 'function') mounted.onHandComplete({ message: game.lastResult });
         render();
       }, BOT_REVEAL_DELAY);
@@ -499,7 +585,7 @@
           '</div>';
         }).join('') +
       '</div></div>' +
-      '<div class="draw-hand-dock"><div class="draw-hand-panel"><div class="draw-your-cards">' + player.hand.slice(0, mounted.isDealing ? dealtCountForSeat(0) : player.hand.length).map(function(card, index){ return cardHtml(card, index, selected.has(index), mounted.isDealing || mounted.isDrawAnimating); }).join('') + '</div><div class="draw-status"><span>' + status + '</span><strong>' + playerEval + '</strong></div></div>' +
+      '<div class="draw-hand-dock"><div class="draw-hand-panel"><div class="draw-your-cards">' + playerCardsHtml(player, selected) + '</div><div class="draw-status"><span>' + status + '</span><strong>' + playerEval + '</strong></div></div>' +
       '<div class="draw-action-panel"><button type="button" class="draw-btn primary" id="drawMain"' + mainDisabled + '>' + mainLabel + '</button>' + betControls + secondary + '</div></div>' +
     '</section>';
     bindControls();
@@ -527,6 +613,7 @@
           render();
           return;
         }
+        playSound('shuffle');
         mounted.selectedDiscard.clear();
         startDealAnimation();
       }else if(game.phase === 'draw'){
@@ -536,6 +623,7 @@
       }else if(game.phase === 'player-response'){
         game.playerCallRaise();
         game.showdown();
+        if(game.lastWinner === 0) playSound('win');
         if(typeof mounted.onHandComplete === 'function') mounted.onHandComplete({ message: game.lastResult });
         render();
       }else if(game.phase === 'showdown'){
@@ -560,6 +648,7 @@
       mounted.message = '';
       mounted.game.playerFoldToRaise();
       mounted.game.showdown();
+      if(mounted.game.lastWinner === 0) playSound('win');
       if(typeof mounted.onHandComplete === 'function') mounted.onHandComplete({ message: mounted.game.lastResult });
       render();
     });
@@ -584,6 +673,7 @@
       dealProgress: 0,
       dealTarget: 0,
       pendingDiscardCount: 0,
+      freshCardIds: [],
       playerSeconds: null,
       playerTimer: null,
       actionTimers: [],
