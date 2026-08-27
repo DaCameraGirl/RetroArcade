@@ -15,6 +15,8 @@
   const PLAYER_TURN_SECONDS = 10;
   const BOT_ACTION_DELAY = 2600;
   const BOT_REVEAL_DELAY = 1400;
+  const DEAL_CARD_DELAY = 95;
+  const DRAW_ANIMATION_DELAY = 1200;
 
   let mounted = null;
 
@@ -277,16 +279,17 @@
     }
   }
 
-  function cardHtml(card, index, selected){
+  function cardHtml(card, index, selected, fresh){
     if(!card) return '';
-    return '<button type="button" class="draw-card ' + (card.color === 'red' ? 'red' : 'black') + (selected ? ' selected' : '') + '" data-card-index="' + index + '"><span>' + card.rank + '</span><strong>' + card.suit + '</strong></button>';
+    return '<button type="button" class="draw-card ' + (card.color === 'red' ? 'red' : 'black') + (selected ? ' selected' : '') + (fresh ? ' deal-new' : '') + '" data-card-index="' + index + '" style="--i:' + index + '"><span>' + card.rank + '</span><strong>' + card.suit + '</strong></button>';
   }
 
-  function seatCardsHtml(seat, index, phase){
+  function seatCardsHtml(seat, index, phase, visibleCount){
     if(!seat || !seat.hand.length) return '';
     if(index === 0) return '';
     if(phase === 'showdown') return seat.hand.map(function(card){ return '<span class="draw-mini-card ' + card.color + '">' + card.rank + card.suit + '</span>'; }).join('');
-    return seat.hand.map(function(){ return '<span class="draw-card-back"></span>'; }).join('');
+    const count = typeof visibleCount === 'number' ? visibleCount : seat.hand.length;
+    return seat.hand.slice(0, count).map(function(card, cardIndex){ return '<span class="draw-card-back' + (mounted && mounted.isDealing && cardIndex === count - 1 ? ' deal-new' : '') + '" style="--i:' + cardIndex + '"></span>'; }).join('');
   }
 
   function chipStackHtml(amount){
@@ -313,6 +316,68 @@
       fn();
     }, delay);
     mounted.actionTimers.push(timer);
+  }
+
+  function currentDealSeat(){
+    if(!mounted || !mounted.isDealing || !mounted.dealOrder.length) return -1;
+    return mounted.dealOrder[Math.min(mounted.dealProgress, mounted.dealTarget - 1) % mounted.dealOrder.length];
+  }
+
+  function dealtCountForSeat(index){
+    if(!mounted || !mounted.isDealing) return null;
+    let count = 0;
+    for(let step = 0; step < mounted.dealProgress; step++){
+      if(mounted.dealOrder[step % mounted.dealOrder.length] === index) count += 1;
+    }
+    const seat = mounted.game.seats[index];
+    return Math.min(count, seat ? seat.hand.length : 0);
+  }
+
+  function startDealAnimation(){
+    if(!mounted || mounted.game.phase !== 'draw') return;
+    clearActionTimers();
+    mounted.isDealing = true;
+    mounted.isDrawAnimating = false;
+    mounted.dealOrder = mounted.game.activeSeats();
+    mounted.dealTarget = mounted.dealOrder.length * 5;
+    mounted.dealProgress = 0;
+    mounted.game.currentPlayer = currentDealSeat();
+    mounted.game.lastResult = 'Dealer is dealing cards around the table.';
+    render();
+    function tickDeal(){
+      if(!mounted || !mounted.isDealing) return;
+      mounted.dealProgress += 1;
+      if(mounted.dealProgress >= mounted.dealTarget){
+        mounted.isDealing = false;
+        mounted.dealProgress = mounted.dealTarget;
+        mounted.game.currentPlayer = 0;
+        mounted.game.lastResult = 'Cards dealt. Choose your discards.';
+        render();
+        return;
+      }
+      mounted.game.currentPlayer = currentDealSeat();
+      render();
+      queueAction(tickDeal, DEAL_CARD_DELAY);
+    }
+    queueAction(tickDeal, DEAL_CARD_DELAY);
+  }
+
+  function startDrawAnimation(discardIdxs){
+    if(!mounted || mounted.game.phase !== 'draw') return;
+    clearActionTimers();
+    mounted.isDrawAnimating = true;
+    mounted.pendingDiscardCount = discardIdxs.length;
+    mounted.game.lastResult = discardIdxs.length ? 'Dealer is replacing ' + discardIdxs.length + ' card' + (discardIdxs.length === 1 ? '' : 's') + '.' : 'Dealer checks the pat hand.';
+    render();
+    queueAction(function(){
+      if(!mounted || !mounted.isDrawAnimating) return;
+      mounted.game.playerDraw(discardIdxs);
+      mounted.selectedDiscard.clear();
+      mounted.uiBet = Math.min(50, mounted.game.seats[0].chips);
+      mounted.isDrawAnimating = false;
+      mounted.pendingDiscardCount = 0;
+      startPlayerTimer();
+    }, DRAW_ANIMATION_DELAY);
   }
 
   function startPlayerTimer(){
@@ -392,24 +457,26 @@
     const game = mounted.game;
     const selected = mounted.selectedDiscard;
     const player = game.seats[0];
-    const playerEval = player.hand.length === 5 ? evaluateHand(player.hand).name : '';
-    const timerText = game.phase === 'bet' && mounted.playerSeconds !== null ? '<em class="draw-action-timer">Turn ' + mounted.playerSeconds + '</em>' : '';
-    const status = mounted.message || (game.phase === 'idle' ? 'Deal a hand. Ante is 10 Arcade Chips.' :
+    const playerEval = player.hand.length === 5 && !mounted.isDealing && !mounted.isDrawAnimating ? evaluateHand(player.hand).name : '';
+    const timerText = mounted.isDealing ? '<em class="draw-action-timer">Deal ' + mounted.dealProgress + '/' + mounted.dealTarget + '</em>' :
+      game.phase === 'bet' && mounted.playerSeconds !== null ? '<em class="draw-action-timer">Turn ' + mounted.playerSeconds + '</em>' : '';
+    const busy = mounted.isDealing || mounted.isDrawAnimating;
+    const status = mounted.message || (busy ? game.lastResult : game.phase === 'idle' ? 'Deal a hand. Ante is 10 Arcade Chips.' :
       game.phase === 'draw' ? (selected.size ? selected.size + ' selected to discard.' : 'Select cards to discard or stand pat.') :
       game.phase === 'bet' ? 'Your turn. Bet or check.' :
       game.phase === 'bot-betting' ? game.lastResult :
       game.phase === 'player-response' ? game.lastResult : game.lastResult);
-    const mainLabel = game.phase === 'idle' ? 'Deal Hand' :
+    const mainLabel = mounted.isDealing ? 'Dealing...' : mounted.isDrawAnimating ? 'Drawing...' : game.phase === 'idle' ? 'Deal Hand' :
       game.phase === 'draw' ? (selected.size ? 'Draw ' + selected.size : 'Stand Pat') :
       game.phase === 'bet' ? 'Bet ' + formatChips(mounted.uiBet) :
       game.phase === 'player-response' ? 'Call ' + formatChips(Math.max(0, game.highBet - player.currentBet)) :
       game.phase === 'bot-betting' ? 'Action...' : 'Next Hand';
-    const mainDisabled = game.phase === 'bot-betting' ? ' disabled' : '';
-    const secondary = game.phase === 'draw' ? '<button type="button" class="draw-btn" id="drawKeep">Keep All</button>' :
+    const mainDisabled = game.phase === 'bot-betting' || busy ? ' disabled' : '';
+    const secondary = !busy && game.phase === 'draw' ? '<button type="button" class="draw-btn" id="drawKeep">Keep All</button>' :
       game.phase === 'bet' ? '<button type="button" class="draw-btn" id="drawCheck">Check</button>' :
       game.phase === 'player-response' ? '<button type="button" class="draw-btn danger" id="drawFold">Fold</button>' : '';
-    const betControls = game.phase === 'bet' ? '<div class="draw-bet-controls"><button type="button" id="drawBetDown">-</button><span>' + formatChips(mounted.uiBet) + '</span><button type="button" id="drawBetUp">+</button></div>' : '';
-    mounted.parent.innerHTML = '<section class="draw-poker-game" aria-label="5-card draw poker table">' +
+    const betControls = !busy && game.phase === 'bet' ? '<div class="draw-bet-controls"><button type="button" id="drawBetDown">-</button><span>' + formatChips(mounted.uiBet) + '</span><button type="button" id="drawBetUp">+</button></div>' : '';
+    mounted.parent.innerHTML = '<section class="draw-poker-game' + (mounted.isDealing ? ' is-dealing' : '') + (mounted.isDrawAnimating ? ' is-drawing' : '') + '" aria-label="5-card draw poker table">' +
       '<div class="draw-topbar"><strong>Poker Room - Table 1</strong><span>5-Card Draw</span><span>Arcade Chips <b>' + formatChips(player.chips) + '</b></span></div>' +
       '<div class="draw-table-wrap"><div class="draw-poker-table">' +
         '<div class="draw-pot-area">' + chipStackHtml(game.pot) + '<strong>' + formatChips(game.pot) + '</strong><span>POT</span></div>' +
@@ -417,6 +484,7 @@
         game.seats.map(function(seat, index){
           const occupied = seat ? ' occupied' : ' empty';
           const active = game.currentPlayer === index && game.phase !== 'idle' && game.phase !== 'showdown' ? ' active' : '';
+          const visibleCount = mounted.isDealing ? dealtCountForSeat(index) : null;
           const winner = game.lastWinner === index ? ' winner' : '';
           const folded = seat && seat.folded ? ' folded' : '';
           const thinking = seat && seat.lastAction === 'Thinking' ? ' thinking' : '';
@@ -427,11 +495,11 @@
             '<div class="draw-seat-chips">' + (seat ? formatChips(seat.chips) : '') + '</div>' +
             '<div class="draw-seat-bet">' + betText + '</div>' +
             '<div class="draw-seat-action">' + seatActionText(seat) + '</div>' +
-            '<div class="draw-seat-cards">' + seatCardsHtml(seat, index, game.phase) + '</div>' +
+            '<div class="draw-seat-cards">' + seatCardsHtml(seat, index, game.phase, visibleCount) + '</div>' +
           '</div>';
         }).join('') +
       '</div></div>' +
-      '<div class="draw-hand-dock"><div class="draw-hand-panel"><div class="draw-your-cards">' + player.hand.map(function(card, index){ return cardHtml(card, index, selected.has(index)); }).join('') + '</div><div class="draw-status"><span>' + status + '</span><strong>' + playerEval + '</strong></div></div>' +
+      '<div class="draw-hand-dock"><div class="draw-hand-panel"><div class="draw-your-cards">' + player.hand.slice(0, mounted.isDealing ? dealtCountForSeat(0) : player.hand.length).map(function(card, index){ return cardHtml(card, index, selected.has(index), mounted.isDealing || mounted.isDrawAnimating); }).join('') + '</div><div class="draw-status"><span>' + status + '</span><strong>' + playerEval + '</strong></div></div>' +
       '<div class="draw-action-panel"><button type="button" class="draw-btn primary" id="drawMain"' + mainDisabled + '>' + mainLabel + '</button>' + betControls + secondary + '</div></div>' +
     '</section>';
     bindControls();
@@ -442,7 +510,7 @@
     const root = mounted.parent;
     root.querySelectorAll('.draw-card').forEach(function(button, index){
       button.addEventListener('click', function(){
-        if(mounted.game.phase !== 'draw') return;
+        if(mounted.game.phase !== 'draw' || mounted.isDealing || mounted.isDrawAnimating) return;
         if(mounted.selectedDiscard.has(index)) mounted.selectedDiscard.delete(index);
         else mounted.selectedDiscard.add(index);
         render();
@@ -454,14 +522,15 @@
       mounted.message = '';
       if(game.phase === 'idle'){
         clearActionTimers();
-        if(!game.deal()) mounted.message = 'Not enough Arcade Chips to ante.';
+        if(!game.deal()){
+          mounted.message = 'Not enough Arcade Chips to ante.';
+          render();
+          return;
+        }
         mounted.selectedDiscard.clear();
-        render();
+        startDealAnimation();
       }else if(game.phase === 'draw'){
-        game.playerDraw(Array.from(mounted.selectedDiscard));
-        mounted.selectedDiscard.clear();
-        mounted.uiBet = Math.min(50, game.seats[0].chips);
-        startPlayerTimer();
+        startDrawAnimation(Array.from(mounted.selectedDiscard));
       }else if(game.phase === 'bet'){
         startBotSequence(mounted.uiBet);
       }else if(game.phase === 'player-response'){
@@ -479,9 +548,7 @@
     const keep = root.querySelector('#drawKeep');
     if(keep) keep.addEventListener('click', function(){
       mounted.message = '';
-      mounted.selectedDiscard.clear();
-      mounted.game.playerDraw([]);
-      startPlayerTimer();
+      startDrawAnimation([]);
     });
     const check = root.querySelector('#drawCheck');
     if(check) check.addEventListener('click', function(){
@@ -511,6 +578,12 @@
       game: new DrawPoker(6, loadBank()),
       selectedDiscard: new Set(),
       uiBet: 50,
+      isDealing: false,
+      isDrawAnimating: false,
+      dealOrder: [],
+      dealProgress: 0,
+      dealTarget: 0,
+      pendingDiscardCount: 0,
       playerSeconds: null,
       playerTimer: null,
       actionTimers: [],

@@ -1958,6 +1958,9 @@ body.deck-arcade #play-area.room-poker .controls {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .draw-card.deal-new,
+  .draw-card-back.deal-new,
+  .draw-poker-game.is-drawing .draw-card.selected,
   .bj-card.deal-new,
   .blackjack-table-felt.bj-win-celebrate,
   .bj-outcome-layer,
@@ -2934,6 +2937,44 @@ body.deck-arcade #play-area.room-poker .controls {
   transition: transform .14s ease, box-shadow .14s ease, filter .14s ease;
 }
 
+
+.draw-card.deal-new,
+.draw-card-back.deal-new {
+  animation: drawCardSlide .28s ease-out both;
+  animation-delay: calc(var(--i) * .025s);
+}
+
+.draw-poker-game.is-dealing .draw-card,
+.draw-poker-game.is-dealing .draw-card-back {
+  pointer-events: none;
+}
+
+.draw-poker-game.is-drawing .draw-card.selected {
+  animation: drawDiscardLift .32s ease-in both;
+}
+
+@keyframes drawCardSlide {
+  0% {
+    opacity: 0;
+    transform: translate3d(46px, -42px, 0) rotate(9deg) scale(.72);
+    filter: blur(1px) brightness(.82);
+  }
+  72% {
+    opacity: 1;
+    transform: translate3d(-3px, 2px, 0) rotate(-2deg) scale(1.03);
+    filter: blur(0) brightness(1.08);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(0) scale(1);
+    filter: none;
+  }
+}
+
+@keyframes drawDiscardLift {
+  0% { opacity: 1; transform: translateY(-20px) scale(1); }
+  100% { opacity: 0; transform: translateY(-48px) scale(.92) rotate(7deg); }
+}
 .draw-card.red { color: #b5122e; }
 .draw-card span { font-weight: 900; font-size: 1rem; }
 .draw-card strong { font-size: clamp(1.6rem, 4vw, 2.45rem); }
