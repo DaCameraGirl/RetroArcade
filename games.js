@@ -910,6 +910,17 @@ function pokerScore(hand){
 
 function renderPokerMini(selected){
   board.innerHTML = '<div id="pokerMount"></div>';
+  if(window.RetroArcadePokerRoom){
+    pokerGame = window.RetroArcadePokerRoom.mount({
+      parent: 'pokerMount',
+      selected: selected,
+      onHandComplete: function(){
+        moves++;
+        updateHUD();
+      }
+    });
+    return;
+  }
   const engine = selected.engine === 'draw' ? window.RetroArcadeDrawPoker : window.RetroArcadePoker;
   if(!engine){
     board.innerHTML = '<section class="mini-game coming-soon-game"><h2>' + selected.name + '</h2><p class="mini-status">Poker table engine did not load. Refresh and try again.</p></section>';
