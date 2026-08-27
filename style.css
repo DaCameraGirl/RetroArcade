@@ -784,12 +784,14 @@ body.deck-arcade .room-classics .floor-game::after {
 
 /* Frog Crossing cabinet */
 .frog-cabinet-game {
-  min-height: 620px;
-  padding: 10px 0 24px;
+  min-height: calc(100vh - 250px);
+  display: grid;
+  place-items: center;
+  padding: clamp(12px, 2vw, 28px) 0 34px;
 }
 
 .cabinet-3d {
-  width: min(560px, 92vw);
+  width: min(820px, calc(100vw - 120px));
   position: relative;
   perspective: 900px;
   transform-style: preserve-3d;
@@ -863,6 +865,7 @@ body.deck-arcade .room-classics .floor-game::after {
 
 #frogCanvas {
   width: 100%;
+  max-height: calc(100vh - 360px);
   display: block;
   aspect-ratio: 640 / 760;
   border-radius: 14px;
@@ -908,6 +911,7 @@ body.deck-arcade .room-classics .floor-game::after {
 }
 
 @media(max-width:600px){
+  .cabinet-3d { width: min(560px, calc(100vw - 28px)); }
   .frog-cabinet { padding: 14px 12px 18px; }
   .cabinet-side { display: none; }
   .cabinet-controls { grid-template-columns: 1fr 1fr; }
@@ -1461,21 +1465,33 @@ body.deck-arcade .room-classics .floor-game::after {
 }
 
 body.deck-arcade #play-area.play-area-blackjack,
-body.deck-arcade #play-area.play-area-retro-arcade-slot {
+body.deck-arcade #play-area.play-area-retro-arcade-slot,
+body.deck-arcade #play-area.room-classics,
+body.deck-arcade #play-area.room-tablegames,
+body.deck-arcade #play-area.room-slots,
+body.deck-arcade #play-area.room-poker {
   width: calc(100vw - 28px);
   max-width: 1560px;
   margin-inline: auto;
 }
 
 body.deck-arcade #play-area.play-area-blackjack .controls,
-body.deck-arcade #play-area.play-area-retro-arcade-slot .controls {
+body.deck-arcade #play-area.play-area-retro-arcade-slot .controls,
+body.deck-arcade #play-area.room-classics .controls,
+body.deck-arcade #play-area.room-tablegames .controls,
+body.deck-arcade #play-area.room-slots .controls,
+body.deck-arcade #play-area.room-poker .controls {
   width: 100%;
   max-width: none;
   justify-content: center;
 }
 
 #play-area.play-area-blackjack #board,
-#play-area.play-area-retro-arcade-slot #board {
+#play-area.play-area-retro-arcade-slot #board,
+#play-area.room-classics #board,
+#play-area.room-tablegames #board,
+#play-area.room-slots #board,
+#play-area.room-poker #board {
   max-width: none;
   min-height: calc(100vh - 220px);
   padding: clamp(10px, 1.4vw, 20px);
@@ -1490,12 +1506,24 @@ body.deck-arcade #play-area.play-area-retro-arcade-slot .controls {
 #play-area.play-area-blackjack #board::before,
 #play-area.play-area-blackjack #board::after,
 #play-area.play-area-retro-arcade-slot #board::before,
-#play-area.play-area-retro-arcade-slot #board::after {
+#play-area.play-area-retro-arcade-slot #board::after,
+#play-area.room-classics #board::before,
+#play-area.room-classics #board::after,
+#play-area.room-tablegames #board::before,
+#play-area.room-tablegames #board::after,
+#play-area.room-slots #board::before,
+#play-area.room-slots #board::after,
+#play-area.room-poker #board::before,
+#play-area.room-poker #board::after {
   display: none;
 }
 
 #play-area.play-area-blackjack #board > *,
-#play-area.play-area-retro-arcade-slot #board > * {
+#play-area.play-area-retro-arcade-slot #board > *,
+#play-area.room-classics #board > *,
+#play-area.room-tablegames #board > *,
+#play-area.room-slots #board > *,
+#play-area.room-poker #board > * {
   z-index: 2;
 }
 
