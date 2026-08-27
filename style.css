@@ -1832,3 +1832,379 @@ body.deck-arcade .room-classics .floor-game::after {
     min-width: 78px;
   }
 }
+
+
+/* Realistic Sic Bo dice table */
+#sicBoMount {
+  width: 100%;
+}
+
+.sicbo-game {
+  position: relative;
+  min-height: 740px;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 14px;
+  padding: clamp(12px, 2.5vw, 24px);
+  overflow: hidden;
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 80% 0%, rgba(255, 212, 111, .16), transparent 30%),
+    linear-gradient(180deg, #12060b, #050506 72%);
+}
+
+.sic-room-light {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 50% 18%, rgba(255, 226, 160, .13), transparent 40%),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.018) 0 1px, transparent 1px 76px);
+}
+
+.sic-meter-panel {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.sic-meter-panel div {
+  min-height: 58px;
+  display: grid;
+  align-content: center;
+  gap: 3px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,224,138,.28);
+  background: linear-gradient(180deg, rgba(18,20,22,.92), rgba(6,5,7,.95));
+  box-shadow: inset 0 0 18px rgba(142,70,255,.08), 0 10px 22px rgba(0,0,0,.28);
+}
+
+.sic-meter-panel small,
+.sic-table-title span,
+.sic-table-title em,
+.sic-bet-zone small,
+.sic-bet-zone strong {
+  color: rgba(255,255,255,.66);
+  font-family: 'Space Mono', monospace;
+  font-size: .68rem;
+  text-transform: uppercase;
+}
+
+.sic-meter-panel strong {
+  color: #fff0aa;
+  font-family: 'Space Mono', monospace;
+  font-size: clamp(.95rem, 2vw, 1.2rem);
+}
+
+.sic-table {
+  position: relative;
+  z-index: 2;
+  min-height: 560px;
+  padding: 24px clamp(12px, 3vw, 30px) 28px;
+  border-radius: 34px;
+  background:
+    radial-gradient(ellipse at 50% 14%, rgba(255,255,255,.16), transparent 22%),
+    radial-gradient(ellipse at 50% 58%, #176046 0%, #083e31 58%, #061d1a 100%);
+  box-shadow:
+    inset 0 0 0 12px rgba(61,24,11,.88),
+    inset 0 0 0 18px rgba(150,91,45,.42),
+    inset 0 -40px 74px rgba(0,0,0,.44),
+    0 36px 74px rgba(0,0,0,.56);
+  overflow: hidden;
+}
+
+.sic-table::before {
+  content: "";
+  position: absolute;
+  inset: 22px;
+  border-radius: 26px;
+  border: 1px solid rgba(255,242,186,.22);
+  pointer-events: none;
+}
+
+.sic-table-title {
+  display: grid;
+  place-items: center;
+  gap: 3px;
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+.sic-table-title strong {
+  color: rgba(255,242,186,.92);
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(.9rem, 2.3vw, 1.25rem);
+  text-shadow: 0 2px 0 rgba(0,0,0,.7), 0 0 14px rgba(255,212,111,.28);
+}
+
+.sic-dice-bowl {
+  position: relative;
+  width: min(380px, 92%);
+  min-height: 132px;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(12px, 4vw, 28px);
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at 50% 45%, rgba(255,255,255,.13), transparent 34%),
+    linear-gradient(180deg, rgba(0,0,0,.34), rgba(0,0,0,.12));
+  border: 2px solid rgba(255,242,186,.24);
+  box-shadow: inset 0 16px 28px rgba(0,0,0,.34), 0 16px 28px rgba(0,0,0,.24);
+}
+
+.sic-die {
+  position: relative;
+  width: clamp(58px, 9vw, 82px);
+  aspect-ratio: 1;
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 28% 20%, rgba(255,255,255,.86), transparent 24%),
+    linear-gradient(145deg, #fffdf5, #d8cfbd);
+  box-shadow: 0 14px 22px rgba(0,0,0,.34), inset 0 -9px 14px rgba(0,0,0,.13), inset 0 0 0 1px rgba(0,0,0,.1);
+  transform: rotate(calc((var(--i) - 1) * 8deg));
+}
+
+.sic-die.rolling {
+  animation: sicDiceRoll .32s ease-in-out infinite;
+}
+
+@keyframes sicDiceRoll {
+  0% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-16px) rotate(24deg); }
+  100% { transform: translateY(0) rotate(58deg); }
+}
+
+.sic-die .pip {
+  position: absolute;
+  width: 13%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #777, #111 72%);
+  opacity: 0;
+}
+
+.sic-die .p1 { left: 22%; top: 22%; }
+.sic-die .p2 { left: 50%; top: 22%; transform: translateX(-50%); }
+.sic-die .p3 { right: 22%; top: 22%; }
+.sic-die .p4 { left: 22%; top: 50%; transform: translateY(-50%); }
+.sic-die .p5 { left: 50%; top: 50%; transform: translate(-50%, -50%); }
+.sic-die .p6 { right: 22%; top: 50%; transform: translateY(-50%); }
+.sic-die .p7 { left: 22%; bottom: 22%; }
+.sic-die .p8 { left: 50%; bottom: 22%; transform: translateX(-50%); }
+.sic-die .p9 { right: 22%; bottom: 22%; }
+.sic-die.face-1 .p5,
+.sic-die.face-2 .p1,
+.sic-die.face-2 .p9,
+.sic-die.face-3 .p1,
+.sic-die.face-3 .p5,
+.sic-die.face-3 .p9,
+.sic-die.face-4 .p1,
+.sic-die.face-4 .p3,
+.sic-die.face-4 .p7,
+.sic-die.face-4 .p9,
+.sic-die.face-5 .p1,
+.sic-die.face-5 .p3,
+.sic-die.face-5 .p5,
+.sic-die.face-5 .p7,
+.sic-die.face-5 .p9,
+.sic-die.face-6 .p1,
+.sic-die.face-6 .p3,
+.sic-die.face-6 .p4,
+.sic-die.face-6 .p6,
+.sic-die.face-6 .p7,
+.sic-die.face-6 .p9 { opacity: 1; }
+
+.sic-message {
+  width: min(620px, 100%);
+  min-height: 40px;
+  margin: 0 auto 16px;
+  display: grid;
+  place-items: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  color: #fff2a8;
+  font-family: 'Space Mono', monospace;
+  text-align: center;
+  background: rgba(0,0,0,.42);
+  border: 1px solid rgba(255,255,255,.14);
+}
+
+.sic-bet-board {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(92px, 1fr));
+  gap: 8px;
+}
+
+.sic-bet-zone {
+  appearance: none;
+  min-height: 82px;
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  padding: 9px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,242,186,.28);
+  color: #fff;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255,255,255,.1), transparent 34%),
+    linear-gradient(180deg, rgba(8,61,47,.94), rgba(3,32,27,.96));
+  box-shadow: inset 0 0 18px rgba(255,255,255,.03), 0 9px 16px rgba(0,0,0,.22);
+  cursor: pointer;
+  text-align: center;
+}
+
+.sic-bet-zone span {
+  font-family: 'Space Mono', monospace;
+  font-weight: 900;
+  font-size: clamp(.78rem, 1.5vw, .98rem);
+}
+
+.sic-bet-zone strong {
+  color: #ffd46f;
+}
+
+.sic-bet-zone.selected {
+  color: #130609;
+  border-color: rgba(255,255,255,.78);
+  background: linear-gradient(180deg, #ffe28c, #c4852f);
+  box-shadow: 0 0 24px rgba(255,212,111,.42), inset 0 0 0 2px rgba(255,255,255,.24);
+}
+
+.sic-bet-zone.selected small,
+.sic-bet-zone.selected strong {
+  color: #321107;
+}
+
+.sic-active-chip {
+  position: absolute;
+  right: clamp(20px, 4vw, 42px);
+  top: 118px;
+  transform: rotate(7deg);
+}
+
+.sic-chip-stack {
+  position: relative;
+  width: 88px;
+  height: 58px;
+  display: grid;
+  place-items: end center;
+}
+
+.sic-chip-stack strong {
+  position: absolute;
+  left: 50%;
+  bottom: -18px;
+  transform: translateX(-50%);
+  color: #fff4b8;
+  font-family: 'Space Mono', monospace;
+  font-size: .78rem;
+  text-shadow: 0 2px 0 rgba(0,0,0,.8);
+}
+
+.sic-chip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--i) * 7px);
+  width: 54px;
+  height: 17px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 38%, #fff, transparent 18%), linear-gradient(90deg, #c8203d 0 22%, #fff 22% 34%, #c8203d 34% 66%, #fff 66% 78%, #c8203d 78%);
+  box-shadow: 0 3px 6px rgba(0,0,0,.34), inset 0 -3px 0 rgba(0,0,0,.18);
+}
+.sic-chip.blue { background-image: radial-gradient(circle at 50% 38%, #fff, transparent 18%), linear-gradient(90deg, #2264d9 0 22%, #fff 22% 34%, #2264d9 34% 66%, #fff 66% 78%, #2264d9 78%); }
+.sic-chip.green { background-image: radial-gradient(circle at 50% 38%, #fff, transparent 18%), linear-gradient(90deg, #169a53 0 22%, #fff 22% 34%, #169a53 34% 66%, #fff 66% 78%, #169a53 78%); }
+.sic-chip.gold { background-image: radial-gradient(circle at 50% 38%, #fff, transparent 18%), linear-gradient(90deg, #d69a24 0 22%, #fff 22% 34%, #d69a24 34% 66%, #fff 66% 78%, #d69a24 78%); }
+
+.sic-controls {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 12px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(20,18,20,.92), rgba(8,6,8,.95));
+  border: 1px solid rgba(255,224,138,.24);
+}
+
+.sic-bet-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sic-controls button {
+  min-width: 92px;
+  min-height: 48px;
+  border: 1px solid rgba(255,224,138,.42);
+  border-radius: 10px;
+  color: #fff7d1;
+  background: linear-gradient(180deg, #2c2d36, #111217);
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 8px 16px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.12);
+}
+
+.sic-controls button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.sic-bet-controls button {
+  min-width: 42px;
+  width: 42px;
+  border-radius: 50%;
+}
+
+.sic-bet-controls .sic-chip-stack {
+  transform: scale(.78);
+  margin: 0 -6px;
+}
+
+.sic-roll-button {
+  color: #21050d !important;
+  background: linear-gradient(180deg, #ffe08a, #be7a23) !important;
+}
+
+@media(max-width: 880px){
+  .sic-bet-board {
+    grid-template-columns: repeat(3, minmax(78px, 1fr));
+  }
+}
+
+@media(max-width: 600px){
+  .sicbo-game {
+    min-height: 860px;
+    padding: 10px;
+  }
+  .sic-meter-panel {
+    grid-template-columns: 1fr;
+  }
+  .sic-table {
+    min-height: 640px;
+    padding: 20px 10px 24px;
+  }
+  .sic-dice-bowl {
+    min-height: 112px;
+  }
+  .sic-bet-board {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .sic-bet-zone {
+    min-height: 74px;
+  }
+  .sic-active-chip {
+    display: none;
+  }
+}

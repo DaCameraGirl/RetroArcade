@@ -15,6 +15,7 @@ let snakeInt = null;
 let snakeGame = null;
 let slotGame = null;
 let blackjackGame = null;
+let sicBoGame = null;
 let frogInt = null;
 
 const $ = s => document.querySelector(s);
@@ -830,6 +831,10 @@ function stopLiveMiniGames(){
     blackjackGame.destroy();
     blackjackGame = null;
   }
+  if(sicBoGame){
+    sicBoGame.destroy();
+    sicBoGame = null;
+  }
   document.onkeydown = null;
 }
 
@@ -966,31 +971,18 @@ function renderDiceMini(selected){
 }
 
 function renderSicBoMini(selected){
-  state.sicBo = state.sicBo || { bet: 'big', dice: null, result: 'Choose a bet, then roll.' };
-  const betLabel = { small: 'Small 4-10', triple: 'Any Triple', big: 'Big 11-17' };
-  const dice = state.sicBo.dice || [1, 1, 1];
-  board.innerHTML = '<section class="mini-game dice-mini sicbo-mini"><h2>' + selected.name + '</h2>' +
-    '<div class="sicbo-board">' + ['small','triple','big'].map(function(bet){ return '<button class="sicbo-bet ' + (state.sicBo.bet === bet ? 'active' : '') + '" data-bet="' + bet + '">' + betLabel[bet] + '</button>'; }).join('') + '</div>' +
-    '<div class="dice-row">' + dice.map(function(n){ return '<span>' + n + '</span>'; }).join('') + '</div>' +
-    '<p class="mini-status">' + state.sicBo.result + '</p>' +
-    '<div class="mini-actions"><button id="miniRoll">Roll dice</button></div></section>';
-  board.querySelectorAll('[data-bet]').forEach(function(button){
-    button.addEventListener('click', function(){
-      state.sicBo.bet = button.dataset.bet;
-      state.sicBo.result = 'Bet on ' + betLabel[state.sicBo.bet] + '.';
-      renderSicBoMini(selected);
-    });
-  });
-  document.querySelector('#miniRoll').addEventListener('click', function(){
-    const rolled = Array.from({length: 3}, function(){ return 1 + Math.floor(Math.random() * 6); });
-    const total = rolled.reduce(function(sum, n){ return sum + n; }, 0);
-    const triple = rolled[0] === rolled[1] && rolled[1] === rolled[2];
-    const outcome = triple ? 'triple' : (total >= 11 ? 'big' : 'small');
-    state.sicBo.dice = rolled;
-    state.sicBo.result = (outcome === state.sicBo.bet ? 'Win' : 'House wins') + ' | ' + betLabel[outcome] + ' | Total ' + total;
-    moves++;
-    updateHUD();
-    renderSicBoMini(selected);
+  board.innerHTML = '<div id="sicBoMount"></div>';
+  if(!window.RetroArcadeSicBo){
+    board.innerHTML = '<section class="mini-game coming-soon-game"><h2>' + selected.name + '</h2><p class="mini-status">Sic Bo table engine did not load. Refresh and try again.</p></section>';
+    return;
+  }
+  sicBoGame = window.RetroArcadeSicBo.mount({
+    parent: 'sicBoMount',
+    selected: selected,
+    onRollComplete: function(){
+      moves++;
+      updateHUD();
+    }
   });
 }
 

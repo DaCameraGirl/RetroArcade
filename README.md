@@ -22,7 +22,7 @@
 | **Slot Machines** | RetroArcade Reels |
 | **Classic Arcade** | Frog Crossing, Snake |
 
-Klondike, Tri-Peaks, FreeCell, and Pyramid use card-table rules. Frog Crossing is a canvas arcade cabinet with coin/start controls, traffic, logs, lives, homes, score, and local hi-score. Blackjack is now a dedicated table module with a felt table, dealer shoe, visible chips, bet controls, hit/stand/double actions, dealer play, and Arcade Chips payouts. Sic Bo has direct dice-bet choices. RetroArcade Reels is now a dedicated slot-machine module with a physical cabinet, animated reel strips, Arcade Chips balance, bet controls, hold buttons, paytable, win lights, and coin feedback. Snake is a dedicated Phaser 3/WebGL game module with a garden scene, sprite-based snake animation, collision scenery, particles, camera follow, score, and local hi-score. Placeholder mini-game loops are no longer listed as playable games.
+Klondike, Tri-Peaks, FreeCell, and Pyramid use card-table rules. Frog Crossing is a canvas arcade cabinet with coin/start controls, traffic, logs, lives, homes, score, and local hi-score. Blackjack is now a dedicated table module with a felt table, dealer shoe, visible chips, bet controls, hit/stand/double actions, dealer play, and Arcade Chips payouts. Sic Bo is now a dedicated dice-table module with a felt betting board, animated dice, chip balance, bet controls, single/total/triple betting zones, and Arcade Chips payouts. RetroArcade Reels is now a dedicated slot-machine module with a physical cabinet, animated reel strips, Arcade Chips balance, bet controls, hold buttons, paytable, win lights, and coin feedback. Snake is a dedicated Phaser 3/WebGL game module with a garden scene, sprite-based snake animation, collision scenery, particles, camera follow, score, and local hi-score. Placeholder mini-game loops are no longer listed as playable games.
 
 ---
 
@@ -43,7 +43,7 @@ cd RetroArcade
 
 - **JavaScript** – Game logic & interactions
 - **Phaser 3** – 2D/2.5D arcade runtime for Snake and future cabinet games
-- **Dedicated game modules** – Blackjack, Slots, and Snake now mount inside the shared RetroArcade shell
+- **Dedicated game modules** – Blackjack, Sic Bo, Slots, and Snake now mount inside the shared RetroArcade shell
 - **CSS** – Retro arcade styling
 - **HTML** – Clean, semantic markup
 
