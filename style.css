@@ -999,6 +999,21 @@ body.deck-arcade .room-classics .floor-game::after {
   width: 100%;
 }
 
+#play-area.play-area-retro-arcade-slot .slot-casino-game {
+  grid-template-columns: minmax(0, 1fr) minmax(230px, 280px);
+  gap: clamp(18px, 2.5vw, 34px);
+  min-height: calc(100vh - 250px);
+  align-items: stretch;
+}
+
+#play-area.play-area-retro-arcade-slot .slot-machine-shell {
+  width: min(920px, 100%);
+}
+
+#play-area.play-area-retro-arcade-slot .slot-reel-cabinet {
+  height: clamp(220px, 20vw, 290px);
+}
+
 .slot-casino-game {
   position: relative;
   min-height: 720px;
@@ -1428,7 +1443,8 @@ body.deck-arcade .room-classics .floor-game::after {
 
 
 /* Realistic Blackjack table */
-#play-area.play-area-blackjack {
+#play-area.play-area-blackjack,
+#play-area.play-area-retro-arcade-slot {
   width: min(1540px, calc(100vw - 28px));
   max-width: none;
   align-self: center;
@@ -1436,7 +1452,8 @@ body.deck-arcade .room-classics .floor-game::after {
   background: linear-gradient(180deg, rgba(12,15,18,.92), rgba(3,4,5,.96));
 }
 
-#play-area.play-area-blackjack #board {
+#play-area.play-area-blackjack #board,
+#play-area.play-area-retro-arcade-slot #board {
   max-width: none;
   min-height: calc(100vh - 220px);
   padding: clamp(10px, 1.4vw, 20px);
@@ -1449,11 +1466,14 @@ body.deck-arcade .room-classics .floor-game::after {
 }
 
 #play-area.play-area-blackjack #board::before,
-#play-area.play-area-blackjack #board::after {
+#play-area.play-area-blackjack #board::after,
+#play-area.play-area-retro-arcade-slot #board::before,
+#play-area.play-area-retro-arcade-slot #board::after {
   display: none;
 }
 
-#play-area.play-area-blackjack #board > * {
+#play-area.play-area-blackjack #board > *,
+#play-area.play-area-retro-arcade-slot #board > * {
   z-index: 2;
 }
 

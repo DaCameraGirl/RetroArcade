@@ -16,6 +16,8 @@
 
   let mounted = null;
   let spinTimers = [];
+  let reelSoundTimer = null;
+  let audioCtx = null;
 
   function loadState(symbols){
     try{
@@ -40,6 +42,92 @@
       holds: state.holds,
       lastWin: state.lastWin,
     }));
+  }
+
+  function audio(){
+    const Ctor = window.AudioContext || window.webkitAudioContext;
+    if(!Ctor) return null;
+    if(!audioCtx) audioCtx = new Ctor();
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }
+
+  function tone(freq, duration, type, gain, delay){
+    const ctx = audio();
+    if(!ctx) return;
+    const start = ctx.currentTime + (delay || 0);
+    const osc = ctx.createOscillator();
+    const amp = ctx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.setValueAtTime(freq, start);
+    amp.gain.setValueAtTime(0.0001, start);
+    amp.gain.exponentialRampToValueAtTime(gain || 0.05, start + 0.012);
+    amp.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+    osc.connect(amp).connect(ctx.destination);
+    osc.start(start);
+    osc.stop(start + duration + 0.03);
+  }
+
+  function noiseBurst(duration, gain, filterFreq, delay){
+    const ctx = audio();
+    if(!ctx) return;
+    const start = ctx.currentTime + (delay || 0);
+    const buffer = ctx.createBuffer(1, Math.max(1, Math.floor(ctx.sampleRate * duration)), ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for(let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
+    const src = ctx.createBufferSource();
+    const filter = ctx.createBiquadFilter();
+    const amp = ctx.createGain();
+    src.buffer = buffer;
+    filter.type = 'bandpass';
+    filter.frequency.setValueAtTime(filterFreq || 900, start);
+    filter.Q.setValueAtTime(3.2, start);
+    amp.gain.setValueAtTime(gain || 0.045, start);
+    amp.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+    src.connect(filter).connect(amp).connect(ctx.destination);
+    src.start(start);
+    src.stop(start + duration + 0.02);
+  }
+
+  function stopReelLoop(){
+    if(reelSoundTimer) window.clearInterval(reelSoundTimer);
+    reelSoundTimer = null;
+  }
+
+  function playSpinStart(){
+    audio();
+    noiseBurst(0.08, 0.08, 420);
+    tone(92, 0.09, 'sawtooth', 0.035);
+    stopReelLoop();
+    reelSoundTimer = window.setInterval(function(){
+      noiseBurst(0.026, 0.034, 720 + Math.random() * 420);
+      tone(150 + Math.random() * 40, 0.028, 'square', 0.012);
+    }, 86);
+  }
+
+  function playReelStop(symbol, index){
+    noiseBurst(0.038, 0.06, 1020 + index * 130);
+    tone(180 + index * 24, 0.045, 'triangle', 0.028);
+    if(symbol === 'CHERRY'){
+      tone(740, 0.08, 'sine', 0.052, 0.02);
+      tone(980, 0.1, 'sine', 0.045, 0.09);
+    }
+  }
+
+  function playWinSound(result){
+    if(!result.win){
+      tone(120, 0.08, 'triangle', 0.025);
+      tone(92, 0.1, 'triangle', 0.018, 0.08);
+      return;
+    }
+    const cherry = result.label.indexOf('CHERRY') !== -1;
+    const notes = cherry ? [784, 988, 1175, 1568] : [523, 659, 784, 1047];
+    notes.forEach(function(note, i){ tone(note, 0.13, 'sine', 0.052, i * 0.075); });
+    noiseBurst(0.18, 0.045, 1850, 0.08);
+  }
+
+  function playButtonSound(){
+    tone(320, 0.035, 'square', 0.018);
   }
 
   function randomSymbol(symbols){
@@ -185,6 +273,7 @@
   function clearTimers(){
     spinTimers.forEach(function(id){ window.clearTimeout(id); });
     spinTimers = [];
+    stopReelLoop();
   }
 
   function bindHoldButtons(state, selected){
@@ -193,6 +282,7 @@
     root.querySelectorAll('[data-hold]').forEach(function(button){
       button.addEventListener('click', function(){
         if(mounted.spinning) return;
+        playButtonSound();
         const idx = parseInt(button.dataset.hold, 10);
         state.holds[idx] = !state.holds[idx];
         state.lastWin = 0;
@@ -220,7 +310,13 @@
     rerenderReels(state, selected, true);
 
     clearTimers();
+    playSpinStart();
+    state.reels.forEach(function(symbol, i){
+      if(state.holds[i]) return;
+      spinTimers.push(window.setTimeout(function(){ playReelStop(symbol, i); }, 560 + i * 115));
+    });
     spinTimers.push(window.setTimeout(function(){
+      stopReelLoop();
       const result = scoreSpin(state);
       state.lastWin = result.win;
       state.balance += result.win;
@@ -232,6 +328,7 @@
       const shell = mounted.parent.querySelector('.slot-machine-shell');
       if(shell) shell.classList.toggle('slot-winning', result.win > 0);
       setMessage(result.win > 0 ? result.label + ' pays ' + formatChips(result.win) + ' chips.' : result.label + '. Try the next spin.');
+      playWinSound(result);
       if(result.win > 0) burstCoins();
       if(typeof mounted.onSpin === 'function') mounted.onSpin(result);
     }, 1180));
@@ -252,10 +349,11 @@
     const root = mounted.parent;
     bindHoldButtons(state, selected);
     root.querySelector('#slotSpin').addEventListener('click', function(){ spin(state, selected); });
-    root.querySelector('#slotBetDown').addEventListener('click', function(){ changeBet(state, -1); });
-    root.querySelector('#slotBetUp').addEventListener('click', function(){ changeBet(state, 1); });
+    root.querySelector('#slotBetDown').addEventListener('click', function(){ playButtonSound(); changeBet(state, -1); });
+    root.querySelector('#slotBetUp').addEventListener('click', function(){ playButtonSound(); changeBet(state, 1); });
     root.querySelector('#slotClearHolds').addEventListener('click', function(){
       if(mounted.spinning) return;
+      playButtonSound();
       state.holds = [false, false, false, false, false];
       state.lastWin = 0;
       saveState(state);

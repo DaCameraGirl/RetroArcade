@@ -1516,7 +1516,7 @@ function launchGame(gameId){
   arcadeGrid.classList.remove('casino-floor');
   gameGridWrap.classList.add('hidden');
   playArea.classList.remove('hidden');
-  playArea.className = playArea.className.replace(/\bplay-area-\w+\b/g, '').trim();
+  playArea.className = playArea.className.split(/\s+/).filter(function(name){ return name && !name.startsWith('play-area-'); }).join(' ');
   playArea.classList.add('play-area-' + selected.id);
   lobbySubtitle.textContent = selected.name;
   document.querySelector('#game-title').textContent = selected.name;
