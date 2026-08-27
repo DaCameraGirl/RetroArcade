@@ -3578,3 +3578,64 @@ body.deck-arcade #play-area.room-poker .controls {
     min-height: 640px;
   }
 }
+
+
+/* Blackjack hand layout guard */
+.blackjack-table-felt > .bj-hand-zone.dealer-zone {
+  top: clamp(88px, 15%, 112px);
+  bottom: auto;
+}
+
+.blackjack-table-felt > .bj-hand-zone.player-zone:not(.split-player-zone) {
+  top: auto;
+  bottom: clamp(28px, 7%, 46px);
+}
+
+.blackjack-table-felt > .bj-hand-zone.dealer-zone .bj-cards,
+.blackjack-table-felt > .bj-hand-zone.player-zone:not(.split-player-zone) .bj-cards {
+  width: min(520px, calc(100vw - 130px));
+  min-height: clamp(118px, 12vw, 152px);
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(10px, 1.3vw, 18px);
+}
+
+.blackjack-table-felt > .bj-hand-zone.dealer-zone .bj-card,
+.blackjack-table-felt > .bj-hand-zone.player-zone:not(.split-player-zone) .bj-card {
+  flex: 0 0 clamp(74px, 6.4vw, 106px);
+  transform: translateY(0) rotate(calc((var(--i) - 1) * 2deg));
+}
+
+
+@media(max-width: 760px){
+  .blackjack-table-felt > .bj-hand-zone.dealer-zone .bj-cards,
+  .blackjack-table-felt > .bj-hand-zone.player-zone:not(.split-player-zone) .bj-cards {
+    width: calc(100vw - 72px);
+    gap: 6px;
+  }
+  .blackjack-table-felt > .bj-hand-zone.dealer-zone .bj-card,
+  .blackjack-table-felt > .bj-hand-zone.player-zone:not(.split-player-zone) .bj-card {
+    flex-basis: clamp(54px, 16vw, 70px);
+  }
+}
+
+
+/* Blackjack calm deal motion */
+.blackjack-table-felt .bj-card.deal-new {
+  animation: bjDealClean .16s ease-out both;
+  animation-delay: 0s;
+}
+
+@keyframes bjDealClean {
+  0% {
+    opacity: 0;
+    transform: translate3d(18px, -14px, 0) scale(.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotate(calc((var(--i) - 1) * 2deg)) scale(1);
+  }
+}
