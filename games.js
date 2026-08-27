@@ -1462,21 +1462,38 @@ function renderLounge(){
   playArea.classList.add('hidden');
   document.querySelector('#win').classList.add('hidden');
   lobbySubtitle.textContent = 'Pick a floor';
-  if(arcadeHint) arcadeHint.textContent = 'Choose cards, table games, poker, slots, or classic arcade.';
+  if(arcadeHint) arcadeHint.textContent = 'Move through the casino.';
   setBreadcrumb('');
 
-  arcadeGrid.className = 'cabinet-grid casino-floor lounge-floor';
-  arcadeGrid.innerHTML = ROOMS.map(function(room){
-    return '<button class="zone-door zone-' + room.id + '" type="button" data-room="' + room.id + '">' +
-      '<span class="zone-icon">' + room.icon + '</span>' +
-      '<span class="zone-name">' + room.name + '</span>' +
-      '<span class="zone-desc">' + room.games.length + ' games</span>' +
+  arcadeGrid.className = 'cabinet-grid casino-floor lounge-floor environmental-lobby';
+  arcadeGrid.innerHTML = '<div class="environment-sign" aria-hidden="true"><span>RETRO</span><strong>ARCADE</strong></div>' +
+    '<div class="lobby-hotspot-layer">' + ROOMS.map(function(room){
+      return '<button class="env-hotspot env-' + room.id + '" type="button" data-room="' + room.id + '" aria-label="Enter ' + room.name + '">' +
+        '<span class="env-glow"></span>' +
+        '<span class="env-plaque"><small>' + room.games.length + ' games</small><strong>' + room.name + '</strong></span>' +
       '</button>';
-  }).join('');
+    }).join('') + '</div>' +
+    '<div class="host-desk" aria-hidden="true">' +
+      '<span class="desk-cards"></span><span class="desk-chips"></span><span class="desk-bell"></span><span class="desk-map"></span>' +
+    '</div>';
 
   arcadeGrid.querySelectorAll('[data-room]').forEach(function(card){
-    card.addEventListener('click', function(){ renderRoom(card.dataset.room); });
+    card.addEventListener('click', function(){
+      arcadeGrid.classList.add('is-entering', 'enter-' + card.dataset.room);
+      window.setTimeout(function(){ renderRoom(card.dataset.room); }, 520);
+    });
   });
+  arcadeGrid.onpointermove = function(event){
+    const rect = arcadeGrid.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width - .5);
+    const y = ((event.clientY - rect.top) / rect.height - .5);
+    arcadeGrid.style.setProperty('--mx', (x * 10).toFixed(2) + 'px');
+    arcadeGrid.style.setProperty('--my', (y * 7).toFixed(2) + 'px');
+  };
+  arcadeGrid.onpointerleave = function(){
+    arcadeGrid.style.setProperty('--mx', '0px');
+    arcadeGrid.style.setProperty('--my', '0px');
+  };
 }
 
 function renderRoom(roomId){
@@ -1485,6 +1502,10 @@ function renderRoom(roomId){
   if(!currentRoom) return renderLounge();
   gameGridWrap.classList.remove('hidden');
   playArea.classList.add('hidden');
+  arcadeGrid.onpointermove = null;
+  arcadeGrid.onpointerleave = null;
+  arcadeGrid.style.removeProperty('--mx');
+  arcadeGrid.style.removeProperty('--my');
   lobbySubtitle.textContent = currentRoom.name;
   if(arcadeHint) arcadeHint.textContent = 'Pick a game.';
   setBreadcrumb('<a href="#" id="bc-lobby">Arcade</a> / ' + currentRoom.name);
