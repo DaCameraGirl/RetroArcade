@@ -106,6 +106,11 @@
     const canAct = state.phase === 'player';
     const canDeal = state.phase === 'idle' || state.phase === 'settled';
     const canDouble = canAct && state.player.length === 2 && state.balance >= state.bet;
+    const dealLabel = state.phase === 'settled' ? 'Next hand' : 'Deal';
+    const dealClass = canDeal ? '' : ' is-disabled';
+    const hitClass = canAct ? '' : ' is-disabled';
+    const standClass = canAct ? '' : ' is-disabled';
+    const doubleClass = canDouble ? '' : ' is-disabled';
     return '<section class="blackjack-game" aria-label="RetroArcade blackjack table">' +
       '<div class="bj-room-light"></div>' +
       '<div class="bj-bank-panel">' +
@@ -130,11 +135,11 @@
         '</div>' +
       '</div>' +
       '<div class="bj-control-deck">' +
-        '<div class="bj-bet-controls"><button id="bjBetDown" type="button" ' + (!canDeal ? 'disabled' : '') + '>-</button>' + chipsHtml(state.bet) + '<button id="bjBetUp" type="button" ' + (!canDeal ? 'disabled' : '') + '>+</button></div>' +
-        '<button id="bjDeal" class="bj-primary" type="button" ' + (!canDeal ? 'disabled' : '') + '>Deal</button>' +
-        '<button id="bjHit" type="button" ' + (!canAct ? 'disabled' : '') + '>Hit</button>' +
-        '<button id="bjStand" type="button" ' + (!canAct ? 'disabled' : '') + '>Stand</button>' +
-        '<button id="bjDouble" type="button" ' + (!canDouble ? 'disabled' : '') + '>Double</button>' +
+        '<div class="bj-bet-controls"><button id="bjBetDown" class="' + (!canDeal ? 'is-disabled' : '') + '" type="button">-</button>' + chipsHtml(state.bet) + '<button id="bjBetUp" class="' + (!canDeal ? 'is-disabled' : '') + '" type="button">+</button></div>' +
+        '<button id="bjDeal" class="bj-primary' + dealClass + '" type="button">' + dealLabel + '</button>' +
+        '<button id="bjHit" class="' + hitClass + '" type="button">Hit</button>' +
+        '<button id="bjStand" class="' + standClass + '" type="button">Stand</button>' +
+        '<button id="bjDouble" class="' + doubleClass + '" type="button">Double</button>' +
       '</div>' +
     '</section>';
   }
@@ -153,6 +158,10 @@
 
   function newRound(){
     const state = mounted.state;
+    if(state.phase === 'player' || state.phase === 'dealer'){
+      setMessage('Finish this hand with Hit, Stand, or Double.');
+      return;
+    }
     if(state.balance < state.bet){
       setMessage('Not enough Arcade Chips for that bet. Lower the bet.');
       return;
@@ -173,7 +182,10 @@
 
   function playerHit(){
     const state = mounted.state;
-    if(state.phase !== 'player') return;
+    if(state.phase !== 'player'){
+      setMessage(state.phase === 'settled' ? 'Hand is over. Deal the next hand.' : 'Deal a hand first.');
+      return;
+    }
     state.player.push(draw(state));
     state.message = 'Card dealt.';
     render();
@@ -185,7 +197,18 @@
 
   function playerDouble(){
     const state = mounted.state;
-    if(state.phase !== 'player' || state.player.length !== 2 || state.balance < state.bet) return;
+    if(state.phase !== 'player'){
+      setMessage(state.phase === 'settled' ? 'Hand is over. Deal the next hand.' : 'Deal a hand first.');
+      return;
+    }
+    if(state.player.length !== 2){
+      setMessage('Double is only available on your first two cards.');
+      return;
+    }
+    if(state.balance < state.bet){
+      setMessage('Not enough Arcade Chips to double.');
+      return;
+    }
     state.balance -= state.bet;
     state.roundBet += state.bet;
     state.player.push(draw(state));
@@ -198,7 +221,10 @@
 
   function dealerPlay(){
     const state = mounted.state;
-    if(state.phase !== 'player' && state.phase !== 'dealer') return;
+    if(state.phase !== 'player' && state.phase !== 'dealer'){
+      setMessage(state.phase === 'settled' ? 'Hand is over. Deal the next hand.' : 'Deal a hand first.');
+      return;
+    }
     state.phase = 'dealer';
     state.message = 'Dealer plays.';
     render();
@@ -254,7 +280,10 @@
 
   function changeBet(dir){
     const state = mounted.state;
-    if(state.phase !== 'idle' && state.phase !== 'settled') return;
+    if(state.phase !== 'idle' && state.phase !== 'settled'){
+      setMessage('Finish this hand before changing the bet.');
+      return;
+    }
     const idx = BETS.indexOf(state.bet);
     const next = BETS[Math.max(0, Math.min(BETS.length - 1, idx + dir))];
     state.bet = Math.min(next, Math.max(next, state.balance));
