@@ -2709,6 +2709,41 @@ body.deck-arcade #play-area.room-poker .controls {
   letter-spacing: .12em;
 }
 
+
+.draw-table-log {
+  position: absolute;
+  left: 50%;
+  top: 28%;
+  z-index: 6;
+  min-width: min(430px, calc(100% - 360px));
+  max-width: min(560px, calc(100% - 260px));
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 9px 16px;
+  transform: translateX(-50%);
+  border: 1px solid rgba(255,224,138,.28);
+  border-radius: 999px;
+  color: #fff4c6;
+  background: linear-gradient(180deg, rgba(5, 18, 11, .78), rgba(1, 8, 4, .9));
+  box-shadow: 0 12px 24px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.08);
+  font: 800 clamp(.68rem, 1.15vw, .84rem) 'Space Mono', monospace;
+  text-align: center;
+  text-shadow: 0 2px 0 rgba(0,0,0,.82);
+}
+
+.draw-action-timer {
+  flex: 0 0 auto;
+  min-width: 72px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  color: #1b0e02;
+  background: linear-gradient(180deg, #fff2a8, #c98724);
+  font-style: normal;
+  box-shadow: 0 4px 10px rgba(0,0,0,.32);
+}
 .draw-pot-chips {
   position: relative;
   width: 76px;
@@ -2793,6 +2828,40 @@ body.deck-arcade #play-area.room-poker .controls {
   min-height: 16px;
 }
 
+
+.draw-seat.thinking .draw-avatar {
+  animation: drawSeatPulse 1s ease-in-out infinite;
+}
+
+.draw-seat-action {
+  min-height: 22px;
+  display: inline-grid;
+  place-items: center;
+  margin-top: 3px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  color: #130c04;
+  background: linear-gradient(180deg, #ffe795, #bd7b24);
+  border: 1px solid rgba(255,238,174,.42);
+  box-shadow: 0 7px 14px rgba(0,0,0,.26);
+  font: 900 .64rem 'Space Mono', monospace;
+  opacity: .96;
+}
+
+.draw-seat-action:empty {
+  opacity: 0;
+}
+
+.draw-seat.folded .draw-seat-action {
+  color: rgba(255,255,255,.8);
+  background: rgba(0,0,0,.62);
+  border-color: rgba(255,255,255,.16);
+}
+
+@keyframes drawSeatPulse {
+  0%, 100% { box-shadow: 0 0 18px rgba(255,224,138,.36), 0 8px 14px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.12); }
+  50% { box-shadow: 0 0 32px rgba(255,224,138,.72), 0 8px 14px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.12); }
+}
 .draw-seat-cards {
   min-height: 28px;
   display: flex;
@@ -2913,6 +2982,12 @@ body.deck-arcade #play-area.room-poker .controls {
   background: linear-gradient(180deg, #ffe08a, #be7a23);
 }
 
+
+.draw-btn:disabled {
+  opacity: .5;
+  cursor: wait;
+  filter: saturate(.7);
+}
 .draw-bet-controls {
   min-height: 42px;
   display: grid;
@@ -2940,6 +3015,12 @@ body.deck-arcade #play-area.room-poker .controls {
   }
   .draw-seat {
     width: 118px;
+  }
+  .draw-table-log {
+    top: 33%;
+    min-width: calc(100% - 54px);
+    max-width: calc(100% - 54px);
+    border-radius: 14px;
   }
   .draw-avatar {
     width: 46px;
