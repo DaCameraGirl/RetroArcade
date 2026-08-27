@@ -1,7 +1,7 @@
 (function(){
   'use strict';
 
-  const STORAGE_KEY = 'retroA…teV1';
+  const STORAGE_KEY = 'retroArcadeJacksOrBetterStateV1';
   const BETS = [10, 25, 50, 100, 250, 500];
 
   const SUITS = [
@@ -251,7 +251,7 @@
     state.lastPaid = paid;
     state.lastWin = win;
     state.phase = 'settled';
-    state.handResult = win ? (win.name + ' — ' + fmt(paid) + ' Arcade Chips!') : 'No win. Deal again?';
+    state.handResult = win ? (win.name + ' - ' + fmt(paid) + ' Arcade Chips!') : 'No win. Deal again?';
     state.holds = [false,false,false,false,false];
     saveBank(state);
     render();

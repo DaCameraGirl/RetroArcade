@@ -16,6 +16,7 @@ let snakeGame = null;
 let slotGame = null;
 let blackjackGame = null;
 let sicBoGame = null;
+let pokerGame = null;
 let frogInt = null;
 
 const $ = s => document.querySelector(s);
@@ -835,6 +836,10 @@ function stopLiveMiniGames(){
     sicBoGame.destroy();
     sicBoGame = null;
   }
+  if(pokerGame){
+    pokerGame.destroy();
+    pokerGame = null;
+  }
   document.onkeydown = null;
 }
 
@@ -904,15 +909,20 @@ function pokerScore(hand){
 }
 
 function renderPokerMini(selected){
-  const hand = buildDeck().slice(0, selected.handSize || 5);
-  const score = pokerScore(hand);
-  moves++;
-  updateHUD();
-  board.innerHTML = '<section class="mini-game poker-mini"><h2>' + selected.name + '</h2>' +
-    '<p class="mini-status">' + score + '</p>' +
-    '<div class="mini-hand">' + hand.map(miniCard).join('') + '</div>' +
-    '<div class="mini-actions"><button id="miniDeal">Deal again</button></div></section>';
-  document.querySelector('#miniDeal').addEventListener('click', function(){ renderPokerMini(selected); });
+  board.innerHTML = '<div id="pokerMount"></div>';
+  const engine = selected.engine === 'draw' ? window.RetroArcadeDrawPoker : window.RetroArcadePoker;
+  if(!engine){
+    board.innerHTML = '<section class="mini-game coming-soon-game"><h2>' + selected.name + '</h2><p class="mini-status">Poker table engine did not load. Refresh and try again.</p></section>';
+    return;
+  }
+  pokerGame = engine.mount({
+    parent: 'pokerMount',
+    selected: selected,
+    onHandComplete: function(){
+      moves++;
+      updateHUD();
+    }
+  });
 }
 
 function renderBlackjackMini(selected){
@@ -1415,7 +1425,8 @@ const ROOMS = [
     name: 'Poker Tables',
     desc: 'Holdem, draw, stud, and video poker',
     games: [
-      { id: 'video-poker', name: 'Poker Table Prototype', table: 'Rebuild queued', kind: 'coming-soon', available: false },
+      { id: 'jacks-or-better', name: 'Jacks or Better', table: 'Video Poker 1', kind: 'poker', engine: 'jacks', available: true },
+      { id: 'five-card-draw', name: '5-Card Draw', table: 'Table 1', kind: 'poker', engine: 'draw', available: true },
     ],
   },
   {
