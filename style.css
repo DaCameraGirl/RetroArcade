@@ -3693,3 +3693,69 @@ body.deck-arcade #play-area.room-poker .controls {
     transform: translate3d(0, 0, 0) scale(1);
   }
 }
+
+
+/* Shell navigation and pause state */
+#play-area.is-paused #board {
+  filter: grayscale(.18) brightness(.72);
+}
+
+#play-area.is-paused #board::after {
+  content: "PAUSED";
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: grid !important;
+  place-items: center;
+  color: #fff0aa;
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(1rem, 3vw, 2rem);
+  text-shadow: 0 3px 0 #000, 0 0 20px rgba(255,224,138,.42);
+  background: rgba(0,0,0,.48);
+  pointer-events: all;
+}
+
+#pauseBtn {
+  min-width: 96px;
+}
+
+/* Blackjack fixed card lanes */
+.blackjack-table-felt .bj-cards {
+  display: grid !important;
+  grid-auto-flow: column;
+  grid-auto-columns: clamp(74px, 6.4vw, 106px);
+  align-items: center;
+  justify-content: center;
+  gap: clamp(10px, 1.3vw, 18px);
+}
+
+.blackjack-table-felt .bj-card-slot {
+  width: clamp(74px, 6.4vw, 106px);
+  display: grid;
+  place-items: center;
+}
+
+.blackjack-table-felt .bj-card-slot .bj-card {
+  width: 100%;
+  transform: none !important;
+}
+
+.blackjack-table-felt .bj-card-slot .bj-card.deal-new {
+  animation: bjDealFade .14s ease-out both;
+  animation-delay: 0s;
+}
+
+@keyframes bjDealFade {
+  from { opacity: 0; filter: brightness(.78); }
+  to { opacity: 1; filter: none; }
+}
+
+@media(max-width: 760px){
+  .blackjack-table-felt .bj-cards {
+    grid-auto-columns: clamp(54px, 16vw, 70px);
+    gap: 6px;
+  }
+  .blackjack-table-felt .bj-card-slot {
+    width: clamp(54px, 16vw, 70px);
+  }
+}

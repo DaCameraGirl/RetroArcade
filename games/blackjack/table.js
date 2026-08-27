@@ -129,7 +129,9 @@
   }
 
   function handCardsHtml(hand, freshCards){
-    return hand.cards.map(function(card, i){ return cardHtml(card, false, i, freshCards.includes(card.uid)); }).join('');
+    return hand.cards.map(function(card, i){
+      return '<span class="bj-card-slot" style="--i:' + i + '">' + cardHtml(card, false, i, freshCards.includes(card.uid)) + '</span>';
+    }).join('');
   }
 
   function handResultText(hand){
@@ -142,7 +144,9 @@
     const split = hasSplit(state);
     const wager = state.phase === 'player' || state.phase === 'dealer' ? totalRoundBet(state) : state.bet;
     const freshCards = state.freshCards || [];
-    const dealerCards = state.dealer.map(function(card, i){ return cardHtml(card, state.phase === 'player' && i === 1, i, freshCards.includes(card.uid)); }).join('');
+    const dealerCards = state.dealer.map(function(card, i){
+      return '<span class="bj-card-slot" style="--i:' + i + '">' + cardHtml(card, state.phase === 'player' && i === 1, i, freshCards.includes(card.uid)) + '</span>';
+    }).join('');
     const hands = playerHands(state);
     const active = currentHand(state);
     const dealerTotal = dealerVisible ? handTotal(state.dealer) : handTotal([state.dealer[0]]);

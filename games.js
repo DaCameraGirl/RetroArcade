@@ -11,6 +11,7 @@ let moves = 0;
 let undoStack = [];
 let state = {};
 let timerInt, seconds = 0;
+let isPaused = false;
 let snakeInt = null;
 let snakeGame = null;
 let slotGame = null;
@@ -803,16 +804,38 @@ function showWin(){
   clearInterval(timerInt);
 }
 
+function timerText(){
+  return String(Math.floor(seconds / 60)).padStart(2, '0') + ':' + String(seconds % 60).padStart(2, '0');
+}
+
+function renderTimer(){
+  $('#timer').textContent = timerText();
+}
+
+function runTimer(){
+  clearInterval(timerInt);
+  timerInt = setInterval(function(){
+    if(isPaused) return;
+    seconds++;
+    renderTimer();
+  }, 1000);
+}
+
+function setPaused(paused){
+  isPaused = paused;
+  playArea.classList.toggle('is-paused', isPaused);
+  const pause = document.querySelector('#pauseBtn');
+  if(pause) pause.textContent = isPaused ? '▶ Resume' : '⏸ Pause';
+  if(isPaused) clearInterval(timerInt);
+  else if(!playArea.classList.contains('hidden')) runTimer();
+}
+
 function startTimer(){
   clearInterval(timerInt);
+  isPaused = false;
   seconds = 0;
-  $('#timer').textContent = '00:00';
-  timerInt = setInterval(()=>{
-    seconds++;
-    $('#timer').textContent =
-      String(Math.floor(seconds/60)).padStart(2,'0') + ':' +
-      String(seconds%60).padStart(2,'0');
-  }, 1000);
+  renderTimer();
+  setPaused(false);
 }
 
 function stopLiveMiniGames(){
@@ -1480,6 +1503,10 @@ function renderLounge(){
   document.body.className = document.body.className.replace(/\bdeck-\w+\b/g, '').trim();
   document.body.classList.add('deck-arcade');
   clearInterval(timerInt);
+  isPaused = false;
+  playArea.classList.remove('is-paused');
+  const pause = document.querySelector('#pauseBtn');
+  if(pause) pause.textContent = '⏸ Pause';
   gameGridWrap.classList.remove('hidden');
   playArea.classList.add('hidden');
   document.querySelector('#win').classList.add('hidden');
@@ -1564,14 +1591,14 @@ function backToCurrentRoom(){
 }
 
 document.querySelector('#backBtn').addEventListener('click', function(){
-  if(!playArea.classList.contains('hidden')){
-    backToCurrentRoom();
-    return;
-  }
   renderLounge();
 });
 
 document.querySelector('#newGame').addEventListener('click', newGame);
+document.querySelector('#pauseBtn').addEventListener('click', function(){
+  if(playArea.classList.contains('hidden')) return;
+  setPaused(!isPaused);
+});
 var deckSel = document.querySelector('#deck');
 if(deckSel){
   deckSel.addEventListener('change', function(){
@@ -1584,6 +1611,6 @@ document.querySelector('#playAgain').addEventListener('click', function(){
   document.querySelector('#win').classList.add('hidden');
   newGame();
 });
-document.querySelector('#backToArcade').addEventListener('click', backToCurrentRoom);
+document.querySelector('#backToArcade').addEventListener('click', renderLounge);
 
 renderLounge();
