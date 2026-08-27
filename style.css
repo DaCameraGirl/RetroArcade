@@ -34,7 +34,7 @@ h1{font-family:'Press Start 2P',monospace;color:var(--neon-p);text-shadow:none;f
 .room-card,.game-card{min-height:220px;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:10px;padding:22px;text-align:left;cursor:pointer;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,filter .18s ease}
 .room-card:hover,.game-card:hover{transform:translateY(-4px);border-color:var(--neon-c);box-shadow:0 22px 54px rgba(0,0,0,.45),0 0 22px color-mix(in srgb,var(--neon-c) 38%,transparent)}
 .cabinet-icon{font-family:'Press Start 2P',monospace;font-size:.72rem;letter-spacing:0;color:var(--neon-c);text-transform:uppercase}
-.cabinet-title{font-family:'Press Start 2P',monospace;font-size:.82rem;line-height:1.5;color:var(--neon-p)}
+.cabinet-title{font-family:'Press Start 2P',monospace;font-size:.82rem;line-height:1.5;color:var(--neon-c);text-shadow:0 0 10px rgba(103,199,255,.55),0 2px 6px rgba(0,0,0,.95)}
 .cabinet-desc{font-size:.85rem;line-height:1.45;color:rgba(255,255,255,.78)}
 .cabinet-count,.play-tag{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0;color:var(--neon-c)}
 
