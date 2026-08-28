@@ -3805,3 +3805,63 @@ body.deck-arcade #play-area.room-poker .controls {
     min-width: 54px;
   }
 }
+
+/* Play screen control and blackjack stability overrides */
+body.deck-arcade.is-playing header {
+  z-index: 1;
+  pointer-events: none;
+}
+
+body.deck-arcade.is-playing #play-area {
+  position: relative;
+  z-index: 80;
+}
+
+body.deck-arcade.is-playing #play-area .controls {
+  position: relative;
+  z-index: 120;
+  pointer-events: auto;
+}
+
+body.deck-arcade.is-playing #play-area .controls button,
+body.deck-arcade.is-playing #play-area .controls select {
+  pointer-events: auto;
+}
+
+.blackjack-table-felt .bj-cards {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.blackjack-table-felt .bj-card-slot {
+  position: relative !important;
+  flex: 0 0 clamp(74px, 6.4vw, 106px) !important;
+  width: clamp(74px, 6.4vw, 106px) !important;
+  aspect-ratio: 5 / 7 !important;
+  display: block !important;
+}
+
+.blackjack-table-felt .bj-card-slot .bj-card {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: auto !important;
+  transform: none !important;
+  animation: none !important;
+}
+
+.blackjack-table-felt .bj-card.deal-new {
+  animation: none !important;
+  filter: none !important;
+  opacity: 1 !important;
+}
+
+@media(max-width: 760px){
+  .blackjack-table-felt .bj-card-slot {
+    flex-basis: clamp(54px, 16vw, 70px) !important;
+    width: clamp(54px, 16vw, 70px) !important;
+  }
+}

@@ -47,7 +47,7 @@ cd RetroArcade
 - **CSS** – Retro arcade styling
 - **HTML** – Clean, semantic markup
 
-No build step. GitHub Pages loads Phaser from a pinned CDN script, then each dedicated game module owns its own scene. The shell Back button returns to the main arcade floor, and Pause toggles the shell timer and pause overlay.
+No build step. GitHub Pages loads Phaser from a pinned CDN script, then each dedicated game module owns its own scene. The shell Back button returns to the main arcade floor, and Pause now toggles the shell timer, pause overlay, and supported mounted game timers.
 
 ---
 

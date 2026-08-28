@@ -50,7 +50,7 @@
     low.frequency.value = 82;
     high.frequency.value = 124;
     master.gain.setValueAtTime(0.0001, ctx.currentTime);
-    master.gain.exponentialRampToValueAtTime(0.0045, ctx.currentTime + 0.35);
+    master.gain.exponentialRampToValueAtTime(0.012, ctx.currentTime + 0.35);
     low.connect(master);
     high.connect(master);
     master.connect(ctx.destination);
@@ -73,17 +73,17 @@
 
   function playRoomSound(name){
     if(name === 'enter'){
-      tone(392, 0.08, 'triangle', 0.018, 0);
-      tone(523, 0.1, 'triangle', 0.018, 0.07);
-      tone(659, 0.12, 'triangle', 0.014, 0.14);
+      tone(392, 0.09, 'triangle', 0.05, 0);
+      tone(523, 0.11, 'triangle', 0.048, 0.07);
+      tone(659, 0.14, 'triangle', 0.04, 0.14);
     }else if(name === 'seat'){
-      tone(780, 0.035, 'square', 0.018, 0);
-      tone(410, 0.05, 'triangle', 0.012, 0.035);
+      tone(780, 0.04, 'square', 0.05, 0);
+      tone(410, 0.06, 'triangle', 0.035, 0.035);
     }else if(name === 'chat'){
-      tone(640, 0.045, 'sine', 0.012, 0);
-      tone(840, 0.035, 'sine', 0.009, 0.045);
+      tone(640, 0.05, 'sine', 0.038, 0);
+      tone(840, 0.04, 'sine', 0.028, 0.045);
     }else{
-      tone(260, 0.05, 'triangle', 0.012, 0);
+      tone(260, 0.06, 'triangle', 0.035, 0);
     }
   }
 
@@ -336,7 +336,15 @@
     };
     if(mounted.tableId) renderTable();
     else renderLobby();
-    return { destroy: destroy };
+    return { destroy: destroy, pause: pause, resume: resume };
+  }
+
+  function pause(){
+    if(mounted && mounted.engineInstance && typeof mounted.engineInstance.pause === 'function') mounted.engineInstance.pause();
+  }
+
+  function resume(){
+    if(mounted && mounted.engineInstance && typeof mounted.engineInstance.resume === 'function') mounted.engineInstance.resume();
   }
 
   function destroy(){

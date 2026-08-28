@@ -51,7 +51,7 @@
   function tone(freq, duration, type, volume, delay){
     const ctx = getAudioContext();
     if(!ctx) return;
-    if(ctx.state === 'suspended') ctx.resume();
+    if(ctx.state === 'suspended') ctx.resume().catch(function(){});
     const start = ctx.currentTime + (delay || 0);
     const oscillator = ctx.createOscillator();
     const gain = ctx.createGain();
@@ -70,17 +70,17 @@
     if(!mounted) return;
     try{
       if(name === 'shuffle'){
-        for(let i = 0; i < 7; i++) tone(160 + i * 26, 0.045, 'triangle', 0.035, i * 0.028);
+        for(let i = 0; i < 7; i++) tone(160 + i * 26, 0.05, 'triangle', 0.075, i * 0.028);
       }else if(name === 'card'){
-        tone(430, 0.035, 'square', 0.018);
-        tone(650, 0.045, 'triangle', 0.012, 0.018);
+        tone(430, 0.04, 'square', 0.055);
+        tone(650, 0.05, 'triangle', 0.034, 0.018);
       }else if(name === 'draw'){
         const n = Math.max(1, count || 1);
-        for(let i = 0; i < n; i++) tone(520 + i * 42, 0.052, 'triangle', 0.026, i * 0.055);
+        for(let i = 0; i < n; i++) tone(520 + i * 42, 0.06, 'triangle', 0.058, i * 0.055);
       }else if(name === 'tick'){
-        tone(860, 0.035, 'sine', 0.018);
+        tone(860, 0.04, 'sine', 0.035);
       }else if(name === 'win'){
-        [523, 659, 784].forEach(function(freq, i){ tone(freq, 0.12, 'triangle', 0.035, i * 0.08); });
+        [523, 659, 784].forEach(function(freq, i){ tone(freq, 0.14, 'triangle', 0.07, i * 0.08); });
       }
     }catch(err){
       // Sound is optional and can be blocked by browser audio policy.
@@ -388,6 +388,11 @@
     if(!mounted) return;
     const timer = setTimeout(function(){
       if(!mounted) return;
+      if(mounted.paused){
+        mounted.actionTimers = mounted.actionTimers.filter(function(item){ return item !== timer; });
+        queueAction(fn, 160);
+        return;
+      }
       mounted.actionTimers = mounted.actionTimers.filter(function(item){ return item !== timer; });
       fn();
     }, delay);
@@ -473,6 +478,7 @@
         clearActionTimers();
         return;
       }
+      if(mounted.paused) return;
       mounted.playerSeconds -= 1;
       playSound('tick');
       if(mounted.playerSeconds <= 0){
@@ -673,6 +679,7 @@
       dealProgress: 0,
       dealTarget: 0,
       pendingDiscardCount: 0,
+      paused: false,
       freshCardIds: [],
       playerSeconds: null,
       playerTimer: null,
@@ -683,7 +690,15 @@
       onHandComplete: options.onHandComplete,
     };
     render();
-    return { destroy: destroy };
+    return { destroy: destroy, pause: pause, resume: resume };
+  }
+
+  function pause(){
+    if(mounted) mounted.paused = true;
+  }
+
+  function resume(){
+    if(mounted) mounted.paused = false;
   }
 
   function destroy(){

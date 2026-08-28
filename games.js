@@ -821,11 +821,19 @@ function runTimer(){
   }, 1000);
 }
 
+function mountedGameInstances(){
+  return [snakeGame, slotGame, blackjackGame, sicBoGame, pokerGame].filter(Boolean);
+}
+
 function setPaused(paused){
   isPaused = paused;
   playArea.classList.toggle('is-paused', isPaused);
   const pause = document.querySelector('#pauseBtn');
   if(pause) pause.textContent = isPaused ? '▶ Resume' : '⏸ Pause';
+  mountedGameInstances().forEach(function(instance){
+    const method = isPaused ? instance.pause : instance.resume;
+    if(typeof method === 'function') method.call(instance);
+  });
   if(isPaused) clearInterval(timerInt);
   else if(!playArea.classList.contains('hidden')) runTimer();
 }
@@ -1502,11 +1510,13 @@ function renderLounge(){
   currentRoom = null;
   document.body.className = document.body.className.replace(/\bdeck-\w+\b/g, '').trim();
   document.body.classList.add('deck-arcade');
+  document.body.classList.remove('is-playing');
   clearInterval(timerInt);
   isPaused = false;
   playArea.classList.remove('is-paused');
   const pause = document.querySelector('#pauseBtn');
   if(pause) pause.textContent = '⏸ Pause';
+  document.body.classList.remove('is-playing');
   gameGridWrap.classList.remove('hidden');
   playArea.classList.add('hidden');
   document.querySelector('#win').classList.add('hidden');
@@ -1532,6 +1542,7 @@ function renderRoom(roomId){
   stopLiveMiniGames();
   currentRoom = ROOMS.find(function(room){ return room.id === roomId; });
   if(!currentRoom) return renderLounge();
+  document.body.classList.remove('is-playing');
   gameGridWrap.classList.remove('hidden');
   playArea.classList.add('hidden');
   lobbySubtitle.textContent = currentRoom.name;
@@ -1563,6 +1574,7 @@ function launchGame(gameId){
   currentRoom = found.room;
   game = selected.id;
   arcadeGrid.classList.remove('casino-floor');
+  document.body.classList.add('is-playing');
   gameGridWrap.classList.add('hidden');
   playArea.classList.remove('hidden');
   playArea.className = playArea.className.split(/\s+/).filter(function(name){ return name && !name.startsWith('play-area-') && !name.startsWith('room-'); }).join(' ');
@@ -1590,15 +1602,22 @@ function backToCurrentRoom(){
   renderLounge();
 }
 
-document.querySelector('#backBtn').addEventListener('click', function(){
+document.addEventListener('click', function(event){
+  const back = event.target.closest && event.target.closest('#backBtn');
+  if(!back) return;
+  event.preventDefault();
+  event.stopPropagation();
   renderLounge();
-});
+}, true);
 
 document.querySelector('#newGame').addEventListener('click', newGame);
-document.querySelector('#pauseBtn').addEventListener('click', function(){
-  if(playArea.classList.contains('hidden')) return;
+document.addEventListener('click', function(event){
+  const pause = event.target.closest && event.target.closest('#pauseBtn');
+  if(!pause || playArea.classList.contains('hidden')) return;
+  event.preventDefault();
+  event.stopPropagation();
   setPaused(!isPaused);
-});
+}, true);
 var deckSel = document.querySelector('#deck');
 if(deckSel){
   deckSel.addEventListener('change', function(){

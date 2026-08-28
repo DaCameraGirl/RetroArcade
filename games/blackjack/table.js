@@ -403,6 +403,10 @@
     }
     function step(){
       if(!mounted || mounted.state !== state) return;
+      if(state.paused){
+        timers.push(window.setTimeout(step, 160));
+        return;
+      }
       if(handTotal(state.dealer) < 17){
         const card = draw(state);
         state.dealer.push(card);
@@ -550,10 +554,19 @@
         outcome: '',
         resultMessage: '',
         message: 'Place a bet and deal.',
+        paused: false,
       }
     };
     render();
-    return { destroy: destroy };
+    return { destroy: destroy, pause: pause, resume: resume };
+  }
+
+  function pause(){
+    if(mounted) mounted.state.paused = true;
+  }
+
+  function resume(){
+    if(mounted) mounted.state.paused = false;
   }
 
   function destroy(){
