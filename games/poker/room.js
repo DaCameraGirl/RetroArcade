@@ -11,6 +11,81 @@
   const CHAT_NAMES = ['Mack', 'Rosa', 'Chip', 'Dee'];
 
   let mounted = null;
+  let audioContext = null;
+  let ambience = null;
+
+  function getAudioContext(){
+    const AudioCtor = window.AudioContext || window.webkitAudioContext;
+    if(!AudioCtor) return null;
+    if(!audioContext) audioContext = new AudioCtor();
+    if(audioContext.state === 'suspended') audioContext.resume().catch(function(){});
+    return audioContext;
+  }
+
+  function tone(freq, duration, type, gain, delay){
+    const ctx = getAudioContext();
+    if(!ctx) return;
+    const start = ctx.currentTime + (delay || 0);
+    const osc = ctx.createOscillator();
+    const vol = ctx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.setValueAtTime(freq, start);
+    vol.gain.setValueAtTime(0.0001, start);
+    vol.gain.exponentialRampToValueAtTime(Math.max(gain || 0.02, 0.0001), start + 0.012);
+    vol.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+    osc.connect(vol);
+    vol.connect(ctx.destination);
+    osc.start(start);
+    osc.stop(start + duration + 0.04);
+  }
+
+  function startAmbience(){
+    const ctx = getAudioContext();
+    if(!ctx || ambience) return;
+    const master = ctx.createGain();
+    const low = ctx.createOscillator();
+    const high = ctx.createOscillator();
+    low.type = 'sine';
+    high.type = 'triangle';
+    low.frequency.value = 82;
+    high.frequency.value = 124;
+    master.gain.setValueAtTime(0.0001, ctx.currentTime);
+    master.gain.exponentialRampToValueAtTime(0.0045, ctx.currentTime + 0.35);
+    low.connect(master);
+    high.connect(master);
+    master.connect(ctx.destination);
+    low.start();
+    high.start();
+    ambience = { master: master, nodes: [low, high] };
+  }
+
+  function stopAmbience(){
+    if(!ambience || !audioContext) return;
+    const ctx = audioContext;
+    ambience.master.gain.cancelScheduledValues(ctx.currentTime);
+    ambience.master.gain.setValueAtTime(Math.max(ambience.master.gain.value, 0.0001), ctx.currentTime);
+    ambience.master.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.2);
+    ambience.nodes.forEach(function(node){
+      try{ node.stop(ctx.currentTime + 0.24); }catch(err){}
+    });
+    ambience = null;
+  }
+
+  function playRoomSound(name){
+    if(name === 'enter'){
+      tone(392, 0.08, 'triangle', 0.018, 0);
+      tone(523, 0.1, 'triangle', 0.018, 0.07);
+      tone(659, 0.12, 'triangle', 0.014, 0.14);
+    }else if(name === 'seat'){
+      tone(780, 0.035, 'square', 0.018, 0);
+      tone(410, 0.05, 'triangle', 0.012, 0.035);
+    }else if(name === 'chat'){
+      tone(640, 0.045, 'sine', 0.012, 0);
+      tone(840, 0.035, 'sine', 0.009, 0.045);
+    }else{
+      tone(260, 0.05, 'triangle', 0.012, 0);
+    }
+  }
 
   function loadState(){
     try{
@@ -192,11 +267,14 @@
     ensureChat(mounted.roomId, mounted.tableId).push({ name: mounted.playerName, text: text });
     input.value = '';
     renderChat();
+    playRoomSound('chat');
   }
 
   function wireLobby(){
     mounted.parent.querySelectorAll('[data-room]').forEach(function(button){
       button.addEventListener('click', function(){
+        playRoomSound('room');
+        stopAmbience();
         mounted.roomId = button.dataset.room;
         mounted.tableId = null;
         saveState();
@@ -205,6 +283,8 @@
     });
     mounted.parent.querySelectorAll('[data-table]').forEach(function(button){
       button.addEventListener('click', function(){
+        playRoomSound('enter');
+        startAmbience();
         mounted.tableId = button.dataset.table;
         saveState();
         renderTable();
@@ -217,6 +297,8 @@
   function wireTable(){
     const back = mounted.parent.querySelector('#pokerRoomBack');
     if(back) back.addEventListener('click', function(){
+      playRoomSound('room');
+      stopAmbience();
       destroyEngine();
       mounted.tableId = null;
       saveState();
@@ -224,6 +306,7 @@
     });
     mounted.parent.querySelectorAll('[data-seat]').forEach(function(button){
       button.addEventListener('click', function(){
+        playRoomSound('seat');
         mounted.seat = parseInt(button.dataset.seat, 10);
         ensureChat(mounted.roomId, mounted.tableId).push({ name: 'Host', text: mounted.playerName + ' moved to seat ' + (mounted.seat + 1) + '.' });
         saveState();
@@ -257,6 +340,7 @@
   }
 
   function destroy(){
+    stopAmbience();
     destroyEngine();
     mounted = null;
   }

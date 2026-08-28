@@ -1467,6 +1467,7 @@ body.deck-arcade .room-classics .floor-game::after {
 body.deck-arcade #play-area.play-area-blackjack,
 body.deck-arcade #play-area.play-area-retro-arcade-slot,
 body.deck-arcade #play-area.room-classics,
+body.deck-arcade #play-area.room-cards,
 body.deck-arcade #play-area.room-tablegames,
 body.deck-arcade #play-area.room-slots,
 body.deck-arcade #play-area.room-poker {
@@ -1478,6 +1479,7 @@ body.deck-arcade #play-area.room-poker {
 body.deck-arcade #play-area.play-area-blackjack .controls,
 body.deck-arcade #play-area.play-area-retro-arcade-slot .controls,
 body.deck-arcade #play-area.room-classics .controls,
+body.deck-arcade #play-area.room-cards .controls,
 body.deck-arcade #play-area.room-tablegames .controls,
 body.deck-arcade #play-area.room-slots .controls,
 body.deck-arcade #play-area.room-poker .controls {
@@ -1489,6 +1491,7 @@ body.deck-arcade #play-area.room-poker .controls {
 #play-area.play-area-blackjack #board,
 #play-area.play-area-retro-arcade-slot #board,
 #play-area.room-classics #board,
+#play-area.room-cards #board,
 #play-area.room-tablegames #board,
 #play-area.room-slots #board,
 #play-area.room-poker #board {
@@ -1509,6 +1512,8 @@ body.deck-arcade #play-area.room-poker .controls {
 #play-area.play-area-retro-arcade-slot #board::after,
 #play-area.room-classics #board::before,
 #play-area.room-classics #board::after,
+#play-area.room-cards #board::before,
+#play-area.room-cards #board::after,
 #play-area.room-tablegames #board::before,
 #play-area.room-tablegames #board::after,
 #play-area.room-slots #board::before,
@@ -1521,6 +1526,7 @@ body.deck-arcade #play-area.room-poker .controls {
 #play-area.play-area-blackjack #board > *,
 #play-area.play-area-retro-arcade-slot #board > *,
 #play-area.room-classics #board > *,
+#play-area.room-cards #board > *,
 #play-area.room-tablegames #board > *,
 #play-area.room-slots #board > *,
 #play-area.room-poker #board > * {
@@ -3757,5 +3763,45 @@ body.deck-arcade #play-area.room-poker .controls {
   }
   .blackjack-table-felt .bj-card-slot {
     width: clamp(54px, 16vw, 70px);
+  }
+}
+
+/* Card tables full-width layout */
+#play-area.room-cards #board {
+  width: 100%;
+  display: block;
+}
+
+#play-area.room-cards .piles,
+#play-area.room-cards .tableau {
+  width: min(1120px, 100%);
+  margin-inline: auto;
+}
+
+#play-area.room-cards .tableau {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(68px, 1fr));
+  gap: clamp(8px, 1.15vw, 16px);
+  overflow-x: auto;
+  padding-bottom: 26px;
+}
+
+#play-area.room-cards .tableau-col {
+  min-width: 68px;
+}
+
+#play-area.room-cards .piles {
+  justify-content: center;
+  gap: clamp(10px, 1.4vw, 18px);
+}
+
+@media(max-width: 760px){
+  #play-area.room-cards .tableau {
+    grid-template-columns: repeat(7, minmax(54px, 1fr));
+    gap: 6px;
+  }
+
+  #play-area.room-cards .tableau-col {
+    min-width: 54px;
   }
 }

@@ -176,7 +176,7 @@
         '<div class="bj-split-bet">' + chipsHtml(hand.bet) + '</div>' +
         handResultText(hand) +
       '</div>';
-    }).join('') + '</div>' : handCardsHtml({ cards: state.player }, freshCards);
+    }).join('') + '</div>' : '<div class="bj-cards">' + handCardsHtml({ cards: state.player }, freshCards) + '</div>';
     return '<section class="blackjack-game" aria-label="RetroArcade blackjack table">' +
       '<div class="bj-room-light"></div>' +
       outcomePop +
